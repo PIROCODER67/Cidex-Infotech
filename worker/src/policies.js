@@ -8,10 +8,10 @@ CIDEX POLICY SUMMARY (from the Terms & Conditions draft; the written quotation o
 --- DELIVERY DATES ---
 - Deadlines, deliverables and timelines are set in the written quotation or project agreement.
 - A project starts only after the quotation is accepted and any stated initial payment or onboarding step is done.
-- The team confirms delivery dates. The assistant cannot promise a date.
+- Delivery dates are subject to the contract for each project.
 - Dates can move if: the customer's approvals, materials or payments are late; the customer asks for changes after approval; work is paused for non-payment; or a third-party platform or provider has an outage outside CIDEX's control.
 - Work requested outside the agreed scope may need a revised quotation, which can change the timeline.
-- A customer can share a preferred date. The team reviews it and confirms what is possible.
+- A customer can share a preferred date. It is a request, not a commitment.
 
 --- CANCELLATION AND REFUNDS (the amount is always worked out by the team and explained in writing) ---
 - Before work begins: no cancellation fee. Payments received are returned, except legitimate third-party expenses agreed in advance that cannot be recovered, where the law allows.
