@@ -634,6 +634,10 @@
   .ai-form button{border:0; border-radius:10px; padding:0 16px; cursor:pointer; font-weight:600; color:#050505; background:linear-gradient(120deg,var(--blue),var(--violet));}
   .ai-form button:disabled{opacity:.5; cursor:default;}
   @media (max-width:480px){ .ai-panel{right:12px; left:12px; width:auto; bottom:76px;} .ai-fab{right:12px; bottom:12px;} }
+  /* Services guide (bottom-left) */
+  .ai-fab.ai-fab-left{left:20px; right:auto;}
+  .ai-panel.ai-panel-left{left:20px; right:auto;}
+  @media (max-width:480px){ .ai-fab.ai-fab-left{left:12px; right:auto; bottom:64px;} .ai-panel.ai-panel-left{left:12px; right:12px; width:auto; bottom:124px;} }
 </style>
 </head>
 <body>
@@ -1089,6 +1093,23 @@
     </div>
   </div>
 </div>
+
+<!-- Services guide (explains services; no prices calculated). Backend: /api/advisor -->
+<button type="button" class="ai-fab ai-fab-left" id="advFab" aria-expanded="false" aria-controls="advPanel">Explore services</button>
+<section class="ai-panel ai-panel-left" id="advPanel" role="dialog" aria-label="CIDEX services guide">
+  <div class="ai-head">
+    <div class="ai-title">
+      <strong>CIDEX services guide</strong>
+      <div class="ai-sub">Ask about any service. Prices are starting prices.</div>
+    </div>
+    <button type="button" class="ai-close" id="advClose" aria-label="Close services guide">&times;</button>
+  </div>
+  <div class="ai-log" id="advLog" aria-live="polite"></div>
+  <form class="ai-form" id="advForm" autocomplete="off">
+    <input id="advInput" type="text" maxlength="1000" placeholder="Ask about a service..." aria-label="Your question" required>
+    <button type="submit" id="advSend">Send</button>
+  </form>
+</section>
 
 <!-- AI price assistant (chat box). Backend: worker/ folder. -->
 <button type="button" class="ai-fab" id="aiFab" aria-expanded="false" aria-controls="aiPanel">Ask for a price</button>
@@ -1760,6 +1781,79 @@
 </script>
 
 <script>
+/* ---------- SERVICES GUIDE (talks to /api/advisor) ---------- */
+(function(){
+  const fab = document.getElementById('advFab');
+  const panel = document.getElementById('advPanel');
+  const closeBtn = document.getElementById('advClose');
+  const form = document.getElementById('advForm');
+  const input = document.getElementById('advInput');
+  const sendBtn = document.getElementById('advSend');
+  const log = document.getElementById('advLog');
+  if(!fab || !panel || !form) return;
+
+  let history = [];
+  let busy = false;
+
+  function addText(role, text){
+    const d = document.createElement('div');
+    d.className = 'ai-msg ' + role;
+    d.textContent = text;
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+    return d;
+  }
+
+  function open(){
+    panel.classList.add('open');
+    fab.setAttribute('aria-expanded', 'true');
+    if(!log.childElementCount){
+      addText('bot', 'Hi. Ask me about any CIDEX service: what it includes, what costs extra, and which one may suit your needs.');
+    }
+    input.focus();
+  }
+  function close(){
+    panel.classList.remove('open');
+    fab.setAttribute('aria-expanded', 'false');
+    fab.focus();
+  }
+
+  fab.addEventListener('click', function(){ panel.classList.contains('open') ? close() : open(); });
+  closeBtn.addEventListener('click', close);
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const text = input.value.trim();
+    if(!text || busy) return;
+    input.value = '';
+    addText('user', text);
+    history.push({ role: 'user', content: text });
+    busy = true;
+    sendBtn.disabled = true;
+    const waiting = addText('bot', '...');
+    try {
+      const res = await fetch('/api/advisor', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ messages: history.slice(-20) })
+      });
+      const data = await res.json();
+      waiting.remove();
+      if(data.reply){
+        addText('bot', data.reply);
+        history.push({ role: 'assistant', content: data.reply });
+      }
+    } catch(err){
+      waiting.remove();
+      addText('bot', 'Connection problem. Please try again, or contact the team at +91 87773 24473 or cidexinfotech1@gmail.com.');
+    } finally {
+      busy = false;
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  });
+})();
+
 /* ---------- AI PRICE ASSISTANT (talks to /api/chat) ---------- */
 (function(){
   const fab = document.getElementById('aiFab');

@@ -1,6 +1,7 @@
 // CIDEX INFOTECH - Cloudflare Worker: chat endpoint, price endpoint, static site.
 // Secrets: OPENAI_API_KEY (set with `wrangler secret put OPENAI_API_KEY`). Never put the key in this file.
 import { SERVICES, estimate, cleanAnswers, missingFields, RULE_VERSION, CONTACT, TEAM_THRESHOLD_INR } from './pricing.js';
+import { SERVICES_INFO } from './services_info.js';
 
 const MAX_MESSAGES = 20;
 const MAX_CHARS = 1000;
@@ -164,6 +165,65 @@ async function handleEstimate(request, env) {
   return json({ ...display({ ...result, rate }), threshold_inr: TEAM_THRESHOLD_INR, rule_version: RULE_VERSION });
 }
 
+// ---------- Service explainer ("Explore services") ----------
+// Explains services from SERVICES_INFO only. Never calculates or applies discounts.
+function advisorPrompt() {
+  return `You are the CIDEX INFOTECH services guide. CIDEX is a digital services company in Kolkata, India.
+
+Your job:
+- Explain CIDEX services in depth, using only the SERVICES GUIDE below.
+- Help visitors see which service may fit their situation, and say honestly when a service may not be needed yet (for example, "a Basic website may be enough if you only need 4 pages and no online payments").
+- Answer follow-up questions about what is included, what is extra, and which package fits.
+
+Strict rules:
+- Use only facts in the SERVICES GUIDE. If something is not in it, say you don't know and give the team contact.
+- You may quote starting prices exactly as written in the guide, labelled "starting from". Never add up items, never create a total or quote, and never say "your price will be".
+- If the visitor wants an estimate for their project, tell them the Price assistant (the "Ask for a price" button) will work it out.
+- Never call a CIDEX service useless, bad or unnecessary in general. Never name or compare other companies.
+- Never discuss or promise discounts, contracts, advance payments, refunds, cancellations, late payments, or delivery dates. Say the CIDEX team confirms those. Second-website discounts: mention only if the visitor asks about a second website, in brackets, say our management confirms it, and never calculate it.
+- Do not promise rankings, results, sales, or that a project will be accepted.
+- Do not ask for payment details, passwords, or ID numbers.
+- For custom or large projects, or anything outside the guide, give the team contact: phone ${CONTACT.phone}, email ${CONTACT.email}.
+- Be clear and friendly. Short paragraphs and bullet lists are fine. Keep each reply focused on what was asked.
+
+SERVICES GUIDE:
+${SERVICES_INFO}
+
+Reply ONLY with a JSON object in this shape: {"reply": "your message to the visitor"}`;
+}
+
+async function handleAdvisor(request, env) {
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'bad_request' }, 400); }
+  const messages = validMessages(body.messages);
+
+  if (!env.OPENAI_API_KEY) return json({ reply: OFFLINE_REPLY, ai_ready: false }, 503);
+  if (!messages.length) return json({ error: 'no_messages' }, 400);
+
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { authorization: `Bearer ${env.OPENAI_API_KEY}`, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        model: env.OPENAI_MODEL || 'gpt-4o-mini',
+        temperature: 0.4,
+        max_tokens: 900,
+        response_format: { type: 'json_object' },
+        messages: [{ role: 'system', content: advisorPrompt() }, ...messages],
+      }),
+    });
+    if (!res.ok) return json({ reply: ERROR_REPLY, ai_ready: true }, 502);
+    const data = await res.json();
+    const parsed = JSON.parse(data.choices?.[0]?.message?.content || '{}');
+    const reply = typeof parsed.reply === 'string' && parsed.reply.trim()
+      ? parsed.reply.trim().slice(0, 3000)
+      : 'Could you tell me a bit more about what you are looking for?';
+    return json({ reply, ai_ready: true });
+  } catch {
+    return json({ reply: ERROR_REPLY, ai_ready: true }, 502);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -171,6 +231,7 @@ export default {
       return json({ ok: true, ai_ready: Boolean(env.OPENAI_API_KEY), rule_version: RULE_VERSION });
     }
     if (url.pathname === '/api/chat' && request.method === 'POST') return handleChat(request, env);
+    if (url.pathname === '/api/advisor' && request.method === 'POST') return handleAdvisor(request, env);
     if (url.pathname === '/api/estimate' && request.method === 'POST') return handleEstimate(request, env);
     if (url.pathname.startsWith('/api/')) return json({ error: 'not_found' }, 404);
     if (env.ASSETS) return env.ASSETS.fetch(request);
