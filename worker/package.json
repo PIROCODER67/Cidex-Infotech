@@ -1,0 +1,5 @@
+{
+  "name": "cidex-worker",
+  "private": true,
+  "type": "module"
+}
