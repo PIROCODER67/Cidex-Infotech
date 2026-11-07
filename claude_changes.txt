@@ -1825,6 +1825,11 @@
     e.preventDefault();
     const text = input.value.trim();
     if(!text || busy) return;
+    if(history.filter(function(m){ return m.role === 'user'; }).length >= 30){
+      input.value = '';
+      addText('bot', 'This chat has reached its limit. For anything else, please contact the team at +91 87773 24473 or cidexinfotech1@gmail.com.');
+      return;
+    }
     input.value = '';
     addText('user', text);
     history.push({ role: 'user', content: text });
