@@ -675,35 +675,12 @@
         <a href="#technology" class="btn-ghost" data-route="home" data-anchor="technology" data-ripple>Explore services</a>
       </div>
       <div class="float-badge fb1"><span class="fb-num">11</span><span class="fb-label">services live</span></div>
-      <div class="float-badge fb2"><span class="fb-num">$9–2K</span><span class="fb-label">price range</span></div>
       <div class="float-badge fb3"><span class="fb-num">Kolkata</span><span class="fb-label">Based in</span></div>
       <div class="scroll-cue">Scroll</div>
     </section>
 
 
     
-    <!-- AI chat box (hidden, not deleted — retained for future backend integration with company API key and spending cap) -->
-    <div class="terminal" id="ask" hidden style="display:none;" aria-hidden="true">
-      <div class="term-bar">
-        <span class="term-dot" style="background:#FF5F57;"></span>
-        <span class="term-dot" style="background:#FEBC2E;"></span>
-        <span class="term-dot" style="background:#28C840;"></span>
-        <span class="term-title">visitor@cidexinfotech — ask</span>
-        <button id="clearChatBtn" class="copy-btn" style="margin-left:auto;" aria-label="Clear conversation">Clear</button>
-      </div>
-      <div class="term-body" id="termBody">
-        <div class="msg bot">
-          <div class="who">Cidex AI</div>
-          <div class="body">Hi — I'm the Cidex concierge. Ask me about SEO, ads, branding, a website build, or pricing. I'll give it to you straight.</div>
-        </div>
-      </div>
-      <div class="term-input">
-        <span class="prompt">you $</span>
-        <input id="chatInput" type="text" placeholder="e.g. how much for social media management?" autocomplete="off">
-        <button class="term-send" id="sendBtn">Send</button>
-      </div>
-    </div>
-
     <section id="technology">
       <div class="wrap section-statement reveal">
         <span class="eyebrow">Technology</span>
@@ -842,8 +819,7 @@
         <div class="stat-grid reveal">
           <div class="stat-chip"><div class="stat-num">11</div><div class="stat-label">Services live</div></div>
           <div class="stat-chip"><div class="stat-num">$9–2K</div><div class="stat-label">Price range</div></div>
-          <div class="stat-chip"><div class="stat-num">Kolkata</div><div class="stat-label">Based in</div></div>
-          <div class="stat-chip"><div class="stat-num">7 days</div><div class="stat-label">Basic service</div><div style="font-size:0.65rem; color:var(--lo-dim); margin-top:4px;">(contact team for custom development)</div></div>
+         <div class="stat-chip"><div class="stat-num">7 days</div><div class="stat-label">Basic service</div><div style="font-size:0.65rem; color:var(--lo-dim); margin-top:4px;">(contact team for custom development)</div></div>
         </div>
       </div>
     </section>
