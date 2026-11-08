@@ -644,6 +644,9 @@
   .auth-tab{flex:1; background:transparent; border:1px solid var(--hairline-hi); color:var(--lo); padding:9px 10px; border-radius:10px; cursor:pointer; font:inherit; font-size:14px;}
   .auth-tab.is-active{color:var(--hi); background:var(--glass);}
   .auth-links{margin:6px 0 0;}
+  .consent-field{display:flex; gap:10px; align-items:flex-start; font-size:0.88rem; line-height:1.5; margin:14px 0 0;}
+  .consent-field input{margin-top:4px; flex:0 0 auto; width:16px; height:16px;}
+  .consent-field a{color:var(--accent-a); font-weight:500;}
   .nav-auth{background:transparent; border:1px solid var(--hairline-hi); color:var(--hi); padding:8px 14px; border-radius:999px; cursor:pointer; font:inherit; font-size:14px; white-space:nowrap;}
   .nav-auth.nav-auth-primary{background:linear-gradient(120deg,var(--blue),var(--violet)); color:#050505; border:0; font-weight:600;}
   @media (max-width:860px){ .nav-actions .nav-auth{display:none;} }
@@ -1109,6 +1112,10 @@
         <div class="field" id="fieldNewPw" hidden>
           <label for="authNewPw">New password (at least 8 characters)</label>
           <input type="password" id="authNewPw" autocomplete="new-password" minlength="8">
+        </div>
+        <div class="consent-field" id="fieldConsent" hidden>
+          <input type="checkbox" id="authConsent">
+          <label for="authConsent">I accept the <a href="#privacy" target="_blank" rel="noopener">Privacy Policy</a> and <a href="#terms" target="_blank" rel="noopener">Terms &amp; Conditions</a>.</label>
         </div>
         <p class="modal-note" id="authMsg" aria-live="polite"></p>
         <p class="auth-links" id="authLinks">
@@ -1777,6 +1784,7 @@
     $('fieldEmail').hidden = s === 'newpw';
     $('fieldPassword').hidden = !isAuth;
     $('fieldNewPw').hidden = s !== 'newpw';
+    $('fieldConsent').hidden = s !== 'signup';
     $('authLinks').hidden = s !== 'signin' && s !== 'forgot';
     $('forgotBtn').hidden = s !== 'signin';
     $('backBtn').hidden = s !== 'forgot';
@@ -1788,6 +1796,7 @@
     $('authEmail').value = '';
     pwInput.value = '';
     $('authNewPw').value = '';
+    $('authConsent').checked = false;
     setMsg('');
     showStep('signin');
   }
@@ -1881,7 +1890,8 @@
       }
       else if(step === 'signup'){
         if(!email || pw.length < 8){ setMsg('Use a valid email and a password of at least 8 characters.', true); return; }
-        const r = await sb.auth.signUp({ email: email, password: pw, options: { emailRedirectTo: SITE_URL } });
+        if(!$('authConsent').checked){ setMsg('Please accept the Privacy Policy and Terms & Conditions to create an account.', true); return; }
+        const r = await sb.auth.signUp({ email: email, password: pw, options: { emailRedirectTo: SITE_URL, data: { terms_accepted_at: new Date().toISOString() } } });
         if(r.error){
           setMsg(/already/i.test(r.error.message) ? 'An account with this email already exists. Try signing in.' : 'We could not create the account. Please try again.', true);
           return;
