@@ -93,6 +93,8 @@
     pointer-events:all; cursor:grab;
   }
   #bg-canvas:active{cursor:grabbing;}
+  /* Page content sits above the 3D canvas so buttons, links and FAQ items receive clicks */
+  #main-content{position:relative; z-index:1;}
 
   .hero-3d-hud{
     display:flex; flex-direction:column; align-items:center; gap:12px;
@@ -685,6 +687,26 @@
   .consent-field{display:flex; gap:10px; align-items:flex-start; font-size:0.88rem; line-height:1.5; margin:14px 0 0;}
   .consent-field input{margin-top:4px; flex:0 0 auto; width:16px; height:16px;}
   .consent-field a{color:var(--accent-a); font-weight:500;}
+  .price-strip{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:0 auto 36px; max-width:1100px; padding:0 16px;}
+  .price-strip div{padding:18px 20px; border:1px solid var(--hairline-hi); border-radius:14px; background:rgba(255,255,255,0.03);}
+  .price-strip strong{display:block; color:var(--hi); font-weight:500; margin-bottom:6px; font-size:0.95rem;}
+  .price-strip p{margin:0; color:var(--lo); font-size:0.88rem; line-height:1.5; font-weight:300;}
+  .problem-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; max-width:1100px; margin:0 auto; padding:0 16px;}
+  button.problem-tile{text-align:left; cursor:pointer; padding:20px 22px; border-radius:14px; border:1px solid var(--hairline-hi); background:rgba(255,255,255,0.03); color:var(--hi); font:inherit; display:flex; flex-direction:column; gap:8px;}
+  button.problem-tile:hover{border-color:rgba(78,168,255,0.5);}
+  .problem-tile .pt-problem{font-size:1rem; font-weight:500;}
+  .problem-tile .pt-meta{font-size:0.85rem; color:var(--lo); font-weight:300;}
+  .problem-tile .pt-cta{font-size:0.85rem; color:var(--accent-a); font-weight:500;}
+  .faq-list{max-width:820px; margin:0 auto; padding:0 16px;}
+  .faq-list details{border-bottom:1px solid var(--hairline-hi); padding:16px 0;}
+  .faq-list summary{cursor:pointer; color:var(--hi); font-weight:500; list-style:none;}
+  .faq-list summary::-webkit-details-marker{display:none;}
+  .faq-list summary::after{content:' +'; color:var(--lo);}
+  .faq-list details[open] summary::after{content:' –';}
+  .faq-list details p{margin:10px 0 0; color:var(--lo); font-size:0.92rem; line-height:1.6; font-weight:300;}
+  .pricing-block{margin:0 0 48px;}
+  .pricing-block h3{text-align:center; font-size:1.25rem; font-weight:500; color:var(--hi); margin:0 0 20px;}
+  @media (max-width:760px){ .price-strip, .problem-grid{grid-template-columns:minmax(0,1fr);} }
   button.tech-cta{background:none; border:none; padding:0; font:inherit; color:inherit; cursor:pointer; text-align:left;}
   .side-notice{position:fixed; top:96px; right:18px; z-index:260; width:min(340px, calc(100vw - 36px)); padding:16px 40px 16px 18px; border-radius:14px; background:rgba(10,14,22,0.95); border:1px solid rgba(78,168,255,0.35); box-shadow:0 18px 40px rgba(0,0,0,0.45); color:var(--hi); font-size:0.92rem; line-height:1.5;}
   .side-notice[hidden]{display:none !important;}
@@ -973,6 +995,14 @@
       <p class="price-note">Prices are in USD. Switch to ₹ INR above for our standard India rates.</p>
     </div>
 
+    <div class="pricing-block">
+      <div class="price-strip">
+        <div><strong>Starting prices</strong><p>Each range starts from our smallest package. Your price depends on what you need.</p></div>
+        <div><strong>GST is extra</strong><p>All prices exclude GST, which is added as applicable.</p></div>
+        <div><strong>Final price in writing</strong><p>The team confirms your price in a written quotation before any work starts.</p></div>
+      </div>
+    </div>
+
     <section class="cat" data-cat="main">
       <div class="wrap">
         <div class="service-list">
@@ -993,6 +1023,70 @@
         </div>
       </div>
     </section>
+
+    <div class="pricing-block">
+      <h3>Not sure which service fits? Start with the problem.</h3>
+      <div class="problem-grid">
+        <button type="button" class="problem-tile" data-ask-aetheria="My customers cannot find my business online. Which CIDEX services can help, and what do they do for me?">
+          <span class="pt-problem">Customers cannot find my business online</span>
+          <span class="pt-meta">Often solved with: Website and SEO</span>
+          <span class="pt-cta">Ask Aetheria how →</span>
+        </button>
+        <button type="button" class="problem-tile" data-ask-aetheria="I have no time to post on social media. How can CIDEX help, and what would I get from it?">
+          <span class="pt-problem">I have no time to post on social media</span>
+          <span class="pt-meta">Often solved with: Social media management</span>
+          <span class="pt-cta">Ask Aetheria how →</span>
+        </button>
+        <button type="button" class="problem-tile" data-ask-aetheria="I spend money on ads but cannot tell which ones bring enquiries. How can CIDEX help?">
+          <span class="pt-problem">I spend on ads but cannot tell what works</span>
+          <span class="pt-meta">Often solved with: Advertising management</span>
+          <span class="pt-cta">Ask Aetheria how →</span>
+        </button>
+        <button type="button" class="problem-tile" data-ask-aetheria="My team repeats the same tasks every day. How can CIDEX automation help, and what does it do for us?">
+          <span class="pt-problem">My team repeats the same tasks every day</span>
+          <span class="pt-meta">Often solved with: Business and AI automation</span>
+          <span class="pt-cta">Ask Aetheria how →</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="pricing-block">
+      <h3>Common questions</h3>
+      <div class="faq-list">
+        <details>
+          <summary>Is the price final?</summary>
+          <p>The prices shown are starting points. Your final price depends on the scope of your project and is confirmed in a written quotation.</p>
+        </details>
+        <details>
+          <summary>When does work start?</summary>
+          <p>A project starts only after the quotation is accepted and any stated initial payment or onboarding step is done.</p>
+        </details>
+        <details>
+          <summary>Are delivery dates guaranteed?</summary>
+          <p>Delivery dates are subject to the contract for each project. They can move if approvals, materials or payments are late, or if changes are requested after approval.</p>
+        </details>
+        <details>
+          <summary>What if I cancel?</summary>
+          <p>Before work begins there is no cancellation fee, and payments received are returned, except agreed third-party costs that cannot be recovered where the law allows. In the first 7 days after work begins there is no cancellation fee. After that, charges depend on the contract, and the team explains any amount in writing.</p>
+        </details>
+        <details>
+          <summary>How many revisions are included?</summary>
+          <p>Each quotation states how many revisions are included. Extra revisions are charged only after you approve the extra charge.</p>
+        </details>
+        <details>
+          <summary>What happens with late payments?</summary>
+          <p>CIDEX generally sends one written reminder and makes one phone call within about 7 days of the due date. If it stays unpaid, work may be paused. No late fee applies unless it was agreed in advance.</p>
+        </details>
+        <details>
+          <summary>Who owns the final work?</summary>
+          <p>After full payment, you own the final deliverables made for you, unless the agreement says otherwise. Third-party fonts, images, plugins and APIs stay under their own licences.</p>
+        </details>
+        <details>
+          <summary>Does CIDEX guarantee results?</summary>
+          <p>No. CIDEX does not guarantee sales, leads, rankings, followers or revenue.</p>
+        </details>
+      </div>
+    </div>
 
     <div class="wrap" style="text-align:center; margin: 8px 0 40px;">
       <a href="#footer" class="btn-primary" data-route="home" data-anchor="footer" data-ripple>Contact us</a>
