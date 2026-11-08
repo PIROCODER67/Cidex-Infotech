@@ -689,13 +689,16 @@
   .side-notice[hidden]{display:none !important;}
   .side-notice p{margin:0;}
   .side-notice-close{position:absolute; top:6px; right:10px; background:none; border:none; color:var(--lo); font-size:1.4rem; line-height:1; cursor:pointer;}
-  .profile-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
-  .profile-row .field{margin:0;}
+  #profileOverlay{align-items:center; padding:20px;}
+  #profileOverlay .modal{width:min(600px, 100%); max-width:600px; max-height:calc(100vh - 40px); overflow-y:auto; box-sizing:border-box; padding-right:22px;}
+  #profileForm input{width:100%; box-sizing:border-box; min-width:0;}
+  .profile-row{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px;}
+  .profile-row .field{margin:0; min-width:0;}
   .pref-field{border:none; padding:0; margin:14px 0 0; min-width:0;}
   .pref-field legend{font-size:0.88rem; color:var(--lo); margin-bottom:8px; padding:0;}
   .pref-field label{display:inline-flex; align-items:center; gap:6px; margin-right:16px; font-size:0.92rem; color:var(--hi);}
   .optional{color:var(--lo); font-weight:300;}
-  @media (max-width:560px){ .profile-row{grid-template-columns:1fr;} .side-notice{left:18px; right:18px; width:auto; top:auto; bottom:18px;} }
+  @media (max-width:560px){ .profile-row{grid-template-columns:minmax(0,1fr);} .side-notice{left:18px; right:18px; width:auto; top:auto; bottom:18px;} }
   .nav-auth{background:transparent; border:1px solid var(--hairline-hi); color:var(--hi); padding:8px 14px; border-radius:999px; cursor:pointer; font:inherit; font-size:14px; white-space:nowrap;}
   .nav-auth.nav-auth-primary{background:linear-gradient(120deg,var(--blue),var(--violet)); color:#050505; border:0; font-weight:600;}
   @media (max-width:860px){ .nav-actions .nav-auth{display:none;} }
@@ -1514,7 +1517,7 @@
         <div class="field"><label for="profLast">Last name</label><input type="text" id="profLast" autocomplete="family-name" required></div>
       </div>
       <div class="field"><label for="profCompany">Company name <span class="optional">(optional)</span></label><input type="text" id="profCompany" autocomplete="organization"></div>
-      <div class="field"><label for="profPhone">Phone number</label><input type="tel" id="profPhone" autocomplete="tel" required></div>
+      <div class="field"><label for="profPhone">Phone number <span class="optional">(optional)</span></label><input type="tel" id="profPhone" autocomplete="tel"></div>
       <div class="profile-row">
         <div class="field"><label for="profState">State</label><input type="text" id="profState" autocomplete="address-level1" required></div>
         <div class="field"><label for="profCountry">Country</label><input type="text" id="profCountry" autocomplete="country-name" required></div>
@@ -2512,6 +2515,14 @@
     if(!res.ok){ return { error: { message: (data && (data.message || data.hint)) || ('Request failed (' + res.status + ')') } }; }
     return { data: data };
   }
+  function explainError(action, err){
+    const m = (err && err.message) || '';
+    if(m === 'NETWORK') return 'Could not ' + action + ' because the site could not reach the server. Check your internet connection, turn off any security extension for this site, then try again.';
+    if(/permission|policy|row-level|jwt|expired|401|403/i.test(m)) return 'Could not ' + action + ' because your sign-in has expired. Please sign out, sign in again, and retry.';
+    if(/check constraint|violates|invalid input/i.test(m)) return 'Could not ' + action + ' because one entry is in the wrong format. Check the phone number and the other fields.';
+    if(/does not exist|could not find the table|schema cache/i.test(m)) return 'Could not ' + action + ' because the profiles table is missing in the database (admin: run the setup SQL in Supabase).';
+    return 'Could not ' + action + ': ' + m + '.';
+  }
   async function currentSession(){
     try{ const { data } = await sb.auth.getSession(); return data && data.session ? data.session : null; }catch(e){ return null; }
   }
@@ -2525,7 +2536,7 @@
     if(!uid) return;
     const r = await dbFetch('/profiles?id=eq.' + encodeURIComponent(uid) + '&select=*', { token: sess.access_token });
     if(r.error){
-      setProfMsg(r.error.message === 'NETWORK' ? 'Could not load your saved details. The copy on this browser is shown.' : 'Could not load your saved details.', true);
+      console.warn('Profile load failed:', r.error.message);
     } else if(r.data && r.data[0]){
       fillProfile(r.data[0]);
       writeProfileCache(r.data[0]);
@@ -2534,9 +2545,14 @@
   $('profileForm').addEventListener('submit', async function(e){
     e.preventDefault();
     const p = readProfileForm();
-    if(!p.first_name || !p.last_name || !p.phone || !p.state || !p.country){ setProfMsg('Please fill in every required field. Company name is optional.', true); return; }
-    if(!/^[+0-9 ()-]{6,20}$/.test(p.phone)){ setProfMsg('Enter a valid phone number.', true); return; }
-    if(!p.contact_preference){ setProfMsg('Choose WhatsApp, email or call.', true); return; }
+    const missing = [];
+    if(!p.first_name) missing.push('first name');
+    if(!p.last_name) missing.push('last name');
+    if(!p.state) missing.push('state');
+    if(!p.country) missing.push('country');
+    if(missing.length){ setProfMsg('Please enter: ' + missing.join(', ') + '.', true); return; }
+    if(p.phone && !/^[+0-9 ()-]{6,20}$/.test(p.phone)){ setProfMsg('The phone number can contain only digits, spaces, +, ( ), and -, and must be 6 to 20 characters. You can leave it empty.', true); return; }
+    if(!p.contact_preference){ setProfMsg('Choose how you would prefer us to contact you: WhatsApp, email or call.', true); return; }
     const sess = await currentSession();
     if(!sess || !sess.user){ setProfMsg('Please sign in again.', true); return; }
     const btn = $('profSave');
@@ -2544,8 +2560,9 @@
     try{
       const row = Object.assign({ id: sess.user.id, updated_at: new Date().toISOString() }, p);
       if(!row.company_name) row.company_name = null;
+      if(!row.phone) row.phone = null;
       const r = await dbFetch('/profiles?on_conflict=id', { method: 'POST', token: sess.access_token, prefer: 'resolution=merge-duplicates,return=minimal', body: row });
-      if(r.error){ setProfMsg(r.error.message === 'NETWORK' ? NET_MSG : 'Could not save your details. Please try again.', true); return; }
+      if(r.error){ setProfMsg(explainError('save your details', r.error), true); return; }
       writeProfileCache(p);
       setProfMsg('Saved. Thank you.');
     } finally {
