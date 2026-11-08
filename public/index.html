@@ -612,6 +612,22 @@
   .bi-steps span{flex:1; height:4px; border-radius:2px; background:var(--hairline);}
   .bi-steps span.on{background:var(--cyan);}
   .bi-next{font-size:0.82rem; color:var(--lo-dim);}
+  .modal .field textarea, .acc-form textarea{width:100%; box-sizing:border-box; background:var(--bg-2); border:1px solid var(--hairline-hi); color:var(--hi); border-radius:10px; padding:10px 12px; font:inherit; font-size:16px; resize:vertical;}
+  .acc-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:18px; margin-bottom:18px;}
+  .acc-card{border:1px solid var(--hairline-hi); border-radius:16px; padding:20px; background:var(--glass); display:flex; flex-direction:column; gap:10px; min-width:0;}
+  .acc-card h3{font-size:1rem; font-weight:700; color:var(--hi);}
+  .acc-card p, .acc-card li{color:var(--lo); font-size:0.9rem; font-weight:300; line-height:1.5;}
+  .acc-card ul{list-style:none; padding:0; margin:0; display:grid; gap:8px;}
+  .acc-card li{border-top:1px solid var(--hairline); padding-top:8px; overflow-wrap:anywhere;}
+  .acc-big{font-size:1.4rem; font-weight:700; color:var(--hi);}
+  .acc-wide{grid-column:1 / -1;}
+  .acc-form{display:flex; flex-direction:column; gap:10px;}
+  .acc-form input{width:100%; box-sizing:border-box; background:var(--bg-2); border:1px solid var(--hairline-hi); color:var(--hi); border-radius:10px; padding:10px 12px; font:inherit; font-size:16px;}
+  .acc-form button{align-self:flex-start;}
+  .ai-team-row{padding:8px 12px 0; display:flex; flex-direction:column; gap:6px; border-top:1px solid var(--hairline);}
+  .ai-team{align-self:flex-start; background:none; border:1px solid var(--hairline-hi); color:var(--cyan); border-radius:999px; padding:6px 12px; font:inherit; font-size:12px; cursor:pointer;}
+  .ai-team:disabled{opacity:.5; cursor:default;}
+  .ai-team-note{font-size:12px; color:var(--lo-dim);}
 
   /* ---------- PRINT ---------- */
   @media print{
@@ -1641,6 +1657,82 @@
     </div>
   </div>
 
+  <!-- ============ ACCOUNT VIEW ============ -->
+  <div id="view-account" hidden>
+    <div class="wrap page-hero">
+      <span class="eyebrow">Your account</span>
+      <h1>Your account</h1>
+      <p>Your orders, bills, messages and privacy controls in one place.</p>
+    </div>
+
+    <div class="pricing-block">
+      <div class="sub-box" id="accSignedOut" hidden>
+        <p>Sign up or log in to see your account.</p>
+        <button type="button" class="btn-primary" id="accLogin">Log in</button>
+      </div>
+
+      <div id="accBody" hidden>
+        <div class="sub-box" id="accNeedsProfile" hidden>
+          <p>Add your home address and details in your profile to finish setting up your account.</p>
+          <button type="button" class="btn-primary" id="accOpenProfile">Open my profile</button>
+        </div>
+        <p class="newsletter-msg" id="accMsg" role="status" aria-live="polite"></p>
+
+        <div class="acc-grid">
+          <div class="acc-card">
+            <h3>Rank</h3>
+            <div class="acc-big" id="accRank"></div>
+            <p id="accRankNote"></p>
+            <p id="accRankNext"></p>
+          </div>
+          <div class="acc-card">
+            <h3>Due bill</h3>
+            <div id="accDue"></div>
+          </div>
+          <div class="acc-card acc-wide">
+            <h3>Current order</h3>
+            <div id="accCurrent"></div>
+          </div>
+          <div class="acc-card">
+            <h3>Past orders</h3>
+            <ul id="accPast"></ul>
+          </div>
+          <div class="acc-card">
+            <h3>Past transactions</h3>
+            <ul id="accTx"></ul>
+          </div>
+          <div class="acc-card acc-wide">
+            <h3>Pending mails</h3>
+            <p>Messages you sent that are still waiting for a reply.</p>
+            <ul id="accPending"></ul>
+            <form class="acc-form" id="accMsgForm" novalidate>
+              <input type="text" id="accMsgSubject" maxlength="150" placeholder="Subject" aria-label="Subject" required>
+              <textarea id="accMsgBody" rows="3" maxlength="3000" placeholder="Your message to the team" aria-label="Message" required></textarea>
+              <button type="submit" class="btn-primary" id="accMsgSend">Send to team</button>
+              <p class="newsletter-msg" id="accMsgNote" role="status" aria-live="polite"></p>
+            </form>
+          </div>
+          <div class="acc-card acc-wide">
+            <h3>Privacy controls</h3>
+            <p><strong>Delete my data</strong> removes your profile details, messages and saved AI conversations. Your account stays. Order and invoice records stay, because we keep them for tax and accounting.</p>
+            <p><strong>Delete my account</strong> removes everything above and your sign-in. Order and invoice records stay with your name removed.</p>
+            <div class="acc-form">
+              <button type="button" class="btn-ghost" id="accDeleteData">Delete my data</button>
+              <button type="button" class="btn-ghost" id="accDeleteAccount">Delete my account</button>
+            </div>
+            <div class="acc-form" id="accConfirm" hidden>
+              <p id="accConfirmText"></p>
+              <input type="text" id="accConfirmInput" placeholder="Type DELETE to confirm" aria-label="Type DELETE to confirm" autocomplete="off">
+              <button type="button" class="btn-primary" id="accConfirmGo">Confirm</button>
+              <button type="button" class="btn-ghost" id="accConfirmCancel">Cancel</button>
+            </div>
+            <p class="newsletter-msg" id="accDelMsg" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="view-404" hidden>
     <div class="wrap page-hero notfound-hero">
       <span class="eyebrow">404</span>
@@ -1719,6 +1811,7 @@
         <div class="field"><label for="profState">State</label><input type="text" id="profState" autocomplete="address-level1" required></div>
         <div class="field"><label for="profCountry">Country</label><input type="text" id="profCountry" autocomplete="country-name" required></div>
       </div>
+      <div class="field"><label for="profAddress">Home address</label><textarea id="profAddress" rows="2" autocomplete="street-address" required></textarea></div>
       <fieldset class="pref-field">
         <legend>While contacting the management team, will you prefer WhatsApp, email or call?</legend>
         <label><input type="radio" name="contactPref" value="whatsapp"> WhatsApp</label>
@@ -1728,6 +1821,7 @@
       <p class="modal-note" id="profMsg" aria-live="polite"></p>
       <div class="modal-actions">
         <button type="button" class="btn-cancel" id="profCancel">Close</button>
+        <button type="button" class="btn-cancel" id="profToAccount">My account</button>
         <button type="submit" class="btn-confirm" id="profSave">Save details</button>
       </div>
     </form>
@@ -1804,6 +1898,7 @@
     <button type="button" class="ai-close" id="advClose" aria-label="Close services guide">&times;</button>
   </div>
   <div class="ai-log" id="advLog" aria-live="polite"></div>
+  <div class="ai-team-row"><button type="button" class="ai-team" data-team="aetheria">Send this chat to our team</button><span class="ai-team-note" aria-live="polite"></span></div>
   <form class="ai-form" id="advForm" autocomplete="off">
     <input id="advInput" type="text" maxlength="1000" placeholder="Ask about a service..." aria-label="Your question" required>
     <button type="submit" id="advSend">Send</button>
@@ -1825,6 +1920,7 @@
     <button type="button" class="ai-close" id="aiClose" aria-label="Close price assistant">&times;</button>
   </div>
   <div class="ai-log" id="aiLog" aria-live="polite"></div>
+  <div class="ai-team-row"><button type="button" class="ai-team" data-team="clow">Send this chat to our team</button><span class="ai-team-note" aria-live="polite"></span></div>
   <form class="ai-form" id="aiForm" autocomplete="off">
     <input id="aiInput" type="text" maxlength="1000" placeholder="Describe your project..." aria-label="Your message" required>
     <button type="submit" id="aiSend">Send</button>
@@ -2190,9 +2286,10 @@
   const viewPrivacy = document.getElementById('view-privacy');
   const viewTerms = document.getElementById('view-terms');
   const viewSubscribe = document.getElementById('view-subscribe');
+  const viewAccount = document.getElementById('view-account');
   const view404 = document.getElementById('view-404');
-  const allViews = [viewHome, viewPricing, viewPrivacy, viewTerms, viewSubscribe, view404];
-  const KNOWN_ROUTES = ['home', 'pricing', 'privacy', 'terms', 'subscribe'];
+  const allViews = [viewHome, viewPricing, viewPrivacy, viewTerms, viewSubscribe, viewAccount, view404];
+  const KNOWN_ROUTES = ['home', 'pricing', 'privacy', 'terms', 'subscribe', 'account'];
 
   function showView(route){
     allViews.forEach(function(v){ v.hidden = true; });
@@ -2203,6 +2300,7 @@
     } else if(route === 'privacy'){ viewPrivacy.hidden = false; }
     else if(route === 'terms'){ viewTerms.hidden = false; }
     else if(route === 'subscribe'){ viewSubscribe.hidden = false; document.dispatchEvent(new Event('subscribe-view')); }
+    else if(route === 'account'){ viewAccount.hidden = false; document.dispatchEvent(new Event('account-view')); }
     else if(route === '404'){ view404.hidden = false; }
     else { viewHome.hidden = false; }
     if(window.ScrollTrigger) ScrollTrigger.refresh();
@@ -2668,6 +2766,7 @@
       if(user){ $('authWho').textContent = user.email; loginTrigger.textContent = 'My account'; }
       else { loginTrigger.textContent = 'Client Login'; }
       if(!$('view-subscribe').hidden) renderSubscribe();
+      if(!$('view-account').hidden) renderAccount();
     }catch(e){ /* stays signed out */ }
   }
   function closeLogin(){ closeModal(loginOverlay); }
@@ -2698,6 +2797,7 @@
     $('profPhone').value = p.phone || '';
     $('profState').value = p.state || '';
     $('profCountry').value = p.country || '';
+    $('profAddress').value = p.address || '';
     document.querySelectorAll('input[name="contactPref"]').forEach(function(r){ r.checked = (r.value === p.contact_preference); });
   }
   function readProfileForm(){
@@ -2709,6 +2809,7 @@
       phone: $('profPhone').value.trim(),
       state: $('profState').value.trim(),
       country: $('profCountry').value.trim(),
+      address: $('profAddress').value.trim(),
       contact_preference: pref ? pref.value : ''
     };
   }
@@ -2763,6 +2864,7 @@
     if(!p.last_name) missing.push('last name');
     if(!p.state) missing.push('state');
     if(!p.country) missing.push('country');
+    if(!p.address) missing.push('home address');
     if(missing.length){ setProfMsg('Please enter: ' + missing.join(', ') + '.', true); return; }
     if(p.phone && !/^[+0-9 ()-]{6,20}$/.test(p.phone)){ setProfMsg('The phone number can contain only digits, spaces, +, ( ), and -, and must be 6 to 20 characters. You can leave it empty.', true); return; }
     if(!p.contact_preference){ setProfMsg('Choose how you would prefer us to contact you: WhatsApp, email or call.', true); return; }
@@ -2777,7 +2879,9 @@
       const r = await dbFetch('/profiles?on_conflict=id', { method: 'POST', token: sess.access_token, prefer: 'resolution=merge-duplicates,return=minimal', body: row });
       if(r.error){ setProfMsg(explainError('save your details', r.error), true); return; }
       writeProfileCache(p);
-      setProfMsg('Saved. Thank you.');
+      closeModal(profileOverlay);
+      location.hash = 'account';
+      if(location.hash === '#account') renderAccount();
     } finally {
       btn.disabled = false; btn.textContent = 'Save details';
     }
@@ -2843,6 +2947,201 @@
     if(r.error){ setSubMsg(explainError('unsubscribe', r.error), true); return; }
     await renderSubscribe();
     setSubMsg('You have unsubscribed.');
+  });
+
+  /* ---------- ACCOUNT PAGE: the signed-in customer's own rows only ---------- */
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
+  function money(amount, currency){
+    if(amount == null || amount === '') return '—';
+    const cur = currency || 'INR';
+    const sym = cur === 'INR' ? '₹' : (cur === 'USD' ? '$' : cur + ' ');
+    return sym + Number(amount).toLocaleString(cur === 'INR' ? 'en-IN' : 'en-US', { maximumFractionDigits: 2 });
+  }
+  function fmtDate(d){
+    if(!d) return '';
+    const dt = new Date(String(d).length <= 10 ? d + 'T00:00:00' : d);
+    return isNaN(dt) ? '' : dt.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  const ORDER_STATUS = { received: 'Received', in_progress: 'In progress', review: 'Waiting for your review', completed: 'Completed', cancelled: 'Cancelled' };
+  // Rank counts orders that are not cancelled. Discount wording is confirmed by the team per order.
+  const RANKS = [
+    { min: 12, name: 'Partner', note: 'Minimum 20% and up to 35% discount, confirmed by our team for each order.' },
+    { min: 6,  name: 'Ultra-User', note: 'Minimum 12% and up to 25% discount, confirmed by our team for each order.' },
+    { min: 4,  name: 'Regular', note: 'Up to 10% discount, confirmed by our team for each order.' },
+    { min: 1,  name: 'Starter', note: 'Any discount is discussed with our team.' }
+  ];
+  function rankInfo(count){
+    const cur = RANKS.find(function(r){ return count >= r.min; }) || null;
+    const ups = RANKS.filter(function(r){ return r.min > count; }).sort(function(a, b){ return a.min - b.min; });
+    return { cur: cur, next: ups[0] || null, left: ups[0] ? ups[0].min - count : 0 };
+  }
+  function setAccMsg(text, isError){ const el = $('accMsg'); el.textContent = text || ''; el.classList.toggle('error', !!isError); el.classList.toggle('success', !isError && !!text); }
+  function renderRank(orders){
+    const count = orders.filter(function(o){ return o.status !== 'cancelled'; }).length;
+    const info = rankInfo(count);
+    $('accRank').textContent = info.cur ? info.cur.name : 'Not ranked yet';
+    $('accRankNote').textContent = info.cur ? info.cur.note : 'Your rank starts with your first order.';
+    $('accRankNext').textContent = info.next
+      ? info.left + ' more order' + (info.left === 1 ? '' : 's') + ' to reach ' + info.next.name + '.'
+      : 'You are at the top rank.';
+  }
+  function renderCurrent(orders){
+    const o = orders.find(function(x){ return x.status !== 'completed' && x.status !== 'cancelled'; });
+    if(!o){ $('accCurrent').innerHTML = '<p>No active order right now. Your next order will show here.</p>'; return; }
+    let deadline = '<p>No deadline set yet.</p>';
+    if(o.deadline){
+      const dl = new Date(o.deadline + 'T00:00:00');
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const days = Math.round((dl - today) / 86400000);
+      const left = days >= 0
+        ? days + ' day' + (days === 1 ? '' : 's') + ' left'
+        : (-days) + ' day' + (days === -1 ? '' : 's') + ' overdue';
+      deadline = '<p><strong>Deadline:</strong> ' + esc(fmtDate(o.deadline)) + ' (' + esc(left) + ')</p>';
+    }
+    $('accCurrent').innerHTML =
+      '<p class="acc-big">' + esc(o.title) + '</p>' +
+      '<p><strong>Status:</strong> ' + esc(ORDER_STATUS[o.status] || o.status) + '</p>' +
+      deadline +
+      (o.details ? '<p>' + esc(o.details) + '</p>' : '') +
+      '<p><strong>Amount:</strong> ' + esc(money(o.amount, o.currency)) + '</p>' +
+      '<p>Started ' + esc(fmtDate(o.created_at)) + '</p>';
+  }
+  function renderPast(orders){
+    const past = orders.filter(function(o){ return o.status === 'completed' || o.status === 'cancelled'; });
+    $('accPast').innerHTML = past.length
+      ? past.map(function(o){ return '<li><strong>' + esc(o.title) + '</strong><br>' + esc(ORDER_STATUS[o.status]) + ' · ' + esc(fmtDate(o.created_at)) + ' · ' + esc(money(o.amount, o.currency)) + '</li>'; }).join('')
+      : '<li>No past orders yet.</li>';
+  }
+  function renderDue(tx){
+    const totals = {};
+    tx.forEach(function(t){
+      if(t.kind === 'invoice' && t.status === 'due'){ const c = t.currency || 'INR'; totals[c] = (totals[c] || 0) + Number(t.amount); }
+    });
+    const cur = Object.keys(totals);
+    $('accDue').innerHTML = cur.length
+      ? cur.map(function(c){ return '<p class="acc-big">' + esc(money(totals[c], c)) + '</p>'; }).join('') + '<p>Amount due. Ask the team if you need an invoice copy.</p>'
+      : '<p>Nothing due. You are all paid up.</p>';
+  }
+  function renderTx(tx){
+    const KIND = { invoice: 'Invoice', payment: 'Payment', refund: 'Refund' };
+    $('accTx').innerHTML = tx.length
+      ? tx.map(function(t){ return '<li><strong>' + esc(KIND[t.kind] || t.kind) + '</strong> · ' + esc(t.description || '') + '<br>' + esc(money(t.amount, t.currency)) + ' · ' + esc(t.status === 'paid' ? 'Paid' : 'Due') + ' · ' + esc(fmtDate(t.created_at)) + '</li>'; }).join('')
+      : '<li>No transactions yet.</li>';
+  }
+  function renderPending(msgs){
+    const waiting = msgs.filter(function(m){ return !m.replied; });
+    $('accPending').innerHTML = waiting.length
+      ? waiting.map(function(m){ return '<li><strong>' + esc(m.subject) + '</strong><br>Sent ' + esc(fmtDate(m.created_at)) + ' · Waiting for a reply</li>'; }).join('')
+      : '<li>No messages waiting for a reply.</li>';
+  }
+  async function renderAccount(){
+    const sess = await currentSession();
+    $('accSignedOut').hidden = !!sess;
+    $('accBody').hidden = !sess;
+    if(!sess) return;
+    const auth = { token: sess.access_token };
+    const uid = encodeURIComponent(sess.user.id);
+    const res = await Promise.all([
+      dbFetch('/profiles?id=eq.' + uid + '&select=address', auth),
+      dbFetch('/orders?user_id=eq.' + uid + '&select=*&order=created_at.desc', auth),
+      dbFetch('/transactions?user_id=eq.' + uid + '&select=*&order=created_at.desc', auth),
+      dbFetch('/messages?user_id=eq.' + uid + '&select=*&order=created_at.desc', auth)
+    ]);
+    const failed = res.find(function(r){ return r.error; });
+    setAccMsg(failed ? explainError('load your account', failed.error) : '', !!failed);
+    const profile = res[0].data && res[0].data[0];
+    $('accNeedsProfile').hidden = !!(profile && profile.address);
+    const orders = res[1].data || [];
+    const tx = res[2].data || [];
+    const msgs = res[3].data || [];
+    renderRank(orders);
+    renderCurrent(orders);
+    renderPast(orders);
+    renderDue(tx);
+    renderTx(tx);
+    renderPending(msgs);
+  }
+  document.addEventListener('account-view', renderAccount);
+  if(!$('view-account').hidden) renderAccount();
+  $('accLogin').addEventListener('click', function(){ openAuth('signin'); });
+  $('accOpenProfile').addEventListener('click', function(){ openProfile(); });
+  $('profToAccount').addEventListener('click', function(){ closeModal(profileOverlay); location.hash = 'account'; });
+
+  $('accMsgForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const note = $('accMsgNote');
+    const subject = $('accMsgSubject').value.trim();
+    const body = $('accMsgBody').value.trim();
+    if(!subject || !body){ note.textContent = 'Add a subject and a message.'; note.className = 'newsletter-msg error'; return; }
+    const sess = await currentSession();
+    if(!sess){ note.textContent = 'Please sign in first.'; note.className = 'newsletter-msg error'; return; }
+    const r = await dbFetch('/messages', { method: 'POST', token: sess.access_token, prefer: 'return=minimal', body: { user_id: sess.user.id, subject: subject, body: body } });
+    if(r.error){ note.textContent = explainError('send your message', r.error); note.className = 'newsletter-msg error'; return; }
+    $('accMsgSubject').value = '';
+    $('accMsgBody').value = '';
+    note.textContent = 'Sent. Our team will reply by your preferred contact method.';
+    note.className = 'newsletter-msg success';
+    renderAccount();
+  });
+
+  /* Delete data / delete account: the customer types DELETE to confirm; the database functions do the work. */
+  let accPendingAction = null;
+  function openConfirm(kind){
+    accPendingAction = kind;
+    $('accConfirmText').textContent = kind === 'account'
+      ? 'This removes your account, profile, messages, saved AI conversations and sign-in. Order and invoice records stay with your name removed. This cannot be undone.'
+      : 'This removes your profile details, messages and saved AI conversations. Your account stays. Order and invoice records stay. This cannot be undone.';
+    $('accConfirmInput').value = '';
+    $('accConfirm').hidden = false;
+    $('accConfirmInput').focus();
+  }
+  function closeConfirm(){ accPendingAction = null; $('accConfirm').hidden = true; }
+  $('accDeleteData').addEventListener('click', function(){ openConfirm('data'); });
+  $('accDeleteAccount').addEventListener('click', function(){ openConfirm('account'); });
+  $('accConfirmCancel').addEventListener('click', closeConfirm);
+  $('accConfirmGo').addEventListener('click', async function(){
+    const note = $('accDelMsg');
+    const kind = accPendingAction;
+    if(!kind) return;
+    if($('accConfirmInput').value.trim() !== 'DELETE'){ note.textContent = 'Type DELETE in capitals to confirm.'; note.className = 'newsletter-msg error'; return; }
+    const sess = await currentSession();
+    if(!sess){ note.textContent = 'Please sign in first.'; note.className = 'newsletter-msg error'; return; }
+    $('accConfirmGo').disabled = true;
+    const r = await dbFetch(kind === 'account' ? '/rpc/delete_my_account' : '/rpc/delete_my_data', { method: 'POST', token: sess.access_token, body: {} });
+    $('accConfirmGo').disabled = false;
+    if(r.error){ note.textContent = explainError(kind === 'account' ? 'delete your account' : 'delete your data', r.error); note.className = 'newsletter-msg error'; return; }
+    try{ localStorage.removeItem('cidex_profile'); }catch(e){}
+    closeConfirm();
+    if(kind === 'account'){
+      writeSession(null);
+      await refreshSession();
+      showNotice('Your account has been deleted.');
+      location.hash = 'home';
+      return;
+    }
+    note.textContent = 'Your personal data has been deleted. Your account is still active.';
+    note.className = 'newsletter-msg success';
+    renderAccount();
+  });
+
+  /* ---------- SEND AI CHAT TO THE TEAM: saved to ai_history (team-only; customers cannot read it back) ---------- */
+  document.querySelectorAll('[data-team]').forEach(function(btn){
+    btn.addEventListener('click', async function(){
+      const note = btn.parentElement.querySelector('.ai-team-note');
+      const who = btn.getAttribute('data-team');
+      const log = $(who === 'clow' ? 'aiLog' : 'advLog');
+      const transcript = Array.from(log.querySelectorAll('.ai-msg, .ai-card')).map(function(el){
+        return { role: el.classList.contains('user') ? 'customer' : 'assistant', text: el.textContent.trim() };
+      }).filter(function(m){ return m.text; });
+      if(!transcript.length){ note.textContent = 'Ask a question first, then send the chat.'; return; }
+      const sess = await currentSession();
+      if(!sess){ note.textContent = 'Sign up or log in first so our team can follow up with you.'; return; }
+      btn.disabled = true;
+      const r = await dbFetch('/ai_history', { method: 'POST', token: sess.access_token, prefer: 'return=minimal', body: { user_id: sess.user.id, assistant: who, transcript: transcript } });
+      btn.disabled = false;
+      note.textContent = r.error ? explainError('send this chat', r.error) : 'Sent to our team. We will follow up with you.';
+    });
   });
 
   $('navFace').addEventListener('click', async function(){
