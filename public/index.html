@@ -223,7 +223,7 @@
   .hero-lead{position:relative; z-index:2; max-width:46ch; color:var(--lo); font-size:1.05rem; font-weight:300; margin-bottom:40px;}
   .hero-actions{position:relative; z-index:2; display:flex; gap:16px; flex-wrap:wrap; justify-content:center;}
   .scroll-cue{
-    position:absolute; bottom:36px; left:50%; transform:translateX(-50%); z-index:2;
+    position:relative; margin-top:28px; z-index:2;
     font-family:'JetBrains Mono',monospace; font-size:0.65rem; letter-spacing:0.32em; color:var(--lo-dim);
     display:flex; flex-direction:column; align-items:center; gap:10px; text-transform:uppercase;
   }
@@ -595,6 +595,13 @@
   .newsletter-msg{font-size:0.78rem; margin-top:10px; min-height:1.1em;}
   .newsletter-msg.success{color:var(--accent-a);}
   .newsletter-msg.error{color:#FF7A7A;}
+  .newsletter-intro{font-size:0.88rem; color:var(--lo); margin-bottom:14px;}
+  .sub-heading{font-size:1.4rem; font-weight:700; margin-bottom:18px;}
+  .sub-list{list-style:none; padding:0; margin:0 0 36px; display:grid; gap:14px; max-width:70ch;}
+  .sub-list li{color:var(--lo); font-weight:300; padding-left:18px; border-left:1px solid var(--hairline);}
+  .sub-list strong{color:inherit; font-weight:600;}
+  .sub-box{display:flex; flex-direction:column; gap:14px; align-items:flex-start; max-width:70ch;}
+  .sub-box p{color:var(--lo); font-weight:300;}
 
   /* ---------- PRINT ---------- */
   @media print{
@@ -814,7 +821,6 @@
       </div>
       <div class="float-badge fb1"><span class="fb-num">11</span><span class="fb-label">services live</span></div>
       <div class="float-badge fb3"><span class="fb-num">Kolkata</span><span class="fb-label">Based in</span></div>
-      <div class="scroll-cue">Scroll</div>
       <!-- 3D INTERACTIVE CONTROLS HUD -->
       <div class="hero-3d-hud">
         <div class="hud-top-row">
@@ -827,6 +833,7 @@
           <button type="button" class="hud-mode-btn" data-mode="hybrid">[ 03 // HYBRID UNIVERSE ]</button>
         </div>
       </div>
+      <div class="scroll-cue">Scroll</div>
     </section>
 
 
@@ -1588,6 +1595,40 @@
     </section>
   </div>
 
+  <!-- ============ SUBSCRIBE VIEW ============ -->
+  <div id="view-subscribe" hidden>
+    <div class="wrap page-hero">
+      <span class="eyebrow">Newsletter</span>
+      <h1>Subscribe to CIDEX updates</h1>
+      <p>Subscribing is all or nothing. You receive everything listed below.</p>
+    </div>
+
+    <div class="pricing-block">
+      <h2 class="sub-heading">What subscribers receive</h2>
+      <ul class="sub-list">
+        <li><strong>New updates</strong>: new services, new features and news from CIDEX.</li>
+        <li><strong>Resets</strong>: notice when a plan or offer we list is reset or changed.</li>
+        <li><strong>Price changes</strong>: notice before our published prices change.</li>
+        <li><strong>Product mails</strong>: what we launch and how to use it.</li>
+        <li><strong>Offer mails</strong>: occasional offers and discounts.</li>
+        <li><strong>Other mails</strong>: other occasional announcements from the team.</li>
+      </ul>
+
+      <div class="sub-box">
+        <div id="subSignedOut" hidden>
+          <p>Sign in first. Your subscription uses the email on your account.</p>
+          <button type="button" class="btn-primary" id="subLogin">Log in</button>
+        </div>
+        <div id="subSignedIn" hidden>
+          <p>Updates will be sent to <strong id="subEmail"></strong>.</p>
+          <button type="button" class="btn-primary" id="subConfirm">Subscribe</button>
+          <button type="button" class="btn-ghost" id="subLeave" hidden>Unsubscribe</button>
+          <p class="newsletter-msg" id="subMsg" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="view-404" hidden>
     <div class="wrap page-hero notfound-hero">
       <span class="eyebrow">404</span>
@@ -1612,15 +1653,10 @@
           <button class="copy-btn" id="copyEmailBtn" data-copy="CidexInfotech1@gmail.com" aria-label="Copy email address">Copy</button>
         </div>
         
-        <form class="newsletter" id="newsletterForm" novalidate>
-          <div class="newsletter-row">
-            <label for="newsletterEmail" class="sr-only-label" style="position:absolute; width:1px; height:1px; overflow:hidden;">Email for updates</label>
-            <input type="email" id="newsletterEmail" placeholder="Get pricing updates by email" autocomplete="email">
-            <input type="text" id="newsletterHoneypot" name="company_website" tabindex="-1" autocomplete="off" style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;" aria-hidden="true">
-            <button type="submit">Subscribe</button>
-          </div>
-          <div class="newsletter-msg" id="newsletterMsg" role="status" aria-live="polite"></div>
-        </form>
+        <div class="newsletter">
+          <p class="newsletter-intro">Updates, price changes and offers. One subscription, all or nothing.</p>
+          <a class="btn-primary" href="#subscribe" data-route="subscribe">Subscribe</a>
+        </div>
       </div>
       <div class="footer-links">
         <a href="#pricing" data-route="pricing">Full Pricing</a>
@@ -2141,9 +2177,10 @@
   const viewPricing = document.getElementById('view-pricing');
   const viewPrivacy = document.getElementById('view-privacy');
   const viewTerms = document.getElementById('view-terms');
+  const viewSubscribe = document.getElementById('view-subscribe');
   const view404 = document.getElementById('view-404');
-  const allViews = [viewHome, viewPricing, viewPrivacy, viewTerms, view404];
-  const KNOWN_ROUTES = ['home', 'pricing', 'privacy', 'terms'];
+  const allViews = [viewHome, viewPricing, viewPrivacy, viewTerms, viewSubscribe, view404];
+  const KNOWN_ROUTES = ['home', 'pricing', 'privacy', 'terms', 'subscribe'];
 
   function showView(route){
     allViews.forEach(function(v){ v.hidden = true; });
@@ -2153,6 +2190,7 @@
       document.querySelectorAll('.nav-links a[data-route="pricing"]').forEach(function(a){ a.classList.add('active'); });
     } else if(route === 'privacy'){ viewPrivacy.hidden = false; }
     else if(route === 'terms'){ viewTerms.hidden = false; }
+    else if(route === 'subscribe'){ viewSubscribe.hidden = false; document.dispatchEvent(new Event('subscribe-view')); }
     else if(route === '404'){ view404.hidden = false; }
     else { viewHome.hidden = false; }
     if(window.ScrollTrigger) ScrollTrigger.refresh();
@@ -2306,13 +2344,13 @@
 
     const seen = {};
     const items = [];
-    document.querySelectorAll('.service-row').forEach(function(row){
-      const unitEl = row.querySelector('.unit');
+    document.querySelectorAll('.svc-card').forEach(function(card){
+      const nameEl = card.querySelector('h3');
+      const priceEl = card.querySelector('.service-price');
+      const unitEl = priceEl ? priceEl.querySelector('.unit') : null;
       if(!unitEl || unitEl.textContent.trim() !== 'per month') return;
-      const nameEl = row.querySelector('.service-name');
-      const priceEl = row.querySelector('.service-price');
-      if(!nameEl || !priceEl) return;
-      const name = (nameEl.getAttribute('data-original') || nameEl.textContent).trim();
+      if(!nameEl) return;
+      const name = nameEl.textContent.trim();
       if(seen[name]) return;
       seen[name] = true;
       const priceText = priceEl.childNodes[0] ? priceEl.childNodes[0].nodeValue : '';
@@ -2614,6 +2652,7 @@
       $('navFace').setAttribute('aria-label', user ? 'My profile' : 'Log in');
       if(user){ $('authWho').textContent = user.email; loginTrigger.textContent = 'My account'; }
       else { loginTrigger.textContent = 'Client Login'; }
+      if(!$('view-subscribe').hidden) renderSubscribe();
     }catch(e){ /* stays signed out */ }
   }
   function closeLogin(){ closeModal(loginOverlay); }
@@ -2679,7 +2718,7 @@
     if(/row-level security|new row violates/i.test(m)) return 'Could not ' + action + ' because the database security rules rejected it. The profiles table policies need checking in Supabase.' + detail;
     if(/jwt|token|expired|401/i.test(m)) return 'Could not ' + action + ' because your sign-in has expired. Please sign out, sign in again, and retry.' + detail;
     if(/check constraint|violates|invalid input/i.test(m)) return 'Could not ' + action + ' because one entry is in the wrong format. Check the phone number and the other fields.' + detail;
-    if(/does not exist|could not find the table|schema cache/i.test(m)) return 'Could not ' + action + ' because the profiles table is missing in the database. Run the setup SQL in Supabase.' + detail;
+    if(/does not exist|could not find the table|schema cache/i.test(m)) return 'Could not ' + action + ' because a required table is missing in the database. Run the setup SQL in Supabase.' + detail;
     return 'Could not ' + action + '.' + detail;
   }
   async function currentSession(){
@@ -2730,6 +2769,52 @@
   });
   $('profCancel').addEventListener('click', function(){ closeModal(profileOverlay); });
   profileOverlay.addEventListener('click', function(e){ if(e.target === profileOverlay) closeModal(profileOverlay); });
+  /* ---------- SUBSCRIBE: saved to Supabase table "subscribers" (one row per signed-in user) ---------- */
+  function setSubMsg(text, isError){ $('subMsg').textContent = text; $('subMsg').classList.toggle('error', !!isError); $('subMsg').classList.toggle('success', !isError && !!text); }
+  async function renderSubscribe(){
+    const sess = await currentSession();
+    $('subSignedOut').hidden = !!sess;
+    $('subSignedIn').hidden = !sess;
+    setSubMsg('');
+    if(!sess) return;
+    $('subEmail').textContent = sess.user.email || '';
+    $('subConfirm').hidden = true;
+    $('subLeave').hidden = true;
+    const r = await dbFetch('/subscribers?user_id=eq.' + encodeURIComponent(sess.user.id) + '&select=email', { token: sess.access_token });
+    if(r.error){ setSubMsg(explainError('load your subscription', r.error), true); $('subConfirm').hidden = false; return; }
+    const subscribed = !!(r.data && r.data[0]);
+    $('subConfirm').hidden = subscribed;
+    $('subLeave').hidden = !subscribed;
+    setSubMsg(subscribed ? 'You are subscribed.' : '');
+  }
+  document.addEventListener('subscribe-view', renderSubscribe);
+  if(!$('view-subscribe').hidden) renderSubscribe();
+  $('subLogin').addEventListener('click', function(){ openAuth('signin'); });
+  $('subConfirm').addEventListener('click', async function(){
+    const sess = await currentSession();
+    if(!sess){ renderSubscribe(); return; }
+    $('subConfirm').disabled = true;
+    const r = await dbFetch('/subscribers?on_conflict=user_id', {
+      method: 'POST', token: sess.access_token,
+      prefer: 'resolution=merge-duplicates,return=minimal',
+      body: { user_id: sess.user.id, email: sess.user.email }
+    });
+    $('subConfirm').disabled = false;
+    if(r.error){ setSubMsg(explainError('subscribe', r.error), true); return; }
+    await renderSubscribe();
+    setSubMsg('Subscribed. Updates will be sent to your account email.');
+  });
+  $('subLeave').addEventListener('click', async function(){
+    const sess = await currentSession();
+    if(!sess){ renderSubscribe(); return; }
+    $('subLeave').disabled = true;
+    const r = await dbFetch('/subscribers?user_id=eq.' + encodeURIComponent(sess.user.id), { method: 'DELETE', token: sess.access_token, prefer: 'return=minimal' });
+    $('subLeave').disabled = false;
+    if(r.error){ setSubMsg(explainError('unsubscribe', r.error), true); return; }
+    await renderSubscribe();
+    setSubMsg('You have unsubscribed.');
+  });
+
   $('navFace').addEventListener('click', async function(){
     const sess = await currentSession();
     if(sess){ openProfile(); } else { openAuth('signin'); }
@@ -2872,38 +2957,6 @@
     });
   }
 
-  /* ---------- NEWSLETTER FORM (with basic spam/bot protection) ---------- */
-  const newsletterForm = document.getElementById('newsletterForm');
-  const newsletterMsg = document.getElementById('newsletterMsg');
-  const newsletterLoadedAt = Date.now();
-  newsletterForm.addEventListener('submit', function(e){
-    e.preventDefault();
-    const email = document.getElementById('newsletterEmail').value.trim();
-    const honeypot = document.getElementById('newsletterHoneypot').value;
-    newsletterMsg.classList.remove('success','error');
-
-    // Honeypot: a hidden field real visitors never fill in — bots that auto-fill every field trip it.
-    if(honeypot){
-      newsletterMsg.textContent = 'Subscribed. Pricing updates will land in your inbox.';
-      newsletterMsg.classList.add('success');
-      newsletterForm.reset();
-      return; // silently drop — don't tip off the bot
-    }
-    // Time trap: a real person takes at least a couple seconds to read and type.
-    if(Date.now() - newsletterLoadedAt < 2000){
-      newsletterMsg.textContent = 'Please try that again.';
-      newsletterMsg.classList.add('error');
-      return;
-    }
-    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-      newsletterMsg.textContent = 'Enter a valid email to subscribe.';
-      newsletterMsg.classList.add('error');
-      return;
-    }
-    newsletterMsg.textContent = 'Sign-ups aren\'t connected yet, so your email was not saved. Email CidexInfotech1@gmail.com to join the list.';
-    newsletterMsg.classList.add('error');
-    newsletterForm.reset();
-  });
 
 
   /* ---------- LAST UPDATED + COPYRIGHT YEAR ---------- */
