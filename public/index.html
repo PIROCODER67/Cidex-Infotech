@@ -707,6 +707,17 @@
   .pricing-block{margin:0 0 48px;}
   .pricing-block h3{text-align:center; font-size:1.25rem; font-weight:500; color:var(--hi); margin:0 0 20px;}
   @media (max-width:760px){ .price-strip, .problem-grid{grid-template-columns:minmax(0,1fr);} }
+  .svc-jump{display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:1100px; margin:0 auto 28px; padding:0 16px;}
+  .svc-jump-btn{background:rgba(255,255,255,0.03); border:1px solid var(--hairline-hi); color:var(--lo); border-radius:999px; padding:7px 14px; font:inherit; font-size:0.85rem; cursor:pointer;}
+  .svc-jump-btn:hover{color:var(--hi); border-color:rgba(78,168,255,0.5);}
+  .svc-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; max-width:1100px; margin:0 auto 48px; padding:0 16px; scroll-margin-top:90px;}
+  .svc-card{scroll-margin-top:90px; padding:24px 24px 22px; border:1px solid var(--hairline-hi); border-radius:16px; background:rgba(255,255,255,0.03); display:flex; flex-direction:column; gap:10px;}
+  .svc-card h3{margin:0; font-size:1.15rem; font-weight:500; color:var(--hi);}
+  .svc-card .svc-price{margin:0; color:var(--accent-a); font-weight:500; font-size:1rem;}
+  .svc-card .svc-price .unit{color:var(--lo); font-weight:300; font-size:0.85rem; margin-left:6px;}
+  .svc-card .svc-desc{margin:0; color:var(--lo); font-size:0.92rem; line-height:1.6; font-weight:300; flex:1;}
+  button.svc-ask{align-self:flex-start; background:none; border:none; padding:0; margin-top:4px; color:var(--hi); font:inherit; font-size:0.9rem; font-weight:500; cursor:pointer; text-decoration:underline; text-underline-offset:4px;}
+  @media (max-width:760px){ .svc-grid{grid-template-columns:minmax(0,1fr);} }
   button.tech-cta{background:none; border:none; padding:0; font:inherit; color:inherit; cursor:pointer; text-align:left;}
   .side-notice{position:fixed; top:96px; right:18px; z-index:260; width:min(340px, calc(100vw - 36px)); padding:16px 40px 16px 18px; border-radius:14px; background:rgba(10,14,22,0.95); border:1px solid rgba(78,168,255,0.35); box-shadow:0 18px 40px rgba(0,0,0,0.45); color:var(--hi); font-size:0.92rem; line-height:1.5;}
   .side-notice[hidden]{display:none !important;}
@@ -1003,26 +1014,88 @@
       </div>
     </div>
 
-    <section class="cat" data-cat="main">
-      <div class="wrap">
-        <div class="service-list">
-          <div class="service-row"><span class="service-name">Website Development</span><span class="service-price" data-inr="from ₹10,000–₹80,000">from $110–$850<span class="unit">one-time</span></span><span class="service-desc">A business website, designed and built to load fast on phones and computers.</span></div>
-          <div class="service-row"><span class="service-name">SEO</span><span class="service-price" data-inr="from ₹6,000–₹25,000">from $60–$270<span class="unit">per month</span></span><span class="service-desc">Making your site and content easier for people searching for your business to find.</span></div>
-          <div class="service-row"><span class="service-name">Advertising Management</span><span class="service-price" data-inr="from ₹10,000–₹40,000">from $110–$430<span class="unit">per month</span></span><span class="service-desc">Planning and running your Google and Meta ads. The ad budget is paid to the platform, not to us.</span></div>
-          <div class="service-row"><span class="service-name">Social Media Management</span><span class="service-price" data-inr="from ₹10,000–₹75,000">from $110–$800<span class="unit">per month</span></span><span class="service-desc">Ongoing planning, posting and replies on your social media accounts.</span></div>
-          <div class="service-row"><span class="service-name">Logo &amp; Brand Design</span><span class="service-price" data-inr="from ₹5,000–₹25,000">from $50–$270<span class="unit">one-time</span></span><span class="service-desc">A logo, and where needed a full brand kit, so your business looks consistent everywhere.</span></div>
-          <div class="service-row"><span class="service-name">Video Editing</span><span class="service-price" data-inr="from ₹4,700–₹7,050">from $50–$75<span class="unit">per project</span></span><span class="service-desc">Turning your raw footage into a polished video ready to post.</span></div>
-          <div class="service-row"><span class="service-name">Research</span><span class="service-price" data-inr="from ₹5,000–₹30,000">from $50–$320<span class="unit">per project</span></span><span class="service-desc">Finding, checking and organising information into a clear report with sources.</span></div>
-          <div class="service-row"><span class="service-name">AI Automation</span><span class="service-price" data-inr="from ₹25,000–₹40,000">from $270–$430<span class="unit">one-time</span></span><span class="service-desc">Connecting your tools so routine tasks run on their own.</span></div>
-          <div class="service-row"><span class="service-name">Business Automation</span><span class="service-price" data-inr="from ₹3,000–₹40,000">from $30–$430<span class="unit">one-time</span></span><span class="service-desc">Digital systems that organise your team's tasks, performance and everyday processes.</span></div>
-          <div class="service-row"><span class="service-name">Website Management</span><span class="service-price" data-inr="from ₹3,000–₹20,000">from $30–$210<span class="unit">per month</span></span><span class="service-desc">Regular updates, checks and backups so your website keeps working.</span></div>
-          <div class="service-row"><span class="service-name">Email Marketing</span><span class="service-price" data-inr="from ₹2,500–₹20,000">from $30–$210<span class="unit">one-time</span></span><span class="service-desc">Designing and sending email campaigns to people who have agreed to hear from you.</span></div>
-        </div>
-        <div class="pricing-ask">
-          <button type="button" class="btn-ghost" data-ask-aetheria="Can you explain the options and what each price range includes?" data-ripple>Ask Aetheria to explain the options</button>
-        </div>
-      </div>
-    </section>
+    <nav class="svc-jump" aria-label="Jump to a service">
+          <button type="button" class="svc-jump-btn" data-jump="svc-web">Website Development</button>
+          <button type="button" class="svc-jump-btn" data-jump="svc-seo">SEO</button>
+          <button type="button" class="svc-jump-btn" data-jump="svc-ads">Advertising Management</button>
+          <button type="button" class="svc-jump-btn" data-jump="svc-social">Social Media Management</button>
+          <button type="button" class="svc-jump-btn" data-jump="svc-brand">Logo & Brand Design</button>
+          <button type="button" class="svc-jump-btn" data-jump="svc-video">Video Editing</button>
+          <button type="button" class="svc-jump-btn" data-jump="svc-research">Research</button>
+          <button type="button" class="svc-jump-btn" data-jump="svc-ai">AI Automation</button>
+          <button type="button" class="svc-jump-btn" data-jump="svc-biz">Business Automation</button>
+          <button type="button" class="svc-jump-btn" data-jump="svc-mgmt">Website Management</button>
+          <button type="button" class="svc-jump-btn" data-jump="svc-email">Email Marketing</button>
+    </nav>
+
+    <div class="svc-grid">
+        <section class="svc-card" id="svc-web" aria-labelledby="svc-web-title">
+          <h3 id="svc-web-title">Website Development</h3>
+          <p class="svc-price"><span class="service-price" data-inr="from ₹10,000–₹80,000">from $110–$850<span class="unit">one-time</span></span></p>
+          <p class="svc-desc">A business website, designed and built to load fast on phones and computers.</p>
+          <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about Website Development, what it covers and how it helps my business.">Ask Aetheria about Website Development →</button>
+        </section>
+        <section class="svc-card" id="svc-seo" aria-labelledby="svc-seo-title">
+          <h3 id="svc-seo-title">SEO</h3>
+          <p class="svc-price"><span class="service-price" data-inr="from ₹6,000–₹25,000">from $60–$270<span class="unit">per month</span></span></p>
+          <p class="svc-desc">Making your site and content easier for people searching for your business to find.</p>
+          <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about SEO, what it covers and how it helps my business.">Ask Aetheria about SEO →</button>
+        </section>
+        <section class="svc-card" id="svc-ads" aria-labelledby="svc-ads-title">
+          <h3 id="svc-ads-title">Advertising Management</h3>
+          <p class="svc-price"><span class="service-price" data-inr="from ₹10,000–₹40,000">from $110–$430<span class="unit">per month</span></span></p>
+          <p class="svc-desc">Planning and running your Google and Meta ads. The ad budget is paid to the platform, not to us.</p>
+          <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about Advertising Management, what it covers and how it helps my business.">Ask Aetheria about Advertising Management →</button>
+        </section>
+        <section class="svc-card" id="svc-social" aria-labelledby="svc-social-title">
+          <h3 id="svc-social-title">Social Media Management</h3>
+          <p class="svc-price"><span class="service-price" data-inr="from ₹10,000–₹75,000">from $110–$800<span class="unit">per month</span></span></p>
+          <p class="svc-desc">Ongoing planning, posting and replies on your social media accounts.</p>
+          <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about Social Media Management, what it covers and how it helps my business.">Ask Aetheria about Social Media Management →</button>
+        </section>
+        <section class="svc-card" id="svc-brand" aria-labelledby="svc-brand-title">
+          <h3 id="svc-brand-title">Logo &amp; Brand Design</h3>
+          <p class="svc-price"><span class="service-price" data-inr="from ₹5,000–₹25,000">from $50–$270<span class="unit">one-time</span></span></p>
+          <p class="svc-desc">A logo, and where needed a full brand kit, so your business looks consistent everywhere.</p>
+          <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about Logo and Brand Design, what it covers and how it helps my business.">Ask Aetheria about Logo & Brand Design →</button>
+        </section>
+        <section class="svc-card" id="svc-video" aria-labelledby="svc-video-title">
+          <h3 id="svc-video-title">Video Editing</h3>
+          <p class="svc-price"><span class="service-price" data-inr="from ₹4,700–₹7,050">from $50–$75<span class="unit">per project</span></span></p>
+          <p class="svc-desc">Turning your raw footage into a polished video ready to post.</p>
+          <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about Video Editing, what it covers and how it helps my business.">Ask Aetheria about Video Editing →</button>
+        </section>
+        <section class="svc-card" id="svc-research" aria-labelledby="svc-research-title">
+          <h3 id="svc-research-title">Research</h3>
+          <p class="svc-price"><span class="service-price" data-inr="from ₹5,000–₹30,000">from $50–$320<span class="unit">per project</span></span></p>
+          <p class="svc-desc">Finding, checking and organising information into a clear report with sources.</p>
+          <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about Research, what it covers and how it helps my business.">Ask Aetheria about Research →</button>
+        </section>
+        <section class="svc-card" id="svc-ai" aria-labelledby="svc-ai-title">
+          <h3 id="svc-ai-title">AI Automation</h3>
+          <p class="svc-price"><span class="service-price" data-inr="from ₹25,000–₹40,000">from $270–$430<span class="unit">one-time</span></span></p>
+          <p class="svc-desc">Connecting your tools so routine tasks run on their own.</p>
+          <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about AI Automation, what it covers and how it helps my business.">Ask Aetheria about AI Automation →</button>
+        </section>
+        <section class="svc-card" id="svc-biz" aria-labelledby="svc-biz-title">
+          <h3 id="svc-biz-title">Business Automation</h3>
+          <p class="svc-price"><span class="service-price" data-inr="from ₹3,000–₹40,000">from $30–$430<span class="unit">one-time</span></span></p>
+          <p class="svc-desc">Digital systems that organise your team's tasks, performance and everyday processes.</p>
+          <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about Business Automation, what it covers and how it helps my business.">Ask Aetheria about Business Automation →</button>
+        </section>
+        <section class="svc-card" id="svc-mgmt" aria-labelledby="svc-mgmt-title">
+          <h3 id="svc-mgmt-title">Website Management</h3>
+          <p class="svc-price"><span class="service-price" data-inr="from ₹3,000–₹20,000">from $30–$210<span class="unit">per month</span></span></p>
+          <p class="svc-desc">Regular updates, checks and backups so your website keeps working.</p>
+          <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about Website Management, what it covers and how it helps my business.">Ask Aetheria about Website Management →</button>
+        </section>
+        <section class="svc-card" id="svc-email" aria-labelledby="svc-email-title">
+          <h3 id="svc-email-title">Email Marketing</h3>
+          <p class="svc-price"><span class="service-price" data-inr="from ₹2,500–₹20,000">from $30–$210<span class="unit">one-time</span></span></p>
+          <p class="svc-desc">Designing and sending email campaigns to people who have agreed to hear from you.</p>
+          <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about Email Marketing, what it covers and how it helps my business.">Ask Aetheria about Email Marketing →</button>
+        </section>
+    </div>
 
     <div class="pricing-block">
       <h3>Not sure which service fits? Start with the problem.</h3>
@@ -2162,6 +2235,14 @@
     setTimeout(function(){ loader.classList.add('hide'); }, reduceMotion ? 0 : 450);
   });
 
+
+  /* Jump buttons on the price page: scroll to a service without changing the address */
+  document.querySelectorAll('[data-jump]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const target = document.getElementById(btn.dataset.jump);
+      if(target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
 
   /* ---------- CURRENCY TOGGLE (USD / INR) ---------- */
   // INR values are not a currency conversion — they're this agency's actual starting
