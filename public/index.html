@@ -602,6 +602,16 @@
   .sub-list strong{color:inherit; font-weight:600;}
   .sub-box{display:flex; flex-direction:column; gap:14px; align-items:flex-start; max-width:70ch;}
   .sub-box p{color:var(--lo); font-weight:300;}
+  .sub-box button:disabled{opacity:0.4; cursor:not-allowed;}
+  .sub-hint{font-size:0.82rem; color:var(--lo-dim);}
+  .bi-card{display:flex; flex-direction:column; gap:8px; padding:16px 4px; border-top:1px solid var(--hairline);}
+  .bi-card.dim{opacity:0.6;}
+  .bi-head{display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .bi-level{color:var(--cyan); font-family:'JetBrains Mono',monospace; font-size:0.8rem;}
+  .bi-steps{display:flex; gap:4px;}
+  .bi-steps span{flex:1; height:4px; border-radius:2px; background:var(--hairline);}
+  .bi-steps span.on{background:var(--cyan);}
+  .bi-next{font-size:0.82rem; color:var(--lo-dim);}
 
   /* ---------- PRINT ---------- */
   @media print{
@@ -1042,19 +1052,19 @@
           <p class="svc-desc">A business website, designed and built to load fast on phones and computers.</p>
           <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about Website Development, what it covers and how it helps my business.">Ask Aetheria about Website Development →</button>
         </section>
-        <section class="svc-card" id="svc-seo" aria-labelledby="svc-seo-title">
+        <section class="svc-card" id="svc-seo" data-tiers="Foundation|Visibility|Growth|Market leadership" aria-labelledby="svc-seo-title">
           <h3 id="svc-seo-title">SEO</h3>
           <p class="svc-price"><span class="service-price" data-inr="from ₹6,000–₹25,000">from $60–$270<span class="unit">per month</span></span></p>
           <p class="svc-desc">Making your site and content easier for people searching for your business to find.</p>
           <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about SEO, what it covers and how it helps my business.">Ask Aetheria about SEO →</button>
         </section>
-        <section class="svc-card" id="svc-ads" aria-labelledby="svc-ads-title">
+        <section class="svc-card" id="svc-ads" data-tiers="Focused campaigns|Multi-channel reach|Full-funnel strategy" aria-labelledby="svc-ads-title">
           <h3 id="svc-ads-title">Advertising Management</h3>
           <p class="svc-price"><span class="service-price" data-inr="from ₹10,000–₹40,000">from $110–$430<span class="unit">per month</span></span></p>
           <p class="svc-desc">Planning and running your Google and Meta ads. The ad budget is paid to the platform, not to us.</p>
           <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about Advertising Management, what it covers and how it helps my business.">Ask Aetheria about Advertising Management →</button>
         </section>
-        <section class="svc-card" id="svc-social" aria-labelledby="svc-social-title">
+        <section class="svc-card" id="svc-social" data-tiers="Consistent presence|Audience growth|Full-channel strategy" aria-labelledby="svc-social-title">
           <h3 id="svc-social-title">Social Media Management</h3>
           <p class="svc-price"><span class="service-price" data-inr="from ₹10,000–₹75,000">from $110–$800<span class="unit">per month</span></span></p>
           <p class="svc-desc">Ongoing planning, posting and replies on your social media accounts.</p>
@@ -1090,7 +1100,7 @@
           <p class="svc-desc">Digital systems that organise your team's tasks, performance and everyday processes.</p>
           <button type="button" class="svc-ask" data-ask-aetheria="Tell me more about Business Automation, what it covers and how it helps my business.">Ask Aetheria about Business Automation →</button>
         </section>
-        <section class="svc-card" id="svc-mgmt" aria-labelledby="svc-mgmt-title">
+        <section class="svc-card" id="svc-mgmt" data-tiers="Essential upkeep|Monitored care|Proactive support|Full ownership" aria-labelledby="svc-mgmt-title">
           <h3 id="svc-mgmt-title">Website Management</h3>
           <p class="svc-price"><span class="service-price" data-inr="from ₹3,000–₹20,000">from $30–$210<span class="unit">per month</span></span></p>
           <p class="svc-desc">Regular updates, checks and backups so your website keeps working.</p>
@@ -1616,15 +1626,17 @@
 
       <div class="sub-box">
         <div id="subSignedOut" hidden>
-          <p>Sign in first. Your subscription uses the email on your account.</p>
-          <button type="button" class="btn-primary" id="subLogin">Log in</button>
+          <p>Sign up first to subscribe. Your subscription uses the email on your account.</p>
+          <button type="button" class="btn-primary" id="subSignup">Create account</button>
+          <button type="button" class="btn-ghost" id="subLogin">Log in</button>
         </div>
         <div id="subSignedIn" hidden>
           <p>Updates will be sent to <strong id="subEmail"></strong>.</p>
-          <button type="button" class="btn-primary" id="subConfirm">Subscribe</button>
-          <button type="button" class="btn-ghost" id="subLeave" hidden>Unsubscribe</button>
-          <p class="newsletter-msg" id="subMsg" role="status" aria-live="polite"></p>
         </div>
+        <p class="sub-hint" id="subHint">Read the list above, then press SUBSCRIBE NOW.</p>
+        <button type="button" class="btn-primary" id="subNow" disabled>SUBSCRIBE NOW</button>
+        <button type="button" class="btn-ghost" id="subLeave" hidden>Unsubscribe</button>
+        <p class="newsletter-msg" id="subMsg" role="status" aria-live="polite"></p>
       </div>
     </div>
   </div>
@@ -2335,46 +2347,49 @@
   function renderBudgetResults(){
     if(!budgetSlider) return;
     const currency = currentCurrency();
-    const symbol = currency === 'INR' ? '\u20B9' : '$';
+    const symbol = currency === 'INR' ? '₹' : '$';
     const locale = currency === 'INR' ? 'en-IN' : 'en-US';
     const budget = parseInt(budgetSlider.value, 10);
 
     budgetSlider.style.setProperty('--fill', ((budget / parseInt(budgetSlider.max, 10)) * 100) + '%');
     budgetValueEl.textContent = symbol + budget.toLocaleString(locale);
 
-    const seen = {};
     const items = [];
-    document.querySelectorAll('.svc-card').forEach(function(card){
+    document.querySelectorAll('.svc-card[data-tiers]').forEach(function(card){
       const nameEl = card.querySelector('h3');
       const priceEl = card.querySelector('.service-price');
       const unitEl = priceEl ? priceEl.querySelector('.unit') : null;
-      if(!unitEl || unitEl.textContent.trim() !== 'per month') return;
-      if(!nameEl) return;
-      const name = nameEl.textContent.trim();
-      if(seen[name]) return;
-      seen[name] = true;
-      const priceText = priceEl.childNodes[0] ? priceEl.childNodes[0].nodeValue : '';
-      const m = priceText.replace(/,/g, '').match(/(\d+)/);
-      const low = m ? parseInt(m[1], 10) : null;
-      if(low === null) return;
-      items.push({ name: name, low: low, fits: low <= budget });
+      if(!nameEl || !unitEl || unitEl.textContent.trim() !== 'per month') return;
+      const nums = (priceEl.childNodes[0] ? priceEl.childNodes[0].nodeValue : '').replace(/,/g, '').match(/\d+/g);
+      if(!nums || nums.length < 2) return;
+      const low = parseInt(nums[0], 10);
+      const high = parseInt(nums[1], 10);
+      const tiers = card.getAttribute('data-tiers').split('|');
+      const n = tiers.length;
+      // Each tier starts at an even step across the listed range; the budget reaches the highest tier it covers.
+      const starts = tiers.map(function(_, k){ return Math.round(low + (high - low) * k / n); });
+      let reached = -1;
+      starts.forEach(function(st, k){ if(budget >= st) reached = k; });
+      items.push({ name: nameEl.textContent.trim(), tiers: tiers, starts: starts, reached: reached, low: low });
     });
 
-    items.sort(function(a, b){
-      if(a.fits !== b.fits) return a.fits ? -1 : 1;
-      return a.low - b.low;
-    });
-
+    const fmt = function(v){ return symbol + v.toLocaleString(locale); };
     budgetResultsEl.innerHTML = items.map(function(it){
-      return '<div class="budget-item ' + (it.fits ? 'fits' : 'nofit') + '">' +
-        '<span class="bi-dot"></span><span class="bi-name">' + it.name + '</span>' +
-        '<span class="bi-tag">' + (it.fits ? 'Fits' : 'Needs more') + '</span></div>';
+      const label = it.reached >= 0 ? it.tiers[it.reached] : 'Starts at ' + fmt(it.low);
+      const next = it.reached < it.tiers.length - 1
+        ? 'Next: ' + it.tiers[it.reached + 1] + ' from ' + fmt(it.starts[it.reached + 1])
+        : 'Full range reached';
+      const steps = it.tiers.map(function(_, k){ return '<span class="' + (k <= it.reached ? 'on' : '') + '"></span>'; }).join('');
+      return '<div class="bi-card' + (it.reached >= 0 ? '' : ' dim') + '">' +
+        '<div class="bi-head"><span class="bi-name">' + it.name + '</span><span class="bi-level">' + label + '</span></div>' +
+        '<div class="bi-steps">' + steps + '</div>' +
+        '<div class="bi-next">' + next + '</div></div>';
     }).join('');
 
-    const fitCount = items.filter(function(it){ return it.fits; }).length;
-    budgetSummaryEl.textContent = fitCount === 0
+    const inReach = items.filter(function(it){ return it.reached >= 0; }).length;
+    budgetSummaryEl.textContent = inReach === 0
       ? 'At this budget, contact us about the lightest place to start.'
-      : fitCount + ' of ' + items.length + ' monthly services fit inside this budget.';
+      : inReach + ' of ' + items.length + ' monthly services are in reach at this budget.';
   }
 
   if(budgetSlider){ budgetSlider.addEventListener('input', renderBudgetResults); }
@@ -2775,34 +2790,49 @@
     const sess = await currentSession();
     $('subSignedOut').hidden = !!sess;
     $('subSignedIn').hidden = !sess;
-    setSubMsg('');
-    if(!sess) return;
-    $('subEmail').textContent = sess.user.email || '';
-    $('subConfirm').hidden = true;
     $('subLeave').hidden = true;
+    if(!sess) return; // keep any "sign up first" message on screen
+    setSubMsg('');
+    $('subEmail').textContent = sess.user.email || '';
     const r = await dbFetch('/subscribers?user_id=eq.' + encodeURIComponent(sess.user.id) + '&select=email', { token: sess.access_token });
-    if(r.error){ setSubMsg(explainError('load your subscription', r.error), true); $('subConfirm').hidden = false; return; }
+    if(r.error){ setSubMsg(explainError('load your subscription', r.error), true); return; }
     const subscribed = !!(r.data && r.data[0]);
-    $('subConfirm').hidden = subscribed;
     $('subLeave').hidden = !subscribed;
-    setSubMsg(subscribed ? 'You are subscribed.' : '');
+    if(subscribed) setSubMsg('You are already subscribed. Press SUBSCRIBE NOW to continue, or unsubscribe below.');
   }
   document.addEventListener('subscribe-view', renderSubscribe);
   if(!$('view-subscribe').hidden) renderSubscribe();
+
+  // SUBSCRIBE NOW unlocks once the list has been read (its last item is on screen).
+  const subLastItem = document.querySelector('#view-subscribe .sub-list li:last-child');
+  function unlockSubNow(){ $('subNow').disabled = false; $('subHint').hidden = true; }
+  if('IntersectionObserver' in window && subLastItem){
+    const subIO = new IntersectionObserver(function(entries){
+      if(entries.some(function(e){ return e.isIntersecting; })){ unlockSubNow(); subIO.disconnect(); }
+    }, { threshold: 0.6 });
+    subIO.observe(subLastItem);
+  } else { unlockSubNow(); }
+
   $('subLogin').addEventListener('click', function(){ openAuth('signin'); });
-  $('subConfirm').addEventListener('click', async function(){
+  $('subSignup').addEventListener('click', function(){ openAuth('signup'); });
+  $('subNow').addEventListener('click', async function(){
     const sess = await currentSession();
-    if(!sess){ renderSubscribe(); return; }
-    $('subConfirm').disabled = true;
+    if(!sess){
+      // Not signed in: say so and open sign-up once. The page stays put; no redirect loop.
+      setSubMsg('Please sign up first. Your subscription uses the email on your account.', true);
+      openAuth('signup');
+      return;
+    }
+    $('subNow').disabled = true;
     const r = await dbFetch('/subscribers?on_conflict=user_id', {
       method: 'POST', token: sess.access_token,
       prefer: 'resolution=merge-duplicates,return=minimal',
       body: { user_id: sess.user.id, email: sess.user.email }
     });
-    $('subConfirm').disabled = false;
+    $('subNow').disabled = false;
     if(r.error){ setSubMsg(explainError('subscribe', r.error), true); return; }
-    await renderSubscribe();
-    setSubMsg('Subscribed. Updates will be sent to your account email.');
+    showNotice('You are subscribed. Updates will be sent to ' + (sess.user.email || 'your account email') + '.');
+    location.hash = 'home';
   });
   $('subLeave').addEventListener('click', async function(){
     const sess = await currentSession();
