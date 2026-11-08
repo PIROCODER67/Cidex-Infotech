@@ -88,7 +88,45 @@
   .mono{font-family:'JetBrains Mono',monospace;}
 
   /* ---------- AMBIENT LAYERS ---------- */
-  #bg-canvas{position:fixed; inset:0; z-index:0; display:block;}
+  #bg-canvas{
+    position:fixed; inset:0; z-index:0; width:100vw; height:100vh; display:block;
+    pointer-events:all; cursor:grab;
+  }
+  #bg-canvas:active{cursor:grabbing;}
+
+  .hero-3d-hud{
+    display:flex; flex-direction:column; align-items:center; gap:12px;
+    padding:14px 22px; border-radius:18px;
+    background:rgba(8, 10, 18, 0.65); border:1px solid var(--hairline);
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    box-shadow:0 20px 50px rgba(0,0,0,0.6);
+  }
+  .hud-top-row{
+    display:flex; align-items:center; justify-content:space-between; gap:20px; width:100%;
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--lo);
+  }
+  .hud-mode-buttons{
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+  }
+  .hud-mode-btn{
+    font-family:'JetBrains Mono',monospace; font-size:0.74rem; font-weight:700;
+    padding:7px 14px; border-radius:8px; border:1px solid var(--hairline);
+    background:rgba(255,255,255,0.02); color:var(--lo);
+    transition:all .2s ease; cursor:pointer;
+  }
+  .hud-mode-btn:hover{
+    color:var(--violet); border-color:var(--violet);
+    background:rgba(192, 132, 252, 0.08);
+  }
+  .hud-mode-btn.active{
+    background:linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(0, 240, 255, 0.2));
+    border-color:var(--violet); color:var(--hi);
+    box-shadow:0 0 15px rgba(192, 132, 252, 0.35);
+  }
+  .hud-hint{
+    font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--cyan);
+    letter-spacing:0.06em; opacity:0.85; display:flex; align-items:center; gap:6px;
+  }
   .grad-backdrop{
     position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
@@ -731,6 +769,18 @@
       <div class="float-badge fb1"><span class="fb-num">11</span><span class="fb-label">services live</span></div>
       <div class="float-badge fb3"><span class="fb-num">Kolkata</span><span class="fb-label">Based in</span></div>
       <div class="scroll-cue">Scroll</div>
+      <!-- 3D INTERACTIVE CONTROLS HUD -->
+      <div class="hero-3d-hud">
+        <div class="hud-top-row">
+          <span>// 3D MATRIX MODE:</span>
+          <span class="hud-hint">⚡ DRAG TO ROTATE // CLICK FOR SHOCKWAVE</span>
+        </div>
+        <div class="hud-mode-buttons">
+          <button type="button" class="hud-mode-btn active" data-mode="orb">[ 01 // QUANTUM ORB ]</button>
+          <button type="button" class="hud-mode-btn" data-mode="architecture">[ 02 // DIGITAL ARCHITECTURE ]</button>
+          <button type="button" class="hud-mode-btn" data-mode="hybrid">[ 03 // HYBRID UNIVERSE ]</button>
+        </div>
+      </div>
     </section>
 
 
@@ -1551,191 +1601,313 @@
     mainNav.classList.toggle('scrolled', window.scrollY > 40);
   }, { passive:true });
 
-  /* ============ PARTICLE MORPHING SPHERE ============ */
+  /* ============ 3D MATRIX ENGINE (Three.js) ============ */
   if(!reduceMotion){
     try{
+    /* ============ THREE.JS 3D CYBERPUNK MATRIX ENGINE ============ */
+    (function initThreeEngine(){
       const canvas = document.getElementById('bg-canvas');
-      const renderer = new THREE.WebGLRenderer({ canvas:canvas, alpha:true, antialias:true });
+      if(!canvas || !window.THREE) return;
+
+      const renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true, alpha:true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(window.innerWidth, window.innerHeight);
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 200);
-      camera.position.z = 9;
+      const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 11);
 
-      const N = window.innerWidth < 760 ? 1000 : 2400;
+      // Ambient & Point Lighting
+      const ambientLight = new THREE.AmbientLight(0x0e0725, 2.5);
+      scene.add(ambientLight);
 
-      function genSphere(r){
-        const arr = new Float32Array(N*3);
-        for(let i=0;i<N;i++){
-          const y = 1 - (i/(N-1))*2;
-          const rad = Math.sqrt(Math.max(0,1-y*y));
-          const theta = 2.399963 * i;
-          arr[i*3] = Math.cos(theta)*rad*r;
-          arr[i*3+1] = y*r;
-          arr[i*3+2] = Math.sin(theta)*rad*r;
-        }
-        return arr;
-      }
-      function genStretch(r){
-        const arr = new Float32Array(N*3);
-        for(let i=0;i<N;i++){
-          const y = 1 - (i/(N-1))*2;
-          const rad = Math.sqrt(Math.max(0,1-y*y));
-          const theta = 2.399963 * i;
-          arr[i*3] = Math.cos(theta)*rad*r*0.6;
-          arr[i*3+1] = y*r*2.5;
-          arr[i*3+2] = Math.sin(theta)*rad*r*0.6;
-        }
-        return arr;
-      }
-      function genDissolve(sphereArr){
-        const arr = new Float32Array(N*3);
-        for(let i=0;i<N;i++){
-          const x = sphereArr[i*3], y = sphereArr[i*3+1], z = sphereArr[i*3+2];
-          const len = Math.sqrt(x*x+y*y+z*z) || 1;
-          const nx = x/len, ny = y/len, nz = z/len;
-          const spread = 1 + Math.random()*5;
-          arr[i*3] = nx*len*spread + (Math.random()-0.5)*1.5;
-          arr[i*3+1] = ny*len*spread + (Math.random()-0.5)*1.5;
-          arr[i*3+2] = nz*len*spread + (Math.random()-0.5)*1.5;
-        }
-        return arr;
-      }
-      function genRibbon(){
-        const arr = new Float32Array(N*3);
-        const turns = 5;
-        for(let i=0;i<N;i++){
-          const t = i/N;
-          const angle = t*turns*Math.PI*2;
-          const strand = i%2===0 ? 0 : Math.PI;
-          const r = 2.2 + Math.sin(t*Math.PI*3)*0.4;
-          arr[i*3] = Math.cos(angle+strand)*r;
-          arr[i*3+1] = (t-0.5)*9;
-          arr[i*3+2] = Math.sin(angle+strand)*r;
-        }
-        return arr;
-      }
-      function genField(){
-        const arr = new Float32Array(N*3);
-        for(let i=0;i<N;i++){
-          arr[i*3] = (Math.random()-0.5)*46;
-          arr[i*3+1] = (Math.random()-0.5)*8 - 2;
-          arr[i*3+2] = (Math.random()-0.5)*46;
-        }
-        return arr;
-      }
+      const purpleLight = new THREE.PointLight(0xc084fc, 3.5, 50);
+      purpleLight.position.set(5, 5, 5);
+      scene.add(purpleLight);
 
-      const sphereArr = genSphere(2.4);
-      const stretchArr = genStretch(2.4);
-      const dissolveArr = genDissolve(sphereArr);
-      const ribbonArr = genRibbon();
-      const fieldArr = genField();
-      const stages = [sphereArr, stretchArr, dissolveArr, ribbonArr, fieldArr];
-      const stageT = [0, 0.22, 0.45, 0.66, 0.86];
+      const cyanLight = new THREE.PointLight(0x00f0ff, 3.0, 50);
+      cyanLight.position.set(-6, -4, 4);
+      scene.add(cyanLight);
 
-      const current = new Float32Array(N*3);
-      current.set(sphereArr);
+      /* --- MODE 1: QUANTUM CORE ORB (orb.jpg & good.jpg inspired) --- */
+      const orbGroup = new THREE.Group();
 
-      const colors = new Float32Array(N*3);
-      const cBlue = [0.30,0.66,1.0], cViolet = [0.61,0.42,1.0], cCyan=[0.25,0.88,1.0];
-      for(let i=0;i<N;i++){
-        const f = i/N;
-        const mixC = f < 0.5 ? cBlue : cViolet;
-        const flick = (i % 9 === 0) ? cCyan : mixC;
-        colors[i*3]=flick[0]; colors[i*3+1]=flick[1]; colors[i*3+2]=flick[2];
-      }
-
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.BufferAttribute(current,3));
-      geometry.setAttribute('color', new THREE.BufferAttribute(colors,3));
-
-      const vertexShader = `
-        attribute vec3 color;
-        varying vec3 vColor;
-        void main(){
-          vColor = color;
-          vec4 mvPosition = modelViewMatrix * vec4(position,1.0);
-          gl_PointSize = (140.0 / -mvPosition.z);
-          gl_Position = projectionMatrix * mvPosition;
-        }
-      `;
-      const fragmentShader = `
-        varying vec3 vColor;
-        void main(){
-          float d = length(gl_PointCoord - vec2(0.5));
-          float alpha = smoothstep(0.5, 0.0, d);
-          gl_FragColor = vec4(vColor, alpha*0.85);
-        }
-      `;
-      const material = new THREE.ShaderMaterial({
-        vertexShader: vertexShader, fragmentShader: fragmentShader,
-        transparent:true, depthWrite:false, blending:THREE.AdditiveBlending
+      // 1. Outer Translucent Glass Cage
+      const outerGeo = new THREE.IcosahedronGeometry(2.3, 3);
+      const outerMat = new THREE.MeshBasicMaterial({
+        color: 0xc084fc, wireframe: true, transparent: true, opacity: 0.32
       });
-      const points = new THREE.Points(geometry, material);
-      scene.add(points);
+      const outerOrb = new THREE.Mesh(outerGeo, outerMat);
+      orbGroup.add(outerOrb);
 
-      let mouseX=0, mouseY=0;
-      window.addEventListener('mousemove', function(e){
-        mouseX = (e.clientX/window.innerWidth - 0.5);
-        mouseY = (e.clientY/window.innerHeight - 0.5);
+      // 2. Translucent Inner Sphere
+      const glassGeo = new THREE.SphereGeometry(2.1, 32, 32);
+      const glassMat = new THREE.MeshStandardMaterial({
+        color: 0x2e0854, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.45,
+        blending: THREE.AdditiveBlending
       });
+      const glassSphere = new THREE.Mesh(glassGeo, glassMat);
+      orbGroup.add(glassSphere);
+
+      // 3. Nested Swirling Energy Torus Rings
+      const ring1Geo = new THREE.TorusGeometry(1.65, 0.05, 16, 100);
+      const ring1Mat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+      const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
+      ring1.rotation.x = Math.PI / 3;
+      orbGroup.add(ring1);
+
+      const ring2Geo = new THREE.TorusGeometry(1.85, 0.04, 16, 100);
+      const ring2Mat = new THREE.MeshBasicMaterial({ color: 0xff007f });
+      const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+      ring2.rotation.y = Math.PI / 4;
+      orbGroup.add(ring2);
+
+      const knotGeo = new THREE.TorusKnotGeometry(1.15, 0.07, 100, 16, 2, 3);
+      const knotMat = new THREE.MeshBasicMaterial({ color: 0xc084fc, wireframe: true });
+      const energyKnot = new THREE.Mesh(knotGeo, knotMat);
+      orbGroup.add(energyKnot);
+
+      // 4. Luminous Nucleus
+      const coreGeo = new THREE.SphereGeometry(0.55, 24, 24);
+      const coreMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const nucleus = new THREE.Mesh(coreGeo, coreMat);
+      orbGroup.add(nucleus);
+
+      // 5. Swirling Particle Vortex
+      const P_COUNT = 900;
+      const pGeo = new THREE.BufferGeometry();
+      const pPos = new Float32Array(P_COUNT * 3);
+      const pCol = new Float32Array(P_COUNT * 3);
+      for(let i=0; i<P_COUNT; i++){
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+        const rad = 2.4 + Math.random() * 1.6;
+        pPos[i*3] = rad * Math.sin(phi) * Math.cos(theta);
+        pPos[i*3+1] = rad * Math.sin(phi) * Math.sin(theta);
+        pPos[i*3+2] = rad * Math.cos(phi);
+
+        const isCyan = Math.random() > 0.6;
+        pCol[i*3] = isCyan ? 0.0 : 0.75;
+        pCol[i*3+1] = isCyan ? 0.94 : 0.45;
+        pCol[i*3+2] = 1.0;
+      }
+      pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+      pGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
+      const pMat = new THREE.PointsMaterial({ size: 0.045, vertexColors: true, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending });
+      const particleVortex = new THREE.Points(pGeo, pMat);
+      orbGroup.add(particleVortex);
+
+      // 6. Expanding Shockwave Ring on Click
+      const shockGeo = new THREE.RingGeometry(0.3, 0.45, 64);
+      const shockMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0 });
+      const shockMesh = new THREE.Mesh(shockGeo, shockMat);
+      orbGroup.add(shockMesh);
+
+      scene.add(orbGroup);
+
+      /* --- MODE 2: DIGITAL ARCHITECTURE (build.jpg & back.jpg inspired) --- */
+      const archGroup = new THREE.Group();
+      archGroup.visible = false;
+
+      // Cyber Skyscraper Grid
+      const TOWER_COLS = 7, TOWER_ROWS = 7;
+      for(let x = -TOWER_COLS/2; x < TOWER_COLS/2; x++){
+        for(let z = -TOWER_ROWS/2; z < TOWER_ROWS/2; z++){
+          const h = 2 + Math.sin(x*1.4) * Math.cos(z*1.4) * 3 + Math.random() * 3.5;
+          const bGeo = new THREE.BoxGeometry(0.85, h, 0.85);
+          const edges = new THREE.EdgesGeometry(bGeo);
+          const isCyan = (x + z) % 2 === 0;
+          const edgeLine = new THREE.LineSegments(
+            edges,
+            new THREE.LineBasicMaterial({
+              color: isCyan ? 0x00f0ff : 0xa855f7,
+              transparent: true, opacity: 0.65
+            })
+          );
+          const solidCore = new THREE.Mesh(
+            bGeo,
+            new THREE.MeshBasicMaterial({ color: 0x020308, transparent: true, opacity: 0.85 })
+          );
+          solidCore.add(edgeLine);
+          solidCore.position.set(x * 2.2, h/2 - 4.5, z * 2.2);
+          archGroup.add(solidCore);
+        }
+      }
+      const gridGround = new THREE.GridHelper(36, 36, 0xc084fc, 0x1e1b4b);
+      gridGround.position.y = -4.5;
+      archGroup.add(gridGround);
+      scene.add(archGroup);
+
+      /* --- MODE 3: HYBRID UNIVERSE (up.jpg & nice.jpg inspired) --- */
+      const hybridGroup = new THREE.Group();
+      hybridGroup.visible = false;
+
+      // Undulating Sine Wave Terrain
+      const TERRAIN_SEG = 40;
+      const terrGeo = new THREE.PlaneGeometry(30, 30, TERRAIN_SEG, TERRAIN_SEG);
+      terrGeo.rotateX(-Math.PI / 2);
+      const terrMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, wireframe: true, transparent: true, opacity: 0.45 });
+      const terrainMesh = new THREE.Mesh(terrGeo, terrMat);
+      terrainMesh.position.y = -3;
+      hybridGroup.add(terrainMesh);
+
+      // Secondary Floating Quantum Satellite
+      const satGeo = new THREE.IcosahedronGeometry(1.5, 2);
+      const satMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true });
+      const satellite = new THREE.Mesh(satGeo, satMat);
+      satellite.position.set(0, 1, 0);
+      hybridGroup.add(satellite);
+
+      scene.add(hybridGroup);
+
+      /* --- INTERACTION STATE --- */
+      let currentMode = 'orb'; // 'orb' | 'architecture' | 'hybrid'
+      let mouseX = 0, mouseY = 0;
+      let targetRotX = 0, targetRotY = 0;
+      let isDragging = false, prevPointerX = 0, prevPointerY = 0;
+      let shockRadius = 0.5, shockActive = false;
+
+      // Pointer Move for Parallax
+      window.addEventListener('pointermove', function(e){
+        mouseX = (e.clientX / window.innerWidth) - 0.5;
+        mouseY = (e.clientY / window.innerHeight) - 0.5;
+
+        if(isDragging){
+          const deltaX = e.clientX - prevPointerX;
+          const deltaY = e.clientY - prevPointerY;
+          targetRotY += deltaX * 0.008;
+          targetRotX += deltaY * 0.008;
+          prevPointerX = e.clientX;
+          prevPointerY = e.clientY;
+        }
+      });
+
+      window.addEventListener('pointerdown', function(e){
+        isDragging = true;
+        prevPointerX = e.clientX;
+        prevPointerY = e.clientY;
+      });
+
+      window.addEventListener('pointerup', function(){
+        isDragging = false;
+      });
+
+      // Click Impulse Shockwave Trigger
+      canvas.addEventListener('click', function(){
+        triggerShockwave();
+      });
+
+      function triggerShockwave(){
+        shockActive = true;
+        shockRadius = 0.5;
+        shockMesh.scale.set(1, 1, 1);
+        shockMat.opacity = 0.9;
+      }
+
+      // Mode Switch Handler
+      const modeButtons = document.querySelectorAll('.hud-mode-btn');
+      modeButtons.forEach(function(btn){
+        btn.addEventListener('click', function(){
+          const mode = btn.getAttribute('data-mode');
+          switchMode(mode);
+          modeButtons.forEach(function(b){ b.classList.remove('active'); });
+          btn.classList.add('active');
+        });
+      });
+
+      function switchMode(mode){
+        currentMode = mode;
+        orbGroup.visible = (mode === 'orb');
+        archGroup.visible = (mode === 'architecture');
+        hybridGroup.visible = (mode === 'hybrid');
+
+        if(window.gsap){
+          if(mode === 'orb'){
+            gsap.to(camera.position, { z:11, y:0, x:0, duration:1.2, ease:'power3.out' });
+          } else if(mode === 'architecture'){
+            gsap.to(camera.position, { z:14, y:4, x:0, duration:1.2, ease:'power3.out' });
+          } else if(mode === 'hybrid'){
+            gsap.to(camera.position, { z:13, y:2, x:0, duration:1.2, ease:'power3.out' });
+          }
+        }
+        triggerShockwave();
+      }
+
+      // Animation Loop
+      let clock = new THREE.Clock();
+
+      function animate(){
+        requestAnimationFrame(animate);
+        const time = clock.getElapsedTime();
+
+        // Damped rotation tracking
+        targetRotX += (mouseY * 0.5 - targetRotX) * 0.05;
+        targetRotY += (mouseX * 0.8 - targetRotY) * 0.05;
+
+        // 1. Orb Group Animations
+        if(orbGroup.visible){
+          orbGroup.rotation.y += 0.004;
+          orbGroup.rotation.x = targetRotX;
+          orbGroup.rotation.y = targetRotY + time * 0.15;
+
+          ring1.rotation.z += 0.015;
+          ring2.rotation.x += 0.012;
+          energyKnot.rotation.y -= 0.008;
+          outerOrb.rotation.y -= 0.005;
+
+          // Pulsing nucleus & vortex
+          const pulse = 1 + Math.sin(time * 3) * 0.12;
+          nucleus.scale.set(pulse, pulse, pulse);
+          particleVortex.rotation.y += 0.003;
+
+          // Floating hover bobbing
+          orbGroup.position.y = Math.sin(time * 1.5) * 0.18;
+
+          // Shockwave expansion
+          if(shockActive){
+            shockRadius += 0.12;
+            shockMesh.scale.set(shockRadius, shockRadius, shockRadius);
+            shockMat.opacity = Math.max(0, shockMat.opacity - 0.035);
+            if(shockMat.opacity <= 0) shockActive = false;
+          }
+        }
+
+        // 2. Architecture Group Animations
+        if(archGroup.visible){
+          archGroup.rotation.y = targetRotY * 0.6 + time * 0.04;
+          archGroup.rotation.x = 0.35 + targetRotX * 0.4;
+        }
+
+        // 3. Hybrid Universe Animations
+        if(hybridGroup.visible){
+          satellite.rotation.y += 0.01;
+          satellite.position.y = 1 + Math.sin(time * 2) * 0.3;
+
+          // Real-time wave equation on terrain plane
+          const pos = terrGeo.attributes.position;
+          for(let i=0; i<pos.count; i++){
+            const u = pos.getX(i);
+            const v = pos.getZ(i);
+            const w = Math.sin(u * 0.4 + time * 1.8) * Math.cos(v * 0.4 + time * 1.2) * 1.1;
+            pos.setY(i, w);
+          }
+          terrGeo.computeVertexNormals();
+          terrGeo.attributes.position.needsUpdate = true;
+        }
+
+        // Camera slight sway
+        camera.lookAt(0, 0, 0);
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Window Resize Handling
       window.addEventListener('resize', function(){
-        camera.aspect = window.innerWidth/window.innerHeight;
+        camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
-
-      let scrollP = 0;
-      function computeScrollP(){
-        const max = document.documentElement.scrollHeight - window.innerHeight;
-        scrollP = max > 0 ? Math.min(1, Math.max(0, window.scrollY/max)) : 0;
-      }
-      window.addEventListener('scroll', computeScrollP, { passive:true });
-      computeScrollP();
-
-      const posAttr = geometry.attributes.position;
-      let clock = 0;
-
-      (function animate(){
-        clock += 0.01;
-
-        let segIndex = 0;
-        for(let s=0; s<stageT.length-1; s++){
-          if(scrollP >= stageT[s]) segIndex = s;
-        }
-        const t0 = stageT[segIndex];
-        const t1 = stageT[Math.min(segIndex+1, stageT.length-1)];
-        let localT = t1 > t0 ? (scrollP - t0)/(t1 - t0) : 1;
-        localT = Math.min(1, Math.max(0, localT));
-        const A = stages[segIndex];
-        const B = stages[Math.min(segIndex+1, stages.length-1)];
-
-        const breathe = Math.sin(clock*0.8) * 0.05 * (1 - scrollP*0.8);
-        for(let i=0;i<N;i++){
-          const ax=A[i*3], ay=A[i*3+1], az=A[i*3+2];
-          const bx=B[i*3], by=B[i*3+1], bz=B[i*3+2];
-          const x = ax + (bx-ax)*localT;
-          const y = ay + (by-ay)*localT;
-          const z = az + (bz-az)*localT;
-          const jitter = 1 + breathe;
-          current[i*3] = x*jitter;
-          current[i*3+1] = y*jitter;
-          current[i*3+2] = z*jitter;
-        }
-        posAttr.needsUpdate = true;
-
-        points.rotation.y += 0.0009;
-        points.rotation.x = Math.sin(clock*0.15)*0.06;
-
-        camera.position.x += (mouseX*0.9 - camera.position.x) * 0.03;
-        camera.position.y += (-mouseY*0.9 - camera.position.y) * 0.03;
-        camera.position.z = 9 - scrollP*3.2;
-        camera.lookAt(0,0,0);
-
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-      })();
+    })();
     }catch(err){ /* WebGL unavailable — CSS gradient backdrop still provides ambience */ }
   }
 
