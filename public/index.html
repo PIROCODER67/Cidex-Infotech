@@ -685,6 +685,7 @@
   .consent-field{display:flex; gap:10px; align-items:flex-start; font-size:0.88rem; line-height:1.5; margin:14px 0 0;}
   .consent-field input{margin-top:4px; flex:0 0 auto; width:16px; height:16px;}
   .consent-field a{color:var(--accent-a); font-weight:500;}
+  button.tech-cta{background:none; border:none; padding:0; font:inherit; color:inherit; cursor:pointer; text-align:left;}
   .side-notice{position:fixed; top:96px; right:18px; z-index:260; width:min(340px, calc(100vw - 36px)); padding:16px 40px 16px 18px; border-radius:14px; background:rgba(10,14,22,0.95); border:1px solid rgba(78,168,255,0.35); box-shadow:0 18px 40px rgba(0,0,0,0.45); color:var(--hi); font-size:0.92rem; line-height:1.5;}
   .side-notice[hidden]{display:none !important;}
   .side-notice p{margin:0;}
@@ -813,31 +814,31 @@
             <div class="tech-top"><span class="tech-name">Website Design</span><span class="tech-badge">One-time</span></div>
             <div class="tech-price" data-inr="₹8,000–₹60,000">$300–2,000</div>
             <p class="tech-desc">A fast, responsive site built around what you actually sell.</p>
-            <a href="#footer" class="tech-cta" data-route="home" data-anchor="footer">Ask about a build →</a>
+            <button type="button" class="tech-cta" data-ask-aetheria="Tell me more about a build and how it helps my business.">Ask Aetheria about a build →</button>
           </div>
           <div class="tech-card">
             <div class="tech-top"><span class="tech-name">SEO</span><span class="tech-badge">Monthly</span></div>
             <div class="tech-price" data-inr="₹10,000–₹40,000">$300–1,000</div>
             <p class="tech-desc">Ongoing technical, content, and keyword work.</p>
-            <a href="#footer" class="tech-cta" data-route="home" data-anchor="footer">Ask about SEO →</a>
+            <button type="button" class="tech-cta" data-ask-aetheria="Tell me more about SEO and how it helps my business.">Ask Aetheria about SEO →</button>
           </div>
           <div class="tech-card">
             <div class="tech-top"><span class="tech-name">Social Media Mgmt</span><span class="tech-badge">Monthly</span></div>
             <div class="tech-price" data-inr="₹8,000–₹25,000">$150–500</div>
             <p class="tech-desc">Planning, posting, and community replies.</p>
-            <a href="#footer" class="tech-cta" data-route="home" data-anchor="footer">Ask about socials →</a>
+            <button type="button" class="tech-cta" data-ask-aetheria="Tell me more about socials and how it helps my business.">Ask Aetheria about socials →</button>
           </div>
           <div class="tech-card">
             <div class="tech-top"><span class="tech-name">Google Ads</span><span class="tech-badge">Monthly</span></div>
             <div class="tech-price" data-inr="₹10,000–₹30,000">$200–800</div>
             <p class="tech-desc">Campaign setup, bidding, and optimization.</p>
-            <a href="#footer" class="tech-cta" data-route="home" data-anchor="footer">Ask about Google Ads →</a>
+            <button type="button" class="tech-cta" data-ask-aetheria="Tell me more about Google Ads and how it helps my business.">Ask Aetheria about Google Ads →</button>
           </div>
           <div class="tech-card">
             <div class="tech-top"><span class="tech-name">Meta Ads</span><span class="tech-badge">Monthly</span></div>
             <div class="tech-price" data-inr="₹10,000–₹30,000">$200–800</div>
             <p class="tech-desc">Facebook &amp; Instagram campaigns, targeted and optimized.</p>
-            <a href="#footer" class="tech-cta" data-route="home" data-anchor="footer">Ask about Meta Ads →</a>
+            <button type="button" class="tech-cta" data-ask-aetheria="Tell me more about Meta Ads and how it helps my business.">Ask Aetheria about Meta Ads →</button>
           </div>
           <div class="tech-card soon">
             <div class="tech-top"><span class="tech-name">+6 more</span><span class="tech-badge">In pricing</span></div>
@@ -1597,11 +1598,11 @@
 </div>
 
 <!-- Services guide (explains services; no prices calculated). Backend: /api/advisor -->
-<button type="button" class="ai-fab ai-fab-left" id="advFab" aria-expanded="false" aria-controls="advPanel">Explore services</button>
-<section class="ai-panel ai-panel-left" id="advPanel" role="dialog" aria-label="CIDEX services guide">
+<button type="button" class="ai-fab ai-fab-left" id="advFab" aria-expanded="false" aria-controls="advPanel">Talk to Aetheria</button>
+<section class="ai-panel ai-panel-left" id="advPanel" role="dialog" aria-label="Aetheria, CIDEX services guide">
   <div class="ai-head">
     <div class="ai-title">
-      <strong>CIDEX services guide</strong>
+      <strong>Aetheria · Services guide</strong>
       <div class="ai-sub">Ask about any service. Prices are starting prices.</div>
     </div>
     <button type="button" class="ai-close" id="advClose" aria-label="Close services guide">&times;</button>
@@ -1614,11 +1615,11 @@
 </section>
 
 <!-- AI price assistant (chat box). Backend: worker/ folder. -->
-<button type="button" class="ai-fab" id="aiFab" aria-expanded="false" aria-controls="aiPanel">Ask for a price</button>
-<section class="ai-panel" id="aiPanel" role="dialog" aria-label="CIDEX price assistant">
+<button type="button" class="ai-fab" id="aiFab" aria-expanded="false" aria-controls="aiPanel">Ask Clow for a price</button>
+<section class="ai-panel" id="aiPanel" role="dialog" aria-label="Clow, CIDEX price estimator">
   <div class="ai-head">
     <div class="ai-title">
-      <strong>CIDEX price assistant</strong>
+      <strong>Clow · Price estimate</strong>
       <div class="ai-sub">Estimates only. Prices exclude GST.</div>
     </div>
     <div class="currency-toggle" role="group" aria-label="Currency">
@@ -2789,7 +2790,7 @@
     panel.classList.add('open');
     fab.setAttribute('aria-expanded', 'true');
     if(!log.childElementCount){
-      addText('bot', 'Hi. Ask me about any CIDEX service: what it includes, what costs extra, and which one may suit your needs.');
+      addText('bot', "Hi, I'm Aetheria. Ask me about any CIDEX service: what it includes, what costs extra, and how it can help your business.");
     }
     input.focus();
   }
@@ -2801,6 +2802,14 @@
 
   fab.addEventListener('click', function(){ panel.classList.contains('open') ? close() : open(); });
   closeBtn.addEventListener('click', close);
+  // Price-card links: open Aetheria and send the question
+  document.querySelectorAll('[data-ask-aetheria]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      open();
+      input.value = btn.dataset.askAetheria;
+      if(form.requestSubmit){ form.requestSubmit(); } else { form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })); }
+    });
+  });
 
   form.addEventListener('submit', async function(e){
     e.preventDefault();

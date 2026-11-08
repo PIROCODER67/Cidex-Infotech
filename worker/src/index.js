@@ -103,6 +103,10 @@ Reply ONLY with a JSON object in this shape:
 Use true/false for yes/no answers, numbers for counts, and option names exactly as written for choices.`;
 }
 
+// Clow (price estimator) does not judge whether a service is needed; it sends those doubts to Aetheria.
+const NEED_DOUBT = /\b(do|does|should|would|will)\s+(i|we|my\s+\w+|our\s+\w+)\s+(really\s+)?need\b|\bneed\s+it\s+or\s+not\b|\bi\s+(will|'ll|might|may)\s+need\s+(it|this|that)\b|\b(is|are)\s+(it|this|that)\s+(necessary|needed|required|important)\b|\bshould\s+i\s+(get|buy|have|do|take)\b|\bnot\s+sure\s+(if|whether|what)\b|\bdon'?t\s+know\s+(if|whether)\b/i;
+const CLOW_REDIRECT = 'You shall talk to Aetheria first. It will clarify your doubts.';
+
 async function handleChat(request, env) {
   let body;
   try { body = await request.json(); } catch { return json({ error: 'bad_request' }, 400); }
@@ -115,6 +119,12 @@ async function handleChat(request, env) {
     return json({ reply: OFFLINE_REPLY, state, estimate: null, ai_ready: false }, 503);
   }
   if (!messages.length) return json({ error: 'no_messages' }, 400);
+
+  // Doubts about whether a service is needed go to Aetheria, not to the price estimator.
+  const lastUser = [...messages].reverse().find(m => m.role === 'user');
+  if (lastUser && NEED_DOUBT.test(lastUser.content)) {
+    return json({ reply: CLOW_REDIRECT, state, estimate: null, ai_ready: true });
+  }
 
   let parsed = {};
   try {
