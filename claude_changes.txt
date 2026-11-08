@@ -1071,6 +1071,7 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
     <h3 id="loginTitle">Client login</h3>
     <div id="authSignedIn" hidden>
+      <p class="modal-note" id="signedInMsg"></p>
       <p>Signed in as <strong id="authWho"></strong>.</p>
       <div class="modal-actions">
         <button type="button" class="btn-cancel" id="authClose">Close</button>
@@ -1092,16 +1093,15 @@
           <input type="password" id="authPassword" autocomplete="current-password" minlength="8">
           <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">Show</button>
         </div>
-        <div class="field" id="fieldCode" hidden>
-          <label for="authCode">6-digit code</label>
-          <input type="text" id="authCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
-        </div>
         <div class="field" id="fieldNewPw" hidden>
           <label for="authNewPw">New password (at least 8 characters)</label>
           <input type="password" id="authNewPw" autocomplete="new-password" minlength="8">
         </div>
         <p class="modal-note" id="authMsg" aria-live="polite"></p>
-        <p class="auth-links" id="authLinks"><button type="button" class="link-btn" id="forgotBtn">Forgot password?</button></p>
+        <p class="auth-links" id="authLinks">
+          <button type="button" class="link-btn" id="forgotBtn">Forgot password?</button>
+          <button type="button" class="link-btn" id="backBtn" hidden>Back to sign in</button>
+        </p>
         <div class="modal-actions">
           <button type="button" class="btn-cancel" id="loginCancel">Cancel</button>
           <button type="submit" class="btn-confirm" id="authSubmit">Sign in</button>
@@ -1431,6 +1431,8 @@
   }
 
   function handleHash(){
+    // Login links from Supabase carry their own data in the address; leave them for the login code.
+    if(/(^|[#&])(access_token|error_code|error|type)=/.test(window.location.hash || '')) return;
     const h = (window.location.hash || '#home').replace('#','') || 'home';
     if(h === 'refund'){
       showView('terms');
@@ -1731,106 +1733,126 @@
   document.getElementById('loginTrigger').addEventListener('click', function(){ openModal(loginOverlay); });
   document.getElementById('loginCancel').addEventListener('click', function(){ closeModal(loginOverlay); });
   loginOverlay.addEventListener('click', function(e){ if(e.target === loginOverlay) closeModal(loginOverlay); });
-  /* ---------- CLIENT LOGIN (Supabase: email + password, 6-digit email code) ---------- */
+  /* ---------- CLIENT LOGIN (Supabase: email + password, email links) ---------- */
   const SUPABASE_URL = 'https://xqabhktmkeadzrxkmepo.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_GJjOrz6qvcwVkF4UW8W-1w_4vrkalbf';
   const $ = function(id){ return document.getElementById(id); };
   let sb = null;
   try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY); } catch(e){ sb = null; }
+  const SITE_URL = window.location.origin + window.location.pathname;
 
-  let step = 'signin';        // signin | signup | code | forgot | recoverycode | newpw
-  let pendingEmail = '';
   const loginTrigger = $('loginTrigger');
   const authSubmit = $('authSubmit');
   const authMsg = $('authMsg');
   const pwInput = $('authPassword');
   const pwToggle = $('pwToggle');
-
-  const SUBMIT_LABEL = { signin: 'Sign in', signup: 'Create account', code: 'Confirm code', forgot: 'Send code', recoverycode: 'Confirm code', newpw: 'Save password' };
+  const SUBMIT_LABEL = { signin: 'Sign in', signup: 'Create account', forgot: 'Send reset link', newpw: 'Save new password' };
+  let step = 'signin';
 
   function setMsg(text, isError){
     authMsg.textContent = text;
     authMsg.style.color = isError ? '#ff9a9a' : '';
   }
-
+  function setBusy(busy){
+    authSubmit.disabled = busy;
+    authSubmit.textContent = busy ? 'Please wait...' : SUBMIT_LABEL[step];
+  }
   function showStep(s){
     step = s;
     const isAuth = s === 'signin' || s === 'signup';
     $('authTabs').hidden = !isAuth;
-    $('fieldEmail').hidden = s === 'code' || s === 'recoverycode' || s === 'newpw';
+    $('fieldEmail').hidden = s === 'newpw';
     $('fieldPassword').hidden = !isAuth;
-    $('fieldCode').hidden = !(s === 'code' || s === 'recoverycode');
     $('fieldNewPw').hidden = s !== 'newpw';
-    $('authLinks').hidden = s !== 'signin';
+    $('authLinks').hidden = s !== 'signin' && s !== 'forgot';
+    $('forgotBtn').hidden = s !== 'signin';
+    $('backBtn').hidden = s !== 'forgot';
     authSubmit.textContent = SUBMIT_LABEL[s];
-    $('authCode').value = '';
-    $('authNewPw').value = '';
     pwInput.setAttribute('autocomplete', s === 'signup' ? 'new-password' : 'current-password');
-    document.querySelectorAll('.auth-tab').forEach(function(t){
-      t.classList.toggle('is-active', t.dataset.mode === s);
-    });
+    document.querySelectorAll('.auth-tab').forEach(function(t){ t.classList.toggle('is-active', t.dataset.mode === s); });
   }
-
   function resetLogin(){
     $('authEmail').value = '';
-    $('authPassword').value = '';
-    pendingEmail = '';
+    pwInput.value = '';
+    $('authNewPw').value = '';
     setMsg('');
     showStep('signin');
   }
-
   async function refreshSession(){
-    if(!sb){ return; }
-    try {
+    if(!sb) return;
+    try{
       const { data } = await sb.auth.getSession();
       const user = data && data.session ? data.session.user : null;
       $('authSignedIn').hidden = !user;
       $('authArea').hidden = !!user;
-      if(user){
-        $('authWho').textContent = user.email;
-        loginTrigger.textContent = 'My account';
-      } else {
-        loginTrigger.textContent = 'Client Login';
-      }
-    } catch(e){ /* stays signed out */ }
+      if(user){ $('authWho').textContent = user.email; loginTrigger.textContent = 'My account'; }
+      else { loginTrigger.textContent = 'Client Login'; }
+    }catch(e){ /* stays signed out */ }
   }
-
   function closeLogin(){ closeModal(loginOverlay); }
+  function cleanUrl(){ history.replaceState(null, '', window.location.pathname + window.location.search); }
+  function isAuthCallback(hash){ return /(^|[#&])(access_token|error_code|error|type)=/.test(hash || ''); }
 
   loginTrigger.addEventListener('click', function(){ openModal(loginOverlay); refreshSession(); });
   $('loginCancel').addEventListener('click', function(){ resetLogin(); closeLogin(); });
   $('authClose').addEventListener('click', closeLogin);
-  loginOverlay.addEventListener('click', function(e){ if(e.target === loginOverlay){ closeLogin(); } });
-
+  loginOverlay.addEventListener('click', function(e){ if(e.target === loginOverlay) closeLogin(); });
   document.querySelectorAll('.auth-tab').forEach(function(t){
     t.addEventListener('click', function(){ setMsg(''); showStep(t.dataset.mode); });
   });
   $('forgotBtn').addEventListener('click', function(){ setMsg(''); showStep('forgot'); });
-
+  $('backBtn').addEventListener('click', function(){ setMsg(''); showStep('signin'); });
   $('signOutBtn').addEventListener('click', async function(){
-    if(sb){ try { await sb.auth.signOut(); } catch(e){} }
+    if(sb){ try{ await sb.auth.signOut(); }catch(e){} }
     resetLogin();
     await refreshSession();
   });
+
+  // Links from emails: the page is opened with Supabase data in the address.
+  if(sb){
+    sb.auth.onAuthStateChange(function(event){
+      if(event === 'PASSWORD_RECOVERY'){
+        cleanUrl();
+        openModal(loginOverlay);
+        showStep('newpw');
+        setMsg('Choose a new password for your account.');
+      } else if(event === 'SIGNED_IN' && isAuthCallback(window.location.hash)){
+        cleanUrl();
+        openModal(loginOverlay);
+        $('signedInMsg').textContent = 'Your email is verified and you are signed in.';
+        refreshSession();
+      } else if(event === 'SIGNED_IN' || event === 'SIGNED_OUT'){
+        refreshSession();
+      }
+    });
+  }
+  (function showLinkErrors(){
+    const hash = window.location.hash || '';
+    if(!isAuthCallback(hash)) return;
+    const params = new URLSearchParams(hash.replace(/^#/, ''));
+    if(params.get('error') || params.get('error_code')){
+      cleanUrl();
+      openModal(loginOverlay);
+      showStep('signin');
+      setMsg('That link has expired or is not valid. Please request a new one.', true);
+    }
+  })();
 
   $('authForm').addEventListener('submit', async function(e){
     e.preventDefault();
     if(!sb){ setMsg('Login is not available right now. Please email CidexInfotech1@gmail.com.', true); return; }
     const email = $('authEmail').value.trim();
     const pw = pwInput.value;
-    const code = $('authCode').value.trim();
     const newpw = $('authNewPw').value;
-    authSubmit.disabled = true;
+    setBusy(true);
     try {
       if(step === 'signin'){
         if(!email || !pw){ setMsg('Enter your email and password.', true); return; }
         const r = await sb.auth.signInWithPassword({ email: email, password: pw });
         if(r.error){
           if(/not confirmed/i.test(r.error.message)){
-            await sb.auth.resend({ type: 'signup', email: email });
-            pendingEmail = email;
-            showStep('code');
-            setMsg('Your email is not confirmed yet. We sent a new 6-digit code.');
+            await sb.auth.resend({ type: 'signup', email: email, options: { emailRedirectTo: SITE_URL } });
+            setMsg('Your email is not verified yet. We sent you a new verification link.');
           } else {
             setMsg('Email or password is not right.', true);
           }
@@ -1840,45 +1862,29 @@
       }
       else if(step === 'signup'){
         if(!email || pw.length < 8){ setMsg('Use a valid email and a password of at least 8 characters.', true); return; }
-        const r = await sb.auth.signUp({ email: email, password: pw });
+        const r = await sb.auth.signUp({ email: email, password: pw, options: { emailRedirectTo: SITE_URL } });
         if(r.error){
           setMsg(/already/i.test(r.error.message) ? 'An account with this email already exists. Try signing in.' : 'We could not create the account. Please try again.', true);
           return;
         }
-        pendingEmail = email;
-        showStep('code');
-        setMsg('We sent a 6-digit code to ' + email + '. Enter it below to finish.');
-      }
-      else if(step === 'code'){
-        if(!/^\d{6}$/.test(code)){ setMsg('Enter the 6-digit code from the email.', true); return; }
-        const r = await sb.auth.verifyOtp({ email: pendingEmail, token: code, type: 'signup' });
-        if(r.error){ setMsg('That code is wrong or has expired. Try again, or sign in to get a new code.', true); return; }
-        resetLogin(); closeLogin(); await refreshSession();
+        pwInput.value = '';
+        setMsg('Check your email. We sent a verification link to ' + email + '. Open it to activate your account.');
       }
       else if(step === 'forgot'){
         if(!email){ setMsg('Enter your email.', true); return; }
-        await sb.auth.resetPasswordForEmail(email);
-        pendingEmail = email;
-        showStep('recoverycode');
-        setMsg('If an account exists for this email, we sent a 6-digit code.');
-      }
-      else if(step === 'recoverycode'){
-        if(!/^\d{6}$/.test(code)){ setMsg('Enter the 6-digit code from the email.', true); return; }
-        const r = await sb.auth.verifyOtp({ email: pendingEmail, token: code, type: 'recovery' });
-        if(r.error){ setMsg('That code is wrong or has expired. Request a new one.', true); return; }
-        showStep('newpw');
-        setMsg('Choose a new password.');
+        await sb.auth.resetPasswordForEmail(email, { redirectTo: SITE_URL });
+        setMsg('If an account exists for this email, we sent a password reset link. Open it to choose a new password.');
       }
       else if(step === 'newpw'){
         if(newpw.length < 8){ setMsg('Use at least 8 characters.', true); return; }
         const r = await sb.auth.updateUser({ password: newpw });
-        if(r.error){ setMsg('We could not save the password. Please try again.', true); return; }
+        if(r.error){ setMsg('We could not save the password. The link may have expired. Request a new one.', true); return; }
         resetLogin(); closeLogin(); await refreshSession();
       }
     } catch(err){
       setMsg('Something went wrong. Please try again.', true);
     } finally {
-      authSubmit.disabled = false;
+      setBusy(false);
     }
   });
 
