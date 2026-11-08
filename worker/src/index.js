@@ -3,6 +3,7 @@
 import { SERVICES, estimate, cleanAnswers, missingFields, RULE_VERSION, CONTACT, TEAM_THRESHOLD_INR } from './pricing.js';
 import { SERVICES_INFO } from './services_info.js';
 import { POLICIES } from './policies.js';
+import { MARKETING_GUIDE } from './marketing.js';
 
 const MAX_MESSAGES = 20;
 const MAX_CHARS = 1000;
@@ -169,10 +170,12 @@ async function handleEstimate(request, env) {
 // ---------- Service explainer ("Explore services") ----------
 // Explains services from SERVICES_INFO only. Never calculates or applies discounts.
 function advisorPrompt() {
-  return `You are the CIDEX INFOTECH services guide. CIDEX is a digital services company in Kolkata, India.
+  return `You are Aetheria, the CIDEX INFOTECH services guide. CIDEX is a digital services company in Kolkata, India.
 
 Your job:
 - Explain CIDEX services, using only the SERVICES GUIDE below.
+- Show what each service does for the client. For every feature you explain, give its benefit right after it, so the visitor sees both. Keep features and benefits in balance; do not list features alone.
+- When a visitor asks what they need or which service fits, follow the CIDEX MARKETING METHOD below: a relatable problem, why it matters, the service, its benefit, then one short invitation to contact the team.
 - Explain delivery dates, refunds and cancellations, and late payments, using only the POLICY SUMMARY below.
 - Help a visitor see which service may fit, and say honestly when a service may not be needed yet.
 
@@ -195,6 +198,8 @@ Strict rules:
 - Do not promise rankings, results, sales, or that a project will be accepted.
 - Do not ask for payment details, passwords, or ID numbers.
 - For custom or large projects, or anything outside these guides, give the team contact: phone ${CONTACT.phone}, email ${CONTACT.email}.
+
+${MARKETING_GUIDE}
 
 SERVICES GUIDE:
 ${SERVICES_INFO}
