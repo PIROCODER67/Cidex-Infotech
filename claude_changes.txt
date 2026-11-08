@@ -647,6 +647,9 @@
   .nav-auth{background:transparent; border:1px solid var(--hairline-hi); color:var(--hi); padding:8px 14px; border-radius:999px; cursor:pointer; font:inherit; font-size:14px; white-space:nowrap;}
   .nav-auth.nav-auth-primary{background:linear-gradient(120deg,var(--blue),var(--violet)); color:#050505; border:0; font-weight:600;}
   @media (max-width:860px){ .nav-actions .nav-auth{display:none;} }
+  .nav-face{width:40px; height:40px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:var(--glass); border:1px solid var(--hairline-hi); color:var(--hi); cursor:pointer; padding:0; flex:0 0 auto;}
+  .nav-face:hover{border-color:var(--cyan);}
+  .nav-face:focus-visible{outline:2px solid var(--cyan); outline-offset:2px;}
   .link-btn{background:none; border:0; color:var(--cyan); cursor:pointer; padding:0; font:inherit; font-size:13px; text-decoration:underline;}
 </style>
 </head>
@@ -685,6 +688,9 @@
         <button type="button" data-currency="USD" class="active">$ USD</button>
         <button type="button" data-currency="INR">₹ INR</button>
       </div>
+      <button type="button" class="nav-face" id="navFace" aria-label="Sign up or log in" title="Sign up or log in">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-7 8-7s8 2.8 8 7"/></svg>
+      </button>
       <button type="button" class="nav-auth" id="navLogin">Log in</button>
       <button type="button" class="nav-auth nav-auth-primary" id="navSignup">Sign up</button>
       <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu"><span></span></button>
@@ -1452,7 +1458,7 @@
     if(KNOWN_ROUTES.indexOf(h) !== -1){ showView(h); window.scrollTo({top:0}); return; }
     // Not a top-level route — maybe it's an in-page anchor on the home view.
     const el = document.getElementById(h);
-    if(el && viewHome.contains(el)){
+    if(el && (viewHome.contains(el) || el.id === 'footer')){
       showView('home');
       setTimeout(function(){ el.scrollIntoView({behavior:'smooth', block:'start'}); }, 60);
     } else {
@@ -1803,6 +1809,7 @@
   loginTrigger.addEventListener('click', function(){ openModal(loginOverlay); refreshSession(); });
   function openAuth(mode){ setMsg(''); showStep(mode); openModal(loginOverlay); refreshSession(); }
   $('navLogin').addEventListener('click', function(){ openAuth('signin'); });
+  $('navFace').addEventListener('click', function(){ openAuth('signup'); });
   $('navSignup').addEventListener('click', function(){ openAuth('signup'); });
   $('mobLogin').addEventListener('click', function(){ openAuth('signin'); });
   $('mobSignup').addEventListener('click', function(){ openAuth('signup'); });
