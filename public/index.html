@@ -685,6 +685,17 @@
   .consent-field{display:flex; gap:10px; align-items:flex-start; font-size:0.88rem; line-height:1.5; margin:14px 0 0;}
   .consent-field input{margin-top:4px; flex:0 0 auto; width:16px; height:16px;}
   .consent-field a{color:var(--accent-a); font-weight:500;}
+  .side-notice{position:fixed; top:96px; right:18px; z-index:260; width:min(340px, calc(100vw - 36px)); padding:16px 40px 16px 18px; border-radius:14px; background:rgba(10,14,22,0.95); border:1px solid rgba(78,168,255,0.35); box-shadow:0 18px 40px rgba(0,0,0,0.45); color:var(--hi); font-size:0.92rem; line-height:1.5;}
+  .side-notice[hidden]{display:none !important;}
+  .side-notice p{margin:0;}
+  .side-notice-close{position:absolute; top:6px; right:10px; background:none; border:none; color:var(--lo); font-size:1.4rem; line-height:1; cursor:pointer;}
+  .profile-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .profile-row .field{margin:0;}
+  .pref-field{border:none; padding:0; margin:14px 0 0; min-width:0;}
+  .pref-field legend{font-size:0.88rem; color:var(--lo); margin-bottom:8px; padding:0;}
+  .pref-field label{display:inline-flex; align-items:center; gap:6px; margin-right:16px; font-size:0.92rem; color:var(--hi);}
+  .optional{color:var(--lo); font-weight:300;}
+  @media (max-width:560px){ .profile-row{grid-template-columns:1fr;} .side-notice{left:18px; right:18px; width:auto; top:auto; bottom:18px;} }
   .nav-auth{background:transparent; border:1px solid var(--hairline-hi); color:var(--hi); padding:8px 14px; border-radius:999px; cursor:pointer; font:inherit; font-size:14px; white-space:nowrap;}
   .nav-auth.nav-auth-primary{background:linear-gradient(120deg,var(--blue),var(--violet)); color:#050505; border:0; font-weight:600;}
   @media (max-width:860px){ .nav-actions .nav-auth{display:none;} }
@@ -729,11 +740,10 @@
         <button type="button" data-currency="USD" class="active">$ USD</button>
         <button type="button" data-currency="INR">₹ INR</button>
       </div>
-      <button type="button" class="nav-face" id="navFace" aria-label="Sign up or log in" title="Sign up or log in">
+      <button type="button" class="nav-face" id="navFace" aria-label="Log in or my profile" title="Log in or my profile">
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-7 8-7s8 2.8 8 7"/></svg>
       </button>
       <button type="button" class="nav-auth" id="navLogin">Log in</button>
-      <button type="button" class="nav-auth nav-auth-primary" id="navSignup">Sign up</button>
       <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu"><span></span></button>
     </div>
   </nav>
@@ -748,7 +758,6 @@
   <a href="#showcase" data-route="home" data-anchor="showcase">Showcase</a>
   <a href="#pricing" data-route="pricing">Pricing</a>
   <a href="#footer" data-route="home" data-anchor="footer">Contact</a>
-  <button type="button" class="nav-auth nav-auth-primary" id="mobSignup">Sign up</button>
   <button type="button" class="nav-auth" id="mobLogin">Log in</button>
   <a href="#footer" class="btn-primary" data-route="home" data-anchor="footer">Contact us</a>
 </nav>
@@ -1483,10 +1492,45 @@
 
 
 <div class="cookie-banner" id="cookieBanner">
-  <p>We use local preferences to remember your currency settings. See how in our <a href="#privacy" data-route="privacy">privacy policy</a>.</p>
+  <p>We use cookies and local storage to remember your currency choice and keep you signed in. Please review our <a href="#cookies" data-route="cookies">Cookie Policy</a>.</p>
   <div class="cookie-actions">
     <button class="accept" id="cookieAccept">Accept</button>
     <button id="cookieDecline">Decline</button>
+  </div>
+</div>
+
+<div class="side-notice" id="sideNotice" role="status" aria-live="polite" hidden>
+  <p id="sideNoticeText"></p>
+  <button type="button" class="side-notice-close" id="sideNoticeClose" aria-label="Close notice">&times;</button>
+</div>
+
+<div class="modal-overlay" id="profileOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+    <h3 id="profileTitle">Your details</h3>
+    <p class="modal-note">Saved to your account. You can update them any time.</p>
+    <form id="profileForm" novalidate>
+      <div class="profile-row">
+        <div class="field"><label for="profFirst">First name</label><input type="text" id="profFirst" autocomplete="given-name" required></div>
+        <div class="field"><label for="profLast">Last name</label><input type="text" id="profLast" autocomplete="family-name" required></div>
+      </div>
+      <div class="field"><label for="profCompany">Company name <span class="optional">(optional)</span></label><input type="text" id="profCompany" autocomplete="organization"></div>
+      <div class="field"><label for="profPhone">Phone number</label><input type="tel" id="profPhone" autocomplete="tel" required></div>
+      <div class="profile-row">
+        <div class="field"><label for="profState">State</label><input type="text" id="profState" autocomplete="address-level1" required></div>
+        <div class="field"><label for="profCountry">Country</label><input type="text" id="profCountry" autocomplete="country-name" required></div>
+      </div>
+      <fieldset class="pref-field">
+        <legend>While contacting the management team, will you prefer WhatsApp, email or call?</legend>
+        <label><input type="radio" name="contactPref" value="whatsapp"> WhatsApp</label>
+        <label><input type="radio" name="contactPref" value="email"> Email</label>
+        <label><input type="radio" name="contactPref" value="call"> Call</label>
+      </fieldset>
+      <p class="modal-note" id="profMsg" aria-live="polite"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="profCancel">Close</button>
+        <button type="submit" class="btn-confirm" id="profSave">Save details</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -1982,6 +2026,14 @@
     // Login links from Supabase carry their own data in the address; leave them for the login code.
     if(/(^|[#&])(access_token|error_code|error|type)=/.test(window.location.hash || '')) return;
     const h = (window.location.hash || '#home').replace('#','') || 'home';
+    if(h === 'cookies'){
+      showView('privacy');
+      setTimeout(function(){
+        const el = document.getElementById('cookie-policy');
+        if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+      }, 60);
+      return;
+    }
     if(h === 'refund'){
       showView('terms');
       setTimeout(function(){
@@ -2399,6 +2451,7 @@
       const user = data && data.session ? data.session.user : null;
       $('authSignedIn').hidden = !user;
       $('authArea').hidden = !!user;
+      $('navFace').setAttribute('aria-label', user ? 'My profile' : 'Log in');
       if(user){ $('authWho').textContent = user.email; loginTrigger.textContent = 'My account'; }
       else { loginTrigger.textContent = 'Client Login'; }
     }catch(e){ /* stays signed out */ }
@@ -2407,13 +2460,109 @@
   function cleanUrl(){ history.replaceState(null, '', window.location.pathname + window.location.search); }
   function isAuthCallback(hash){ return /(^|[#&])(access_token|error_code|error|type)=/.test(hash || ''); }
 
+  /* ---------- SIDE NOTICE ---------- */
+  const sideNotice = $('sideNotice');
+  let noticeTimer = null;
+  function showNotice(text){
+    $('sideNoticeText').textContent = text;
+    sideNotice.hidden = false;
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(function(){ sideNotice.hidden = true; }, 10000);
+  }
+  $('sideNoticeClose').addEventListener('click', function(){ sideNotice.hidden = true; });
+
+  /* ---------- PROFILE: saved in the backend (Supabase table "profiles"); this browser keeps a copy so the form fills in ---------- */
+  const profileOverlay = $('profileOverlay');
+  function readProfileCache(){ try{ return JSON.parse(localStorage.getItem('cidex_profile') || 'null'); }catch(e){ return null; } }
+  function writeProfileCache(p){ try{ localStorage.setItem('cidex_profile', JSON.stringify(p)); }catch(e){} }
+  function setProfMsg(text, isError){ $('profMsg').textContent = text; $('profMsg').style.color = isError ? '#ff9a9a' : ''; }
+  function fillProfile(p){
+    if(!p) return;
+    $('profFirst').value = p.first_name || '';
+    $('profLast').value = p.last_name || '';
+    $('profCompany').value = p.company_name || '';
+    $('profPhone').value = p.phone || '';
+    $('profState').value = p.state || '';
+    $('profCountry').value = p.country || '';
+    document.querySelectorAll('input[name="contactPref"]').forEach(function(r){ r.checked = (r.value === p.contact_preference); });
+  }
+  function readProfileForm(){
+    const pref = document.querySelector('input[name="contactPref"]:checked');
+    return {
+      first_name: $('profFirst').value.trim(),
+      last_name: $('profLast').value.trim(),
+      company_name: $('profCompany').value.trim(),
+      phone: $('profPhone').value.trim(),
+      state: $('profState').value.trim(),
+      country: $('profCountry').value.trim(),
+      contact_preference: pref ? pref.value : ''
+    };
+  }
+  async function dbFetch(path, o){
+    o = o || {};
+    const headers = { 'apikey': SUPABASE_PUBLISHABLE_KEY, 'Content-Type': 'application/json' };
+    if(o.token){ headers['Authorization'] = 'Bearer ' + o.token; }
+    if(o.prefer){ headers['Prefer'] = o.prefer; }
+    let res;
+    try{
+      res = await fetch(SUPABASE_URL + '/rest/v1' + path, { method: o.method || 'GET', headers: headers, body: o.body ? JSON.stringify(o.body) : undefined });
+    }catch(e){ return { error: { message: 'NETWORK' } }; }
+    let data = null;
+    try{ data = await res.json(); }catch(e){}
+    if(!res.ok){ return { error: { message: (data && (data.message || data.hint)) || ('Request failed (' + res.status + ')') } }; }
+    return { data: data };
+  }
+  async function currentSession(){
+    try{ const { data } = await sb.auth.getSession(); return data && data.session ? data.session : null; }catch(e){ return null; }
+  }
+  async function openProfile(){
+    const sess = await currentSession();
+    if(!sess){ openAuth('signin'); return; }
+    setProfMsg('');
+    fillProfile(readProfileCache());
+    openModal(profileOverlay);
+    const uid = sess.user && sess.user.id;
+    if(!uid) return;
+    const r = await dbFetch('/profiles?id=eq.' + encodeURIComponent(uid) + '&select=*', { token: sess.access_token });
+    if(r.error){
+      setProfMsg(r.error.message === 'NETWORK' ? 'Could not load your saved details. The copy on this browser is shown.' : 'Could not load your saved details.', true);
+    } else if(r.data && r.data[0]){
+      fillProfile(r.data[0]);
+      writeProfileCache(r.data[0]);
+    }
+  }
+  $('profileForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const p = readProfileForm();
+    if(!p.first_name || !p.last_name || !p.phone || !p.state || !p.country){ setProfMsg('Please fill in every required field. Company name is optional.', true); return; }
+    if(!/^[+0-9 ()-]{6,20}$/.test(p.phone)){ setProfMsg('Enter a valid phone number.', true); return; }
+    if(!p.contact_preference){ setProfMsg('Choose WhatsApp, email or call.', true); return; }
+    const sess = await currentSession();
+    if(!sess || !sess.user){ setProfMsg('Please sign in again.', true); return; }
+    const btn = $('profSave');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    try{
+      const row = Object.assign({ id: sess.user.id, updated_at: new Date().toISOString() }, p);
+      if(!row.company_name) row.company_name = null;
+      const r = await dbFetch('/profiles?on_conflict=id', { method: 'POST', token: sess.access_token, prefer: 'resolution=merge-duplicates,return=minimal', body: row });
+      if(r.error){ setProfMsg(r.error.message === 'NETWORK' ? NET_MSG : 'Could not save your details. Please try again.', true); return; }
+      writeProfileCache(p);
+      setProfMsg('Saved. Thank you.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Save details';
+    }
+  });
+  $('profCancel').addEventListener('click', function(){ closeModal(profileOverlay); });
+  profileOverlay.addEventListener('click', function(e){ if(e.target === profileOverlay) closeModal(profileOverlay); });
+  $('navFace').addEventListener('click', async function(){
+    const sess = await currentSession();
+    if(sess){ openProfile(); } else { openAuth('signin'); }
+  });
+
   loginTrigger.addEventListener('click', function(){ openModal(loginOverlay); refreshSession(); });
   function openAuth(mode){ setMsg(''); showStep(mode); openModal(loginOverlay); refreshSession(); }
   $('navLogin').addEventListener('click', function(){ openAuth('signin'); });
-  $('navFace').addEventListener('click', function(){ openAuth('signup'); });
-  $('navSignup').addEventListener('click', function(){ openAuth('signup'); });
   $('mobLogin').addEventListener('click', function(){ openAuth('signin'); });
-  $('mobSignup').addEventListener('click', function(){ openAuth('signup'); });
   $('loginCancel').addEventListener('click', function(){ resetLogin(); closeLogin(); });
   $('authClose').addEventListener('click', closeLogin);
   loginOverlay.addEventListener('click', function(e){ if(e.target === loginOverlay) closeLogin(); });
@@ -2424,6 +2573,7 @@
   $('backBtn').addEventListener('click', function(){ setMsg(''); showStep('signin'); });
   $('signOutBtn').addEventListener('click', async function(){
     if(sb){ try{ await sb.auth.signOut(); }catch(e){} }
+    try{ localStorage.removeItem('cidex_profile'); }catch(e){}
     resetLogin();
     await refreshSession();
   });
@@ -2447,6 +2597,7 @@
     } else {
       $('signedInMsg').textContent = 'Your email is verified and you are signed in.';
       refreshSession();
+      showNotice('You are logged in. Use the profile button at the top right to complete your details.');
     }
   }
   handleAuthHash();
@@ -2483,6 +2634,7 @@
           return;
         }
         resetLogin(); closeLogin(); await refreshSession();
+        showNotice('You are logged in. Use the profile button at the top right to complete your details.');
       }
       else if(step === 'signup'){
         if(!email || pw.length < 8){ setMsg('Use a valid email and a password of at least 8 characters.', true); return; }
