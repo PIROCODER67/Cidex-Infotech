@@ -2285,24 +2285,71 @@
   const SUPABASE_URL = 'https://xqabhktmkeadzrxkmepo.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_GJjOrz6qvcwVkF4UW8W-1w_4vrkalbf';
   const $ = function(id){ return document.getElementById(id); };
-  let sb = null;
-  /* Supabase library: try two CDNs, so one blocked source (browser extensions, filters) does not stop login */
-  const SUPABASE_SOURCES = [
-    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js',
-    'https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'
-  ];
-  function loadSupabase(i){
-    if(i >= SUPABASE_SOURCES.length) return;
-    const s = document.createElement('script');
-    s.src = SUPABASE_SOURCES[i];
-    s.async = true;
-    s.onload = function(){
-      try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY); } catch(e){ sb = null; }
-      if(sb){ attachAuth(); } else { loadSupabase(i + 1); }
-    };
-    s.onerror = function(){ loadSupabase(i + 1); };
-    document.head.appendChild(s);
+  /* ---------- LOGIN SERVICE CLIENT (no third-party script; plain requests to Supabase Auth) ---------- */
+  const AUTH_URL = SUPABASE_URL + '/auth/v1';
+  const SESSION_KEY = 'cidex_auth_session';
+  function readSession(){ try{ return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }catch(e){ return null; } }
+  function writeSession(sess){ try{ if(sess){ localStorage.setItem(SESSION_KEY, JSON.stringify(sess)); } else { localStorage.removeItem(SESSION_KEY); } }catch(e){} }
+  function toSession(d){
+    return { access_token: d.access_token, refresh_token: d.refresh_token, expires_at: Date.now()/1000 + Number(d.expires_in || 3600), user: d.user || null };
   }
+  async function authFetch(path, o){
+    o = o || {};
+    const headers = { 'apikey': SUPABASE_PUBLISHABLE_KEY, 'Content-Type': 'application/json' };
+    if(o.token){ headers['Authorization'] = 'Bearer ' + o.token; }
+    let res;
+    try{
+      res = await fetch(AUTH_URL + path, { method: o.method || 'POST', headers: headers, body: o.body ? JSON.stringify(o.body) : undefined });
+    }catch(e){
+      return { error: { message: 'NETWORK' } };
+    }
+    let data = null;
+    try{ data = await res.json(); }catch(e){}
+    if(!res.ok){
+      return { error: { message: (data && (data.error_description || data.msg || data.message)) || ('Request failed (' + res.status + ')') } };
+    }
+    return { data: data };
+  }
+  const sb = { auth: {
+    async getSession(){
+      let sess = readSession();
+      if(!sess) return { data: { session: null } };
+      if(sess.expires_at - 60 < Date.now()/1000){
+        const r = await authFetch('/token?grant_type=refresh_token', { body: { refresh_token: sess.refresh_token } });
+        if(r.error){ writeSession(null); return { data: { session: null } }; }
+        sess = toSession(r.data);
+        writeSession(sess);
+      }
+      return { data: { session: sess } };
+    },
+    async signInWithPassword(c){
+      const r = await authFetch('/token?grant_type=password', { body: { email: c.email, password: c.password } });
+      if(r.error) return r;
+      writeSession(toSession(r.data));
+      return { data: r.data };
+    },
+    signUp(c){
+      const q = c.options && c.options.emailRedirectTo ? '?redirect_to=' + encodeURIComponent(c.options.emailRedirectTo) : '';
+      return authFetch('/signup' + q, { body: { email: c.email, password: c.password, data: (c.options && c.options.data) || {} } });
+    },
+    resend(c){
+      const q = c.options && c.options.emailRedirectTo ? '?redirect_to=' + encodeURIComponent(c.options.emailRedirectTo) : '';
+      return authFetch('/resend' + q, { body: { type: c.type, email: c.email } });
+    },
+    resetPasswordForEmail(email, o){
+      return authFetch('/recover?redirect_to=' + encodeURIComponent(o.redirectTo), { body: { email: email } });
+    },
+    async updateUser(c){
+      const sess = readSession();
+      if(!sess) return { error: { message: 'No active link. Please request a new one.' } };
+      return authFetch('/user', { method: 'PUT', token: sess.access_token, body: { password: c.password } });
+    },
+    async signOut(){
+      const sess = readSession();
+      writeSession(null);
+      if(sess){ await authFetch('/logout', { token: sess.access_token }); }
+    }
+  } };
   const SITE_URL = window.location.origin + window.location.pathname;
 
   const loginTrigger = $('loginTrigger');
@@ -2310,6 +2357,7 @@
   const authMsg = $('authMsg');
   const pwInput = $('authPassword');
   const pwToggle = $('pwToggle');
+  const NET_MSG = 'Could not reach the login service. Check your internet connection, turn off any security extension for this site, and try again.';
   const SUBMIT_LABEL = { signin: 'Sign in', signup: 'Create account', forgot: 'Send reset link', newpw: 'Save new password' };
   let step = 'signin';
 
@@ -2380,26 +2428,28 @@
     await refreshSession();
   });
 
-  // Links from emails: the page is opened with Supabase data in the address.
-  function attachAuth(){
-    sb.auth.onAuthStateChange(function(event){
-      if(event === 'PASSWORD_RECOVERY'){
-        cleanUrl();
-        openModal(loginOverlay);
-        showStep('newpw');
-        setMsg('Choose a new password for your account.');
-      } else if(event === 'SIGNED_IN' && isAuthCallback(window.location.hash)){
-        cleanUrl();
-        openModal(loginOverlay);
-        $('signedInMsg').textContent = 'Your email is verified and you are signed in.';
-        refreshSession();
-      } else if(event === 'SIGNED_IN' || event === 'SIGNED_OUT'){
-        refreshSession();
-      }
-    });
-    refreshSession();
+  // Links from emails (verification, password reset) open the page with the session in the address.
+  async function handleAuthHash(){
+    const hash = window.location.hash || '';
+    if(!/(^|[#&])access_token=/.test(hash)) return;
+    const p = new URLSearchParams(hash.replace(/^#/, ''));
+    const sess = { access_token: p.get('access_token'), refresh_token: p.get('refresh_token'), expires_at: Date.now()/1000 + Number(p.get('expires_in') || 3600), user: null };
+    const u = await authFetch('/user', { method: 'GET', token: sess.access_token });
+    sess.user = u.data || null;
+    writeSession(sess);
+    cleanUrl();
+    openModal(loginOverlay);
+    if(p.get('type') === 'recovery'){
+      $('authSignedIn').hidden = true;
+      $('authArea').hidden = false;
+      showStep('newpw');
+      setMsg('Choose a new password for your account.');
+    } else {
+      $('signedInMsg').textContent = 'Your email is verified and you are signed in.';
+      refreshSession();
+    }
   }
-  loadSupabase(0);
+  handleAuthHash();
   (function showLinkErrors(){
     const hash = window.location.hash || '';
     if(!isAuthCallback(hash)) return;
@@ -2414,7 +2464,6 @@
 
   $('authForm').addEventListener('submit', async function(e){
     e.preventDefault();
-    if(!sb){ setMsg('Login could not load. Please refresh the page and try again. If it still fails, a browser or security extension may be blocking it, or email CidexInfotech1@gmail.com.', true); return; }
     const email = $('authEmail').value.trim();
     const pw = pwInput.value;
     const newpw = $('authNewPw').value;
@@ -2423,6 +2472,7 @@
       if(step === 'signin'){
         if(!email || !pw){ setMsg('Enter your email and password.', true); return; }
         const r = await sb.auth.signInWithPassword({ email: email, password: pw });
+        if(r.error && r.error.message === 'NETWORK'){ setMsg(NET_MSG, true); return; }
         if(r.error){
           if(/not confirmed/i.test(r.error.message)){
             await sb.auth.resend({ type: 'signup', email: email, options: { emailRedirectTo: SITE_URL } });
@@ -2438,6 +2488,7 @@
         if(!email || pw.length < 8){ setMsg('Use a valid email and a password of at least 8 characters.', true); return; }
         if(!$('authConsent').checked){ setMsg('Please accept the Privacy Policy and Terms & Conditions to create an account.', true); return; }
         const r = await sb.auth.signUp({ email: email, password: pw, options: { emailRedirectTo: SITE_URL, data: { terms_accepted_at: new Date().toISOString() } } });
+        if(r.error && r.error.message === 'NETWORK'){ setMsg(NET_MSG, true); return; }
         if(r.error){
           setMsg(/already/i.test(r.error.message) ? 'An account with this email already exists. Try signing in.' : 'We could not create the account. Please try again.', true);
           return;
@@ -2447,12 +2498,14 @@
       }
       else if(step === 'forgot'){
         if(!email){ setMsg('Enter your email.', true); return; }
-        await sb.auth.resetPasswordForEmail(email, { redirectTo: SITE_URL });
+        const r = await sb.auth.resetPasswordForEmail(email, { redirectTo: SITE_URL });
+        if(r.error && r.error.message === 'NETWORK'){ setMsg(NET_MSG, true); return; }
         setMsg('If an account exists for this email, we sent a password reset link. Open it to choose a new password.');
       }
       else if(step === 'newpw'){
         if(newpw.length < 8){ setMsg('Use at least 8 characters.', true); return; }
         const r = await sb.auth.updateUser({ password: newpw });
+        if(r.error && r.error.message === 'NETWORK'){ setMsg(NET_MSG, true); return; }
         if(r.error){ setMsg('We could not save the password. The link may have expired. Request a new one.', true); return; }
         resetLogin(); closeLogin(); await refreshSession();
       }
