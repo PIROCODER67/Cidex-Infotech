@@ -644,6 +644,9 @@
   .auth-tab{flex:1; background:transparent; border:1px solid var(--hairline-hi); color:var(--lo); padding:9px 10px; border-radius:10px; cursor:pointer; font:inherit; font-size:14px;}
   .auth-tab.is-active{color:var(--hi); background:var(--glass);}
   .auth-links{margin:6px 0 0;}
+  .nav-auth{background:transparent; border:1px solid var(--hairline-hi); color:var(--hi); padding:8px 14px; border-radius:999px; cursor:pointer; font:inherit; font-size:14px; white-space:nowrap;}
+  .nav-auth.nav-auth-primary{background:linear-gradient(120deg,var(--blue),var(--violet)); color:#050505; border:0; font-weight:600;}
+  @media (max-width:860px){ .nav-actions .nav-auth{display:none;} }
   .link-btn{background:none; border:0; color:var(--cyan); cursor:pointer; padding:0; font:inherit; font-size:13px; text-decoration:underline;}
 </style>
 </head>
@@ -682,6 +685,8 @@
         <button type="button" data-currency="USD" class="active">$ USD</button>
         <button type="button" data-currency="INR">₹ INR</button>
       </div>
+      <button type="button" class="nav-auth" id="navLogin">Log in</button>
+      <button type="button" class="nav-auth nav-auth-primary" id="navSignup">Sign up</button>
       <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu"><span></span></button>
     </div>
   </nav>
@@ -696,6 +701,8 @@
   <a href="#showcase" data-route="home" data-anchor="showcase">Showcase</a>
   <a href="#pricing" data-route="pricing">Pricing</a>
   <a href="#footer" data-route="home" data-anchor="footer">Contact</a>
+  <button type="button" class="nav-auth nav-auth-primary" id="mobSignup">Sign up</button>
+  <button type="button" class="nav-auth" id="mobLogin">Log in</button>
   <a href="#footer" class="btn-primary" data-route="home" data-anchor="footer">Contact us</a>
 </nav>
 
@@ -1794,6 +1801,11 @@
   function isAuthCallback(hash){ return /(^|[#&])(access_token|error_code|error|type)=/.test(hash || ''); }
 
   loginTrigger.addEventListener('click', function(){ openModal(loginOverlay); refreshSession(); });
+  function openAuth(mode){ setMsg(''); showStep(mode); openModal(loginOverlay); refreshSession(); }
+  $('navLogin').addEventListener('click', function(){ openAuth('signin'); });
+  $('navSignup').addEventListener('click', function(){ openAuth('signup'); });
+  $('mobLogin').addEventListener('click', function(){ openAuth('signin'); });
+  $('mobSignup').addEventListener('click', function(){ openAuth('signup'); });
   $('loginCancel').addEventListener('click', function(){ resetLogin(); closeLogin(); });
   $('authClose').addEventListener('click', closeLogin);
   loginOverlay.addEventListener('click', function(e){ if(e.target === loginOverlay) closeLogin(); });
