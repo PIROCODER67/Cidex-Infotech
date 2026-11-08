@@ -2517,11 +2517,13 @@
   }
   function explainError(action, err){
     const m = (err && err.message) || '';
+    const detail = m && m !== 'NETWORK' ? ' (details: ' + m + ')' : '';
     if(m === 'NETWORK') return 'Could not ' + action + ' because the site could not reach the server. Check your internet connection, turn off any security extension for this site, then try again.';
-    if(/permission|policy|row-level|jwt|expired|401|403/i.test(m)) return 'Could not ' + action + ' because your sign-in has expired. Please sign out, sign in again, and retry.';
-    if(/check constraint|violates|invalid input/i.test(m)) return 'Could not ' + action + ' because one entry is in the wrong format. Check the phone number and the other fields.';
-    if(/does not exist|could not find the table|schema cache/i.test(m)) return 'Could not ' + action + ' because the profiles table is missing in the database (admin: run the setup SQL in Supabase).';
-    return 'Could not ' + action + ': ' + m + '.';
+    if(/row-level security|new row violates/i.test(m)) return 'Could not ' + action + ' because the database security rules rejected it. The profiles table policies need checking in Supabase.' + detail;
+    if(/jwt|token|expired|401/i.test(m)) return 'Could not ' + action + ' because your sign-in has expired. Please sign out, sign in again, and retry.' + detail;
+    if(/check constraint|violates|invalid input/i.test(m)) return 'Could not ' + action + ' because one entry is in the wrong format. Check the phone number and the other fields.' + detail;
+    if(/does not exist|could not find the table|schema cache/i.test(m)) return 'Could not ' + action + ' because the profiles table is missing in the database. Run the setup SQL in Supabase.' + detail;
+    return 'Could not ' + action + '.' + detail;
   }
   async function currentSession(){
     try{ const { data } = await sb.auth.getSession(); return data && data.session ? data.session : null; }catch(e){ return null; }
