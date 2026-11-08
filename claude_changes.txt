@@ -638,6 +638,13 @@
   .ai-fab.ai-fab-left{left:20px; right:auto;}
   .ai-panel.ai-panel-left{left:20px; right:auto;}
   @media (max-width:480px){ .ai-fab.ai-fab-left{left:12px; right:auto; bottom:64px;} .ai-panel.ai-panel-left{left:12px; right:12px; width:auto; bottom:124px;} }
+  /* Client login tabs */
+  [hidden]{display:none !important;}
+  .auth-tabs{display:flex; gap:8px; margin-bottom:14px;}
+  .auth-tab{flex:1; background:transparent; border:1px solid var(--hairline-hi); color:var(--lo); padding:9px 10px; border-radius:10px; cursor:pointer; font:inherit; font-size:14px;}
+  .auth-tab.is-active{color:var(--hi); background:var(--glass);}
+  .auth-links{margin:6px 0 0;}
+  .link-btn{background:none; border:0; color:var(--cyan); cursor:pointer; padding:0; font:inherit; font-size:13px; text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -1063,23 +1070,44 @@
 <div class="modal-overlay" id="loginOverlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
     <h3 id="loginTitle">Client login</h3>
-    <p>Client login is coming soon. For project status or invoices, email CidexInfotech1@gmail.com.</p>
-    <form id="loginForm">
-      <div class="field">
-        <label for="loginEmail">Email</label>
-        <input type="email" id="loginEmail" autocomplete="username" required>
-      </div>
-      <div class="field pw-field">
-        <label for="loginPassword">Password</label>
-        <input type="password" id="loginPassword" autocomplete="current-password" required>
-        <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">Show</button>
-      </div>
-      <p class="modal-note">This login isn't connected yet, so nothing is saved or checked.</p>
+    <div id="authSignedIn" hidden>
+      <p>Signed in as <strong id="authWho"></strong>.</p>
       <div class="modal-actions">
-        <button type="button" class="btn-cancel" id="loginCancel">Cancel</button>
-        <button type="submit" class="btn-confirm" disabled>Coming soon</button>
+        <button type="button" class="btn-cancel" id="authClose">Close</button>
+        <button type="button" class="btn-confirm" id="signOutBtn">Sign out</button>
       </div>
-    </form>
+    </div>
+    <div id="authArea">
+      <div class="auth-tabs" id="authTabs" role="tablist">
+        <button type="button" class="auth-tab is-active" data-mode="signin">Sign in</button>
+        <button type="button" class="auth-tab" data-mode="signup">Create account</button>
+      </div>
+      <form id="authForm" novalidate>
+        <div class="field" id="fieldEmail">
+          <label for="authEmail">Email</label>
+          <input type="email" id="authEmail" autocomplete="email" required>
+        </div>
+        <div class="field pw-field" id="fieldPassword">
+          <label for="authPassword">Password</label>
+          <input type="password" id="authPassword" autocomplete="current-password" minlength="8">
+          <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">Show</button>
+        </div>
+        <div class="field" id="fieldCode" hidden>
+          <label for="authCode">6-digit code</label>
+          <input type="text" id="authCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
+        </div>
+        <div class="field" id="fieldNewPw" hidden>
+          <label for="authNewPw">New password (at least 8 characters)</label>
+          <input type="password" id="authNewPw" autocomplete="new-password" minlength="8">
+        </div>
+        <p class="modal-note" id="authMsg" aria-live="polite"></p>
+        <p class="auth-links" id="authLinks"><button type="button" class="link-btn" id="forgotBtn">Forgot password?</button></p>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" id="loginCancel">Cancel</button>
+          <button type="submit" class="btn-confirm" id="authSubmit">Sign in</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
@@ -1132,6 +1160,7 @@
   </form>
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -1702,18 +1731,165 @@
   document.getElementById('loginTrigger').addEventListener('click', function(){ openModal(loginOverlay); });
   document.getElementById('loginCancel').addEventListener('click', function(){ closeModal(loginOverlay); });
   loginOverlay.addEventListener('click', function(e){ if(e.target === loginOverlay) closeModal(loginOverlay); });
-  document.getElementById('loginForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    closeModal(loginOverlay);
+  /* ---------- CLIENT LOGIN (Supabase: email + password, 6-digit email code) ---------- */
+  const SUPABASE_URL = 'https://xqabhktmkeadzrxkmepo.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_GJjOrz6qvcwVkF4UW8W-1w_4vrkalbf';
+  const $ = function(id){ return document.getElementById(id); };
+  let sb = null;
+  try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY); } catch(e){ sb = null; }
+
+  let step = 'signin';        // signin | signup | code | forgot | recoverycode | newpw
+  let pendingEmail = '';
+  const loginTrigger = $('loginTrigger');
+  const authSubmit = $('authSubmit');
+  const authMsg = $('authMsg');
+  const pwInput = $('authPassword');
+  const pwToggle = $('pwToggle');
+
+  const SUBMIT_LABEL = { signin: 'Sign in', signup: 'Create account', code: 'Confirm code', forgot: 'Send code', recoverycode: 'Confirm code', newpw: 'Save password' };
+
+  function setMsg(text, isError){
+    authMsg.textContent = text;
+    authMsg.style.color = isError ? '#ff9a9a' : '';
+  }
+
+  function showStep(s){
+    step = s;
+    const isAuth = s === 'signin' || s === 'signup';
+    $('authTabs').hidden = !isAuth;
+    $('fieldEmail').hidden = s === 'code' || s === 'recoverycode' || s === 'newpw';
+    $('fieldPassword').hidden = !isAuth;
+    $('fieldCode').hidden = !(s === 'code' || s === 'recoverycode');
+    $('fieldNewPw').hidden = s !== 'newpw';
+    $('authLinks').hidden = s !== 'signin';
+    authSubmit.textContent = SUBMIT_LABEL[s];
+    $('authCode').value = '';
+    $('authNewPw').value = '';
+    pwInput.setAttribute('autocomplete', s === 'signup' ? 'new-password' : 'current-password');
+    document.querySelectorAll('.auth-tab').forEach(function(t){
+      t.classList.toggle('is-active', t.dataset.mode === s);
+    });
+  }
+
+  function resetLogin(){
+    $('authEmail').value = '';
+    $('authPassword').value = '';
+    pendingEmail = '';
+    setMsg('');
+    showStep('signin');
+  }
+
+  async function refreshSession(){
+    if(!sb){ return; }
+    try {
+      const { data } = await sb.auth.getSession();
+      const user = data && data.session ? data.session.user : null;
+      $('authSignedIn').hidden = !user;
+      $('authArea').hidden = !!user;
+      if(user){
+        $('authWho').textContent = user.email;
+        loginTrigger.textContent = 'My account';
+      } else {
+        loginTrigger.textContent = 'Client Login';
+      }
+    } catch(e){ /* stays signed out */ }
+  }
+
+  function closeLogin(){ closeModal(loginOverlay); }
+
+  loginTrigger.addEventListener('click', function(){ openModal(loginOverlay); refreshSession(); });
+  $('loginCancel').addEventListener('click', function(){ resetLogin(); closeLogin(); });
+  $('authClose').addEventListener('click', closeLogin);
+  loginOverlay.addEventListener('click', function(e){ if(e.target === loginOverlay){ closeLogin(); } });
+
+  document.querySelectorAll('.auth-tab').forEach(function(t){
+    t.addEventListener('click', function(){ setMsg(''); showStep(t.dataset.mode); });
   });
-  const pwToggle = document.getElementById('pwToggle');
-  const pwInput = document.getElementById('loginPassword');
+  $('forgotBtn').addEventListener('click', function(){ setMsg(''); showStep('forgot'); });
+
+  $('signOutBtn').addEventListener('click', async function(){
+    if(sb){ try { await sb.auth.signOut(); } catch(e){} }
+    resetLogin();
+    await refreshSession();
+  });
+
+  $('authForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    if(!sb){ setMsg('Login is not available right now. Please email CidexInfotech1@gmail.com.', true); return; }
+    const email = $('authEmail').value.trim();
+    const pw = pwInput.value;
+    const code = $('authCode').value.trim();
+    const newpw = $('authNewPw').value;
+    authSubmit.disabled = true;
+    try {
+      if(step === 'signin'){
+        if(!email || !pw){ setMsg('Enter your email and password.', true); return; }
+        const r = await sb.auth.signInWithPassword({ email: email, password: pw });
+        if(r.error){
+          if(/not confirmed/i.test(r.error.message)){
+            await sb.auth.resend({ type: 'signup', email: email });
+            pendingEmail = email;
+            showStep('code');
+            setMsg('Your email is not confirmed yet. We sent a new 6-digit code.');
+          } else {
+            setMsg('Email or password is not right.', true);
+          }
+          return;
+        }
+        resetLogin(); closeLogin(); await refreshSession();
+      }
+      else if(step === 'signup'){
+        if(!email || pw.length < 8){ setMsg('Use a valid email and a password of at least 8 characters.', true); return; }
+        const r = await sb.auth.signUp({ email: email, password: pw });
+        if(r.error){
+          setMsg(/already/i.test(r.error.message) ? 'An account with this email already exists. Try signing in.' : 'We could not create the account. Please try again.', true);
+          return;
+        }
+        pendingEmail = email;
+        showStep('code');
+        setMsg('We sent a 6-digit code to ' + email + '. Enter it below to finish.');
+      }
+      else if(step === 'code'){
+        if(!/^\d{6}$/.test(code)){ setMsg('Enter the 6-digit code from the email.', true); return; }
+        const r = await sb.auth.verifyOtp({ email: pendingEmail, token: code, type: 'signup' });
+        if(r.error){ setMsg('That code is wrong or has expired. Try again, or sign in to get a new code.', true); return; }
+        resetLogin(); closeLogin(); await refreshSession();
+      }
+      else if(step === 'forgot'){
+        if(!email){ setMsg('Enter your email.', true); return; }
+        await sb.auth.resetPasswordForEmail(email);
+        pendingEmail = email;
+        showStep('recoverycode');
+        setMsg('If an account exists for this email, we sent a 6-digit code.');
+      }
+      else if(step === 'recoverycode'){
+        if(!/^\d{6}$/.test(code)){ setMsg('Enter the 6-digit code from the email.', true); return; }
+        const r = await sb.auth.verifyOtp({ email: pendingEmail, token: code, type: 'recovery' });
+        if(r.error){ setMsg('That code is wrong or has expired. Request a new one.', true); return; }
+        showStep('newpw');
+        setMsg('Choose a new password.');
+      }
+      else if(step === 'newpw'){
+        if(newpw.length < 8){ setMsg('Use at least 8 characters.', true); return; }
+        const r = await sb.auth.updateUser({ password: newpw });
+        if(r.error){ setMsg('We could not save the password. Please try again.', true); return; }
+        resetLogin(); closeLogin(); await refreshSession();
+      }
+    } catch(err){
+      setMsg('Something went wrong. Please try again.', true);
+    } finally {
+      authSubmit.disabled = false;
+    }
+  });
+
   pwToggle.addEventListener('click', function(){
     const show = pwInput.type === 'password';
     pwInput.type = show ? 'text' : 'password';
     pwToggle.textContent = show ? 'Hide' : 'Show';
     pwToggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
   });
+
+  refreshSession();
 
   /* ---------- UTM TRACKING ---------- */
   const params = new URLSearchParams(window.location.search);
