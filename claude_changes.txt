@@ -612,6 +612,22 @@
   .bi-steps span{flex:1; height:4px; border-radius:2px; background:var(--hairline);}
   .bi-steps span.on{background:var(--cyan);}
   .bi-next{font-size:0.82rem; color:var(--lo-dim);}
+  .seo-form{display:flex; flex-direction:column; gap:16px; max-width:820px;}
+  .seo-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:14px;}
+  .seo-field{display:flex; flex-direction:column; gap:6px;}
+  .seo-field label{font-size:0.78rem; color:var(--lo-dim); font-family:'JetBrains Mono',monospace;}
+  .seo-field input{width:100%; box-sizing:border-box; background:var(--bg-2); border:1px solid var(--hairline-hi); color:var(--hi); border-radius:10px; padding:10px 12px; font:inherit; font-size:16px;}
+  .seo-note, .seo-msg{font-size:0.82rem; color:var(--lo-dim); margin:0;}
+  .seo-msg.error{color:#FF7A7A;}
+  .seo-result{margin-top:28px; max-width:820px; border:1px solid var(--hairline-hi); border-radius:16px; padding:24px; background:var(--glass);}
+  .seo-score{font-size:2.4rem; font-weight:700; color:var(--hi);}
+  .seo-row{display:grid; grid-template-columns:auto 1fr; gap:6px 14px; padding:12px 0; border-top:1px solid var(--hairline); align-items:start;}
+  .seo-row strong{color:var(--hi); font-weight:600; font-size:0.95rem;}
+  .seo-row p{margin:4px 0 0; color:var(--lo); font-size:0.88rem; font-weight:300; line-height:1.5;}
+  .seo-tag{font-family:'JetBrains Mono',monospace; font-size:0.7rem; padding:4px 10px; border-radius:999px; border:1px solid var(--hairline-hi); color:var(--lo);}
+  .seo-tag.pass{color:#7CFFB2;}
+  .seo-tag.warn{color:#FFD27A;}
+  .seo-tag.fail{color:#FF7A7A;}
   .modal .field textarea, .acc-form textarea{width:100%; box-sizing:border-box; background:var(--bg-2); border:1px solid var(--hairline-hi); color:var(--hi); border-radius:10px; padding:10px 12px; font:inherit; font-size:16px; resize:vertical;}
   .acc-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:18px; margin-bottom:18px;}
   .acc-card{border:1px solid var(--hairline-hi); border-radius:16px; padding:20px; background:var(--glass); display:flex; flex-direction:column; gap:10px; min-width:0;}
@@ -1028,6 +1044,26 @@
           <p class="budget-summary" id="budgetSummary"></p>
           <a href="#footer" class="btn-ghost" data-route="home" data-anchor="footer">Get an exact plan →</a>
         </div>
+      </div>
+    </section>
+
+    <section id="seo-check">
+      <div class="wrap">
+        <span class="eyebrow">Free check</span>
+        <h2 style="font-size:clamp(1.8rem,3.4vw,2.5rem); font-weight:700; letter-spacing:-0.02em; margin-bottom:14px;">How does your website score?</h2>
+        <p style="color:var(--lo); font-size:1.02rem; font-weight:300; max-width:60ch; margin-bottom:32px;">A quick automated check of your homepage: secure connection, title, description, mobile setup, images and load time. It takes a few seconds. It is not a full audit or a plan.</p>
+        <form class="seo-form" id="seoForm" novalidate>
+          <div class="seo-grid">
+            <div class="seo-field"><label for="seoUrl">Your website</label><input id="seoUrl" type="text" placeholder="yourbusiness.com" maxlength="300" autocomplete="url" required></div>
+            <div class="seo-field"><label for="seoName">Your name (optional)</label><input id="seoName" type="text" maxlength="100" autocomplete="name"></div>
+            <div class="seo-field"><label for="seoEmail">Email</label><input id="seoEmail" type="email" maxlength="200" autocomplete="email" required></div>
+          </div>
+          <input type="text" id="seoWebsite" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;">
+          <p class="seo-note">Our team may contact you about this result at this email. We do not send marketing emails from this check.</p>
+          <button type="submit" class="btn-primary" id="seoRun">Run free check</button>
+          <p class="seo-msg" id="seoMsg" role="status" aria-live="polite"></p>
+        </form>
+        <div id="seoResult" hidden></div>
       </div>
     </section>
 
@@ -2420,6 +2456,80 @@
   priceEls.service.forEach(function(el){ capturePriceBase(el, true); });
 
   /* ---------- BUDGET FIT TOOL ---------- */
+  /* ---------- FREE SEO CHECK (calls /api/audit; the team is emailed, the customer sees the result here) ---------- */
+(function(){
+  const form = document.getElementById('seoForm');
+  if(!form) return;
+  const loadedAt = Date.now();
+  const msg = document.getElementById('seoMsg');
+  const out = document.getElementById('seoResult');
+  const btn = document.getElementById('seoRun');
+  const STATUS = { pass: 'Pass', warn: 'Check', fail: 'Fix' };
+  function show(text, isError){ msg.textContent = text; msg.classList.toggle('error', !!isError); }
+  function render(report){
+    out.textContent = '';
+    const card = document.createElement('div');
+    card.className = 'seo-result';
+    const score = document.createElement('div');
+    score.className = 'seo-score';
+    score.textContent = report.score + ' / 100';
+    card.appendChild(score);
+    const checked = document.createElement('p');
+    checked.style.color = 'var(--lo)';
+    checked.textContent = 'Checked: ' + report.url;
+    card.appendChild(checked);
+    report.checks.forEach(function(c){
+      const row = document.createElement('div');
+      row.className = 'seo-row';
+      const tag = document.createElement('span');
+      tag.className = 'seo-tag ' + c.status;
+      tag.textContent = STATUS[c.status] || c.status;
+      const text = document.createElement('div');
+      const label = document.createElement('strong');
+      label.textContent = c.label;
+      const note = document.createElement('p');
+      note.textContent = c.note;
+      text.appendChild(label);
+      text.appendChild(note);
+      row.appendChild(tag);
+      row.appendChild(text);
+      card.appendChild(row);
+    });
+    const notice = document.createElement('p');
+    notice.className = 'seo-note';
+    notice.style.marginTop = '14px';
+    notice.textContent = report.notice;
+    card.appendChild(notice);
+    out.appendChild(card);
+    out.hidden = false;
+  }
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const url = document.getElementById('seoUrl').value.trim();
+    const email = document.getElementById('seoEmail').value.trim();
+    const name = document.getElementById('seoName').value.trim();
+    if(!url || !email){ show('Enter your website and email.', true); return; }
+    btn.disabled = true;
+    out.hidden = true;
+    show('Checking your website. This takes a few seconds...');
+    try{
+      const res = await fetch('/api/audit', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ url: url, email: email, name: name, website: document.getElementById('seoWebsite').value, elapsed: Date.now() - loadedAt })
+      });
+      const data = await res.json().catch(function(){ return {}; });
+      if(!res.ok){ show(data.message || 'Something went wrong. Please try again.', true); return; }
+      show('');
+      render(data);
+    }catch(err){
+      show('Could not reach the check service. Check your connection and try again.', true);
+    }finally{
+      btn.disabled = false;
+    }
+  });
+})();
+
   const budgetSlider = document.getElementById('budgetSlider');
   const budgetValueEl = document.getElementById('budgetValue');
   const budgetResultsEl = document.getElementById('budgetResults');

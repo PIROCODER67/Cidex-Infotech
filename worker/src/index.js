@@ -1,3 +1,4 @@
+import { handleAudit } from './seo_audit.js';
 // CIDEX INFOTECH - Cloudflare Worker: chat endpoint, price endpoint, static site.
 // Secrets: OPENAI_API_KEY (set with `wrangler secret put OPENAI_API_KEY`). Never put the key in this file.
 import { SERVICES, estimate, cleanAnswers, missingFields, RULE_VERSION, CONTACT, TEAM_THRESHOLD_INR } from './pricing.js';
@@ -260,6 +261,7 @@ export default {
     if (url.pathname === '/api/chat' && request.method === 'POST') return handleChat(request, env);
     if (url.pathname === '/api/advisor' && request.method === 'POST') return handleAdvisor(request, env);
     if (url.pathname === '/api/estimate' && request.method === 'POST') return handleEstimate(request, env);
+    if (url.pathname === '/api/audit' && request.method === 'POST') return handleAudit(request, env);
     if (url.pathname.startsWith('/api/')) return json({ error: 'not_found' }, 404);
     if (env.ASSETS) return env.ASSETS.fetch(request);
     return new Response('Not found', { status: 404 });

@@ -63,9 +63,27 @@ function markRepliedFromGmail() {
   });
 }
 
+/* 3. Email the team about each new free website check */
+function notifyNewAudits() {
+  const rows = sbRequest_('GET',
+    '/audit_requests?notified=eq.false&select=id,url,name,email,score,result,created_at&order=created_at.asc&limit=50');
+  rows.forEach(function (a) {
+    const lines = ((a.result && a.result.checks) || []).map(function (c) {
+      return '- [' + c.status + '] ' + c.label + ': ' + c.note;
+    }).join('\n');
+    GmailApp.sendEmail(TEAM_EMAIL,
+      'New website check: ' + a.url + ' (score ' + a.score + ')',
+      'Name: ' + (a.name || '-') + '\nEmail: ' + a.email + '\nWebsite: ' + a.url + '\nScore: ' + a.score + '/100\n\n' +
+      lines + '\n\nFollow up by email or WhatsApp.\nReceived: ' + a.created_at
+    );
+    sbRequest_('PATCH', '/audit_requests?id=eq.' + encodeURIComponent(a.id), { notified: true });
+  });
+}
+
 /* Run once from the Apps Script editor to create the 5-minute triggers. */
 function setupTriggers() {
   ScriptApp.getProjectTriggers().forEach(function (t) { ScriptApp.deleteTrigger(t); });
   ScriptApp.newTrigger('notifyNewMessages').timeBased().everyMinutes(5).create();
   ScriptApp.newTrigger('markRepliedFromGmail').timeBased().everyMinutes(5).create();
+  ScriptApp.newTrigger('notifyNewAudits').timeBased().everyMinutes(5).create();
 }
