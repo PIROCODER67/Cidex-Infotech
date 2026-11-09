@@ -37,7 +37,8 @@ const pageCss = `
 `;
 
 function page(ind) {
-  const note = ind.note ? `<aside class="ind-note">${esc(ind.note)}</aside>` : '';
+  // Internal review notes (ind.note) stay in industries.json and are never published.
+  const note = '';
   const proof = ind.proof.length ? `<section><h2>Why trust us</h2><ul class="ind-list">${li(ind.proof)}</ul></section>` : '';
   const waText = encodeURIComponent(`Hi CIDEX, I would like to talk about ${ind.name.toLowerCase()}.`);
   return `<!doctype html>
