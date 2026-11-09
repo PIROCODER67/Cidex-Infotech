@@ -1,0 +1,379 @@
+CIDEX INFOTECH - INDUSTRY PAGES: QUESTIONNAIRE (EDITED)
+=======================================================
+
+HOW TO READ THIS FILE
+- Each question is answered from the customer's point of view: what the person facing the problem is going through.
+- Your answers are kept in your meaning. Wording is tidied so the page writer can use it.
+- [CHANGED] = I reworded or removed something. Check it still says what you meant.
+- [CHECK]   = needs real proof, a rule check, or consent before it goes on the site.
+- [ADDED]   = my suggestion, not from you. Keep, change or delete.
+- Q7 is new in every block: what we must NOT say. This protects you from ad and professional-rule problems.
+- Do not invent numbers, results or testimonials. Prices come from the price list, not from this file.
+
+IMPORTANT BEFORE PUBLISHING
+- Doctors, dentists, lawyers and chartered accountants in India have advertising rules from their councils (NMC/Dental Council, Bar Council of India, ICAI). A professional should check those pages before they go live.
+- Any AI that looks at a photo and judges a condition is medical. It can collect information for a doctor to review, but it must not diagnose or recommend medicine.
+
+
+1. CLINICS AND DOCTORS (general practice)
+   Q1. Who is the customer who finds you online?
+       Answer: A person with an infection or an injury, or someone worried about their health who wants to know who to see and how soon.
+       [CHANGED] Removed "find out what disease it is and what medicines to take". A website must not diagnose or recommend medicine.
+   Q2. What is their biggest problem before they contact you?
+       Answer: They need help quickly, but it is hard to find a trusted doctor, and they often end up in long queues or on waiting lists.
+   Q3. What do they ask for first?
+       Answer: When is the doctor free? Can I get a checkup today or this week? How do I book?
+   Q4. What worries them before they book?
+       Answer: Distance, trust and waiting time. For routine tests, they also worry about cost.
+   Q5. What real proof can you show?
+       Answer: Years of experience, facility location, number of patients served [CHECK: real numbers only], patient feedback [CHECK: with permission], photos after treatment [CHECK: only with patient consent; medical advertising rules apply].
+   Q6. Which service should this page lead with?
+       Answer: A website with clear proof and fast replies, plus online appointment booking and patient records [ADDED].
+   Q7. [ADDED] What must we NOT say?
+       Answer: That we diagnose or cure online, that we recommend medicines, or any guaranteed result.
+
+
+2. DENTAL CLINICS
+   Q1. Who is the customer who finds you online?
+       Answer: Someone who needs a routine checkup, has a cavity or a broken tooth, has a jaw injury, or wants to know why their teeth are yellowing.
+   Q2. What is their biggest problem before they contact you?
+       Answer: Distance. They want a face-to-face checkup with the dentist, to feel comfortable and to explain their diet and brushing habits.
+   Q3. Which treatments do they search for most?
+       Answer: Routine cleaning, tooth fillings, dental implants, braces, oral surgery.
+   Q4. What worries them before booking?
+       Answer: The appearance of the result, and the fear of pain. They prefer to visit in person rather than message.
+   Q5. What real proof can you show?
+       Answer: Equipment, dentist qualifications, experience, and reviews [CHECK: do not ask only happy patients to review].
+   Q6. Which service should this page lead with?
+       Answer: SEO, automated appointment booking [ADDED], and a photo intake tool.
+       [CHANGED] The AI that judges a photo and rates how critical the problem is cannot be presented as a diagnosis. Change it to: the patient sends photos and symptoms, and the dentist reviews them and decides the next step. Books an appointment if the dentist asks.
+   Q7. [ADDED] What must we NOT say?
+       Answer: "AI diagnoses your teeth", "painless treatment", or any guaranteed result.
+
+
+3. RESTAURANTS AND CAFES
+   Q1. Who is the customer who finds you online?
+       Answer: Tourists, families, and locals looking for a new experience. Busy during festivals and when big crowds visit the city.
+   Q2. What is the biggest problem?
+       Answer: Few reviews after delivery, empty tables, and doubts about whether the food is good and what goes into it.
+   Q3. What do they ask before visiting?
+       Answer: The menu and prices, ingredients and what a plate contains, delivery and takeaway, and sometimes table booking.
+   Q4. Do you use Zomato or Swiggy? Which matters most?
+       Answer: Yes. Their drawbacks are low margins and losing direct customers. We prefer customers who come to the tables.
+   Q5. What would you change first?
+       Answer: More visitors, more online orders, and more and better reviews.
+   Q6. Which service should this page lead with?
+       Answer: Review collection. After a bill, the customer gets a thank-you message with a 1 to 5 star rating button, which updates the live site automatically.
+       [CHECK] Ask every customer, not only happy ones. Filtering who gets asked to review is against Google's review rules.
+       [ADDED] An ingredients and menu page.
+   Q7. [ADDED] What must we NOT say?
+       Answer: Fake or bought reviews, or "best in town" without proof.
+
+
+4. HOTELS AND GUEST HOUSES
+   Q1. Who are your typical guests?
+       Answer: Tourists, business travellers, school groups, and some leisure guests.
+   Q2. What is the biggest problem before a guest books?
+       Answer: Comparing prices, and not knowing what kind of room they will get.
+   Q3. Which booking channels do you use today?
+       Answer: Our own website, online travel agents (OTAs), and walk-ins.
+   Q4. What do guests ask most before booking?
+       Answer: Check-in and check-out timings, price, extra services, and the exact location.
+   Q5. What real proof can you show?
+       Answer: Ratings, awards [CHECK: only if real and listed], room photos, repeat guests, and occupancy [CHECK: share only if you are comfortable].
+   Q6. Which service should this page lead with?
+       Answer: Reaching more guests, a website that shows room types and proof, and an AI booking assistant on our site [ADDED]. OTA assistants only if the OTA allows it.
+   Q7. [ADDED] What must we NOT say?
+       Answer: "Lowest price", or guaranteed availability unless it comes from your live booking system.
+
+
+5. SALONS AND SPAS
+   Q1. Who are your typical clients?
+       Answer: Men, often middle-aged, teenagers, and local people. [CHECK: is the salon for men and the spa or parlour for women? Please confirm.]
+   Q2. What is the biggest problem?
+       Answer: Few walk-ins, slow seasons, and few bookings. Some women only visit twice a year, around festivals.
+   Q3. What do clients ask for most?
+       Answer: Prices, when a stylist is free, offers, and whether a particular haircut is available.
+   Q4. Which social platform brings the most clients?
+       Answer: Instagram when a reel goes viral. Google Maps brings most local people, but its effect is smaller than we would like.
+   Q5. What real proof can you show?
+       Answer: Before-and-after photos, reviews, certifications, and hygiene standards.
+   Q6. Which service should this page lead with?
+       Answer: Ads, messages to registered customers about offers [CHECK: only to people who agreed to receive them], and a live "is a stylist free now?" display.
+   Q7. [ADDED] What must we NOT say?
+       Answer: "100% safe products", or results promises for treatments.
+
+
+6. GYMS AND FITNESS STUDIOS
+   Q1. Who joins you?
+       Answer: Beginners and regular members of all ages. [CHANGED: "old people are negligible" removed. If you want to target one group, tell us which.]
+   Q2. What is the biggest problem?
+       Answer: Trial visitors who don't join, members who quit after two or three months, and few trainer subscriptions.
+   Q3. What do people ask before they join?
+       Answer: Fees, trainers, trial sessions, and equipment.
+   Q4. What worries them before joining?
+       Answer: Cost, results, lack of time, commitment, and feeling judged or bullied at the gym.
+   Q5. What real proof can you show?
+       Answer: Committed members (with permission), equipment, planned schedules and diets, trainer certificates, and member stories (with permission).
+   Q6. Which service should this page lead with?
+       Answer: An AI assistant that sends gym timings and workout reminders, plus motivational messages and updates to custom plans.
+       [CHECK] Diet plans must be checked by a qualified dietitian or trainer before the member follows them.
+   Q7. [ADDED] What must we NOT say?
+       Answer: Weight loss in a set number of days, or any guaranteed result.
+
+
+7. COACHING INSTITUTES AND TUITION
+   Q1. Who are your students and parents?
+       Answer: Mainly students in classes 10, 12 and middle school, mostly from the local district. [CHECK: "not much localised" means what? Confirm the area.]
+   Q2. What is the biggest problem?
+       Answer: Admissions fall at peak exam time. Few enquiries, few admissions, and a shortage of specialist teachers.
+   Q3. What do parents ask first?
+       Answer: Fees, batch timings, teacher-to-student ratio, and teacher qualifications. Parents also ask for improvement guarantees. [CHANGED: we do not promise guaranteed results on the site.]
+   Q4. What worries parents?
+       Answer: Safety, whether the student is focused or wasting time, and results.
+   Q5. What real proof can you show?
+       Answer: Results (with permission), teacher qualifications, batch size, and teacher-to-student ratio.
+   Q6. Which service should this page lead with?
+       Answer: A teacher hiring page where new teachers apply online and book interviews [CHANGED: "automated hiring scheme which is o google" is unclear. Confirm whether you mean Google Forms]. WhatsApp worksheets and reminders for each student. An AI doubt assistant that passes unsolved doubts to teachers.
+   Q7. [ADDED] What must we NOT say?
+       Answer: "Guaranteed marks", or "top results" without proof.
+
+
+8. SCHOOLS AND PLAYSCHOOLS
+   Q1. Who are the parents who choose you?
+       Answer: Parents by area and income level, with one or more children. They care about infrastructure, brand and popularity.
+   Q2. What is the biggest problem?
+       Answer: A weak online presence, competition from better-funded schools, and the rush of the admission season.
+   Q3. What do parents ask before visiting?
+       Answer: Fees, curriculum, infrastructure, transport safety, and teachers.
+   Q4. What worries parents most?
+       Answer: Poor results, and how their child will settle into the school.
+   Q5. What real proof can you show?
+       Answer: Accreditation, facilities, labs, and photos (with permission). [CHECK: "placements", "top results" and "India's top service men from our school" need a clear, verifiable fact, or remove them.]
+   Q6. Which service should this page lead with?
+       Answer: The same as the coaching institutes page. [ADDED] Tell us if you want a different angle for schools.
+   Q7. [ADDED] What must we NOT say?
+       Answer: "Best school in the city" without proof, or any ranking that does not come from a recognised source.
+
+
+9. REAL ESTATE AGENTS AND BROKERS
+   Q1. Who are your typical buyers or tenants?
+       Answer: First-time buyers and investors, mainly NRIs.
+   Q2. What is the biggest problem?
+       Answer: Buyers do not trust agents and want to talk directly to the owner. Listings get too few views.
+   Q3. Which areas or property types do you focus on?
+       Answer: Commercial, residential, and open land.
+   Q4. What do buyers ask first?
+       Answer: Size, possession date, location, price, and documents. They also ask whether the property or owner has legal disputes or pending cases. [CHANGED: we cannot verify legal title on the website. The page should say buyers should ask for documents and a title check by a lawyer.]
+   Q5. What real proof can you show?
+       Answer: Deals closed [CHECK: give the real count], active listings, years in the area, reviews, and photos of properties bought (with permission).
+   Q6. Which service should this page lead with?
+       Answer: Listings with better reach, SEO, advertising, and managing buyer enquiries.
+   Q7. [ADDED] What must we NOT say?
+       Answer: "No legal disputes" or "fully verified", unless you have checked the documents yourself.
+
+
+10. BUILDERS AND CONTRACTORS
+    Q1. Who are your typical clients?
+        Answer: Homeowners, developers, businesses, content creators, and shop owners opening new branches.
+    Q2. What is the biggest problem?
+        Answer: Price shopping, doubts about whether we will meet expectations, and doubts about the materials used.
+    Q3. What do clients ask first?
+        Answer: Cost per square foot, timelines, the quality of materials we plan to use, and past work.
+    Q4. What worries clients?
+        Answer: Quality, hidden costs, delays, and whether the price is fair for the value.
+    Q5. What real proof can you show?
+        Answer: Certifications, awards [CHECK: only if real], photos of completed projects, and the number of completed projects [CHECK].
+    Q6. Which service should this page lead with?
+        Answer: Social media for projects, blueprint and drawing management, meeting notifications, and site staff management. [CHANGED: "staff control regulator" is unclear. Please explain.]
+    Q7. [ADDED] What must we NOT say?
+        Answer: "No delays", or a fixed final cost before a site visit.
+
+
+11. INTERIOR DESIGNERS
+    Q1. Who are your typical clients?
+        Answer: Homeowners, offices, restaurants, builders, and content creators.
+    Q2. What is the biggest problem?
+        Answer: Their portfolio does not reach the right people. Clients think prices are too high, and they need examples to see before they trust us.
+    Q3. What do clients ask before hiring?
+        Answer: Budget, style, timeline, materials, process, and deadline.
+    Q4. What worries clients?
+        Answer: Budget overrun, delays, design that does not fit the space, expectations, and quality.
+    Q5. What real proof can you show?
+        Answer: Photos of completed projects (with permission), and the number of projects by type and theme [CHECK: give real numbers].
+    Q6. Which service should this page lead with?
+        Answer: Budget planning, design planning, and a gallery of examples sorted by style and budget.
+    Q7. [ADDED] What must we NOT say?
+        Answer: A fixed final cost or delivery date before the brief is agreed.
+
+
+12. LAWYERS AND LEGAL PRACTICES
+    Q1. Who are your typical clients?
+        Answer: Individuals, civil cases, businesses (corporate law), and criminal cases.
+    Q2. What is the biggest problem?
+        Answer: People consult the wrong type of lawyer, or choose lawyers with big titles for small tasks they cannot afford.
+    Q3. Which practice areas do you want to be found for?
+        Answer: Drafting and checking privacy policies and terms, litigation, and settling disputes without going to court.
+    Q4. What do clients ask first?
+        Answer: Fees, documents needed, what to do next, how long it takes, and whether there are other options.
+    Q5. What must we avoid saying?
+        Answer: Legal advice through the website, guaranteed outcomes, and fixed timelines.
+    Q6. Which service should this page lead with?
+        Answer: A way to find the right lawyer for the case type, a confidential enquiry form, and a list of the documents needed.
+    Q7. [CHECK - IMPORTANT] Advertising by advocates is limited by Bar Council of India rules. A lawyer must check every line of this page before it is published.
+
+
+13. CHARTERED ACCOUNTANTS AND TAX CONSULTANTS
+    Q1. Who are your typical clients?
+        Answer: Freelancers, salaried people, small businesses, and individuals who want a contract checked.
+    Q2. What is the biggest problem?
+        Answer: Missed deadlines, not knowing what to file, and not giving enough records on time.
+    Q3. What services do clients ask for most?
+        Answer: GST, audit, company setup, reviewing filings and tax records, returns, and policies.
+    Q4. What worries clients?
+        Answer: Fees, penalties, data safety, and deadlines.
+    Q5. What real proof can you show?
+        Answer: Qualifications, years of practice, and client types. [CHECK: "huge clients served" needs a real number, or remove it.]
+    Q6. Which service should this page lead with?
+        Answer: A data-privacy page, deadline reminders, and secure document upload [ADDED].
+    Q7. [CHECK] Chartered accountants' advertising is governed by ICAI rules. Check the page against them before publishing.
+
+
+14. LOCAL RETAIL SHOPS
+    Q1. Who buys from you?
+        Answer: Locals, apartment residents, office workers, families, and street vendors.
+    Q2. What is the biggest problem?
+        Answer: Footfall is falling, and customers do not know our timings or what stock we have.
+    Q3. What do people ask before visiting?
+        Answer: Timings, price, stock, and location.
+    Q4. Are you on Google Maps and Instagram?
+        Answer: Google Maps, yes, but returns are small. We are not active on Instagram as a business.
+    Q5. What real proof can you show?
+        Answer: Years in the area, reviews, genuine products, and photos of the shelves.
+    Q6. Which service should this page lead with?
+        Answer: A site that shows customers the stock and timings, plus a Google Maps setup [ADDED].
+    Q7. [ADDED] What must we NOT say?
+        Answer: Anything about stock that is not kept up to date.
+
+
+15. ONLINE SELLERS AND E-COMMERCE BRANDS
+    Q1. What do you sell and who buys it?
+        Answer: Gen Z buyers in metro cities, and more buyers in rural areas. We have no system to track repeat buyers yet.
+    Q2. What is the biggest problem?
+        Answer: Ad costs, competition, low conversion, high marketplace commissions, and stock management.
+    Q3. Which platforms do you sell on?
+        Answer: All of them.
+    Q4. What do buyers ask before purchase?
+        Answer: Return policy, delivery time, available sizes, and authenticity.
+    Q5. What real proof can you show?
+        Answer: Reviews, sales [CHECK: only if you are happy to share], and return rate.
+    Q6. Which service should this page lead with?
+        Answer: Ads, a website, a customer tracker for repeat buyers, and stock reminders.
+    Q7. [ADDED] What must we NOT say?
+        Answer: "Lowest price in the market" unless you have checked it.
+
+
+16. MANUFACTURERS AND B2B SUPPLIERS
+    Q1. Who are your buyers?
+        Answer: Distributors, exporters, contractors, and direct businesses.
+    Q2. What is the biggest problem?
+        Answer: Few leads, no proper way to impress visitors, and competitors reach buyers first.
+    Q3. What do buyers ask before ordering?
+        Answer: Lead times, certifications, deadlines, order details, and a price estimate.
+    Q4. What worries buyers?
+        Answer: Quality, delivery, price changes from inflation, and privacy of their order details.
+    Q5. What real proof can you show?
+        Answer: Client names (with permission), reviews, and certifications.
+    Q6. Which service should this page lead with?
+        Answer: Strategy, SEO, ads, and lead generation.
+    Q7. [ADDED] What must we NOT say?
+        Answer: Certifications you do not hold.
+
+
+17. EVENT PLANNERS
+    Q1. What events do you plan?
+        Answer: Weddings, corporate events, parties, birthdays, launches, and private functions.
+    Q2. What is the biggest problem?
+        Answer: Enquiries from clients whose budgets are too low for their plans, slow seasons, and clients unhappy with the setup they got elsewhere.
+    Q3. What do clients ask first?
+        Answer: Packages, venues, timings, what is included, how long it takes to arrange, and the budget needed.
+    Q4. What worries clients?
+        Answer: Vendor quality, overspending, and whether the money is worth it.
+    Q5. What real proof can you show?
+        Answer: Photos of events (with permission), and named big events [CHECK].
+    Q6. Which service should this page lead with?
+        Answer: Package pages with clear prices, a vendor price comparison [CHANGED: only with vendors who agree to list their rates], and a guide to current market prices.
+    Q7. [ADDED] What must we NOT say?
+        Answer: Fixed prices from vendors who have not confirmed them.
+
+
+18. PHOTOGRAPHERS AND VIDEOGRAPHERS
+    Q1. Who are your clients?
+        Answer: Weddings, brands, families, real estate, and wildlife.
+    Q2. What is the biggest problem?
+        Answer: The portfolio does not reach the right clients.
+    Q3. What do clients ask first?
+        Answer: Packages, delivery time, style, and the equipment used.
+    Q4. What worries clients?
+        Answer: Quality, editing, and delivery delays.
+    Q5. What real proof can you show?
+        Answer: Portfolio links, past clients (with permission), and our best photos.
+    Q6. Which service should this page lead with?
+        Answer: [ADDED] Your answer was skipped. Suggestion: a portfolio site sorted by category (weddings, brands, real estate) with an enquiry form. Keep or change.
+    Q7. [ADDED] What must we NOT say?
+        Answer: Delivery dates that you cannot meet.
+
+
+19. TRAVEL AGENCIES AND TOUR OPERATORS
+    Q1. Who are your travellers?
+        Answer: Families, couples, groups, corporate clients, school trips, and foreign tourists.
+    Q2. What is the biggest problem?
+        Answer: Customers compare many agencies, and enquiries come before the venues and food are finalised.
+    Q3. Which destinations or tour types sell best?
+        Answer: Beaches and mountains.
+    Q4. What do travellers ask first?
+        Answer: Itinerary, safety, what is included, cancellation policy, and budget.
+    Q5. What real proof can you show?
+        Answer: Licences, years of operation, reviews, and the number of tours run to each destination [CHECK].
+    Q6. Which service should this page lead with?
+        Answer: Itinerary planning, pre-planned tours, and a hotel price comparison for destinations we do not partner with.
+    Q7. [CHECK] What must we NOT say?
+        Answer: Safety guarantees, or inclusions that depend on vendors we do not control.
+
+
+20. AUTO GARAGES AND SERVICE CENTRES
+    Q1. Who are your customers?
+        Answer: Car owners and two-wheeler owners.
+    Q2. What is the biggest problem?
+        Answer: Vehicles are not coming in. Some customers are unwilling to pay, and they choose big brands.
+    Q3. What do customers ask before visiting?
+        Answer: Price, time, pickup, and warranty.
+    Q4. What worries them?
+        Answer: Overcharging, delays, quality of service, and whether they will get genuine parts or cheap copies. [CHANGED: "stealth of parts" read as "stealing"? Please confirm.]
+    Q5. What real proof can you show?
+        Answer: Years in business, and reviews. [ADDED] Certifications, if you have any.
+    Q6. Which service should this page lead with?
+        Answer: [ADDED] Your answer was skipped. Suggestion: online booking, WhatsApp service reminders, and a parts page that explains what is genuine and what is replaced. Keep or change.
+    Q7. [ADDED] What must we NOT say?
+        Answer: "Lowest price", or "genuine parts only" unless it is true and you can show invoices.
+
+
+21. ANY OTHER INDUSTRY (add your own)
+    Name of industry:
+    Q1. Who are your typical customers?
+        Answer:
+    Q2. What is their biggest problem before contacting you?
+        Answer:
+    Q3. What do they ask for first?
+        Answer:
+    Q4. What worries them?
+        Answer:
+    Q5. What real proof can you show?
+        Answer:
+    Q6. Which service should this page lead with?
+        Answer:
+    Q7. What must we NOT say?
+        Answer:
+
+
+END. Keep this file with your team's notes. The page writer will use the [CHECK] items before anything is published.
