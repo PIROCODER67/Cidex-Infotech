@@ -612,6 +612,11 @@
   .bi-steps span{flex:1; height:4px; border-radius:2px; background:var(--hairline);}
   .bi-steps span.on{background:var(--cyan);}
   .bi-next{font-size:0.82rem; color:var(--lo-dim);}
+  .ind-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:14px; margin-top:28px;}
+  .ind-card{display:flex; flex-direction:column; gap:6px; padding:18px; border:1px solid var(--hairline-hi); border-radius:14px; background:var(--glass); text-decoration:none; color:var(--lo);}
+  .ind-card strong{color:var(--hi); font-size:1rem; font-weight:600;}
+  .ind-card span{font-size:0.86rem; font-weight:300; line-height:1.5;}
+  .ind-card:hover{border-color:var(--cyan);}
   .seo-form{display:flex; flex-direction:column; gap:16px; max-width:820px;}
   .seo-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:14px;}
   .seo-field{display:flex; flex-direction:column; gap:6px;}
@@ -1026,6 +1031,37 @@
       </div>
     </section>
 
+    <!-- INDUSTRIES:START -->
+    <section id="industries">
+      <div class="wrap">
+        <span class="eyebrow">Industries</span>
+        <h2 style="font-size:clamp(1.8rem,3.4vw,2.5rem); font-weight:700; letter-spacing:-0.02em; margin-bottom:14px;">Built for your industry</h2>
+        <p style="color:var(--lo); font-size:1.02rem; font-weight:300; max-width:60ch;">Pick your business to see the problems we solve and how we would help.</p>
+        <div class="ind-grid">
+        <a class="ind-card" href="/industries/clinics-general-practice.html"><strong>General practice clinics</strong><span>Clear answers and easier appointments for patients</span></a>
+        <a class="ind-card" href="/industries/dental-clinics.html"><strong>Dental clinics</strong><span>Dental care you can book without the wait</span></a>
+        <a class="ind-card" href="/industries/restaurants-cafes.html"><strong>Restaurants and cafes</strong><span>More visitors, more orders, more reviews</span></a>
+        <a class="ind-card" href="/industries/hotels-guest-houses.html"><strong>Hotels and guest houses</strong><span>Guests who know exactly what they are booking</span></a>
+        <a class="ind-card" href="/industries/salons-spas.html"><strong>Salons and spas</strong><span>Fuller chairs, even in slow seasons</span></a>
+        <a class="ind-card" href="/industries/gyms-fitness-studios.html"><strong>Gyms and fitness studios</strong><span>Members who start and keep going</span></a>
+        <a class="ind-card" href="/industries/coaching-tuition.html"><strong>Coaching institutes and tuition</strong><span>Parents who trust the teaching</span></a>
+        <a class="ind-card" href="/industries/schools-playschools.html"><strong>Schools and playschools</strong><span>Parents who choose you before the admission rush</span></a>
+        <a class="ind-card" href="/industries/real-estate-brokers.html"><strong>Real estate agents and brokers</strong><span>Listings that reach the right buyers</span></a>
+        <a class="ind-card" href="/industries/builders-contractors.html"><strong>Builders and contractors</strong><span>Clients who trust the quote and the timeline</span></a>
+        <a class="ind-card" href="/industries/interior-designers.html"><strong>Interior designers</strong><span>Clients who see the style before they call</span></a>
+        <a class="ind-card" href="/industries/lawyers.html"><strong>Lawyers and legal practices</strong><span>The right lawyer for your case</span></a>
+        <a class="ind-card" href="/industries/chartered-accountants.html"><strong>Chartered accountants and tax consultants</strong><span>Deadlines handled, records in order</span></a>
+        <a class="ind-card" href="/industries/local-retail-shops.html"><strong>Local retail shops</strong><span>Customers who know you are open and what you have</span></a>
+        <a class="ind-card" href="/industries/online-sellers-ecommerce.html"><strong>Online sellers and e-commerce brands</strong><span>Lower ad costs and more repeat buyers</span></a>
+        <a class="ind-card" href="/industries/manufacturers-b2b.html"><strong>Manufacturers and B2B suppliers</strong><span>Buyers who find you first</span></a>
+        <a class="ind-card" href="/industries/event-planners.html"><strong>Event planners</strong><span>Clients with the right budget for their event</span></a>
+        <a class="ind-card" href="/industries/photographers-videographers.html"><strong>Photographers and videographers</strong><span>A portfolio the right clients can find</span></a>
+        <a class="ind-card" href="/industries/travel-agencies.html"><strong>Travel agencies and tour operators</strong><span>Clear itineraries that turn enquiries into bookings</span></a>
+        <a class="ind-card" href="/industries/auto-garages.html"><strong>Auto garages and service centres</strong><span>Vehicles booked in, customers who trust the bill</span></a>
+        </div>
+      </div>
+    </section>
+    <!-- INDUSTRIES:END -->
     <section id="budget-fit">
       <div class="wrap">
         <span class="eyebrow">Try it</span>
