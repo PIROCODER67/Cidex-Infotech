@@ -1773,7 +1773,7 @@
 
       <div id="accBody" hidden>
         <div class="sub-box" id="accNeedsProfile" hidden>
-          <p>Add your home address and details in your profile to finish setting up your account.</p>
+          <p>Add your name and details in your profile to set up your account. Your home address is optional.</p>
           <button type="button" class="btn-primary" id="accOpenProfile">Open my profile</button>
         </div>
         <p class="newsletter-msg" id="accMsg" role="status" aria-live="polite"></p>
@@ -1911,7 +1911,7 @@
         <div class="field"><label for="profState">State</label><input type="text" id="profState" autocomplete="address-level1" required></div>
         <div class="field"><label for="profCountry">Country</label><input type="text" id="profCountry" autocomplete="country-name" required></div>
       </div>
-      <div class="field"><label for="profAddress">Home address</label><textarea id="profAddress" rows="2" autocomplete="street-address" required></textarea></div>
+      <div class="field"><label for="profAddress">Home address</label><textarea id="profAddress" rows="2" autocomplete="street-address"></textarea></div>
       <fieldset class="pref-field">
         <legend>While contacting the management team, will you prefer WhatsApp, email or call?</legend>
         <label><input type="radio" name="contactPref" value="whatsapp"> WhatsApp</label>
@@ -3085,7 +3085,6 @@
     if(!p.last_name) missing.push('last name');
     if(!p.state) missing.push('state');
     if(!p.country) missing.push('country');
-    if(!p.address) missing.push('home address');
     if(missing.length){ setProfMsg('Please enter: ' + missing.join(', ') + '.', true); return; }
     if(p.phone && !/^[+0-9 ()-]{6,20}$/.test(p.phone)){ setProfMsg('The phone number can contain only digits, spaces, +, ( ), and -, and must be 6 to 20 characters. You can leave it empty.', true); return; }
     if(!p.contact_preference){ setProfMsg('Choose how you would prefer us to contact you: WhatsApp, email or call.', true); return; }
@@ -3272,7 +3271,7 @@
     const failed = res.find(function(r){ return r.error; });
     setAccMsg(failed ? explainError('load your account', failed.error) : '', !!failed);
     const profile = res[0].data && res[0].data[0];
-    $('accNeedsProfile').hidden = !!(profile && profile.address);
+    $('accNeedsProfile').hidden = !!(profile && profile.first_name);
     const orders = res[1].data || [];
     const tx = res[2].data || [];
     const msgs = res[3].data || [];
