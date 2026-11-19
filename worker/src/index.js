@@ -29,6 +29,7 @@ function display(result) {
       status: result.status,
       label: result.label,
       period: result.period,
+      scope_note: result.note || '',
       lines: result.lines.map((l) => ({ label: l.label, INR: fmtINR(l.inr), USD: fmtUSD(l.inr, rate) })),
       total: { INR: fmtINR(result.totalInr), USD: fmtUSD(result.totalInr, rate) },
       rounded: result.rounded,
@@ -83,7 +84,7 @@ Your job:
 - Find out which service the visitor is asking about and collect the answers for it. Do not recommend packages or services, and do not explain what any service includes. If the visitor asks what a service includes, say the team will explain it and give the contact details.
 - Ask the questions needed for that service. Ask one or two at a time, in plain friendly English. Do not repeat questions already answered.
 - Put the answers in the "answers" object using the exact keys below. Only use keys listed for the chosen service.
-- When all answers are known, say the estimate is shown below. Do not calculate or state any price, amount or range yourself. The system works out the price.
+- Only say the estimate is shown below when every question for the service is answered. If any question is still unanswered, ask the next one instead. Do not calculate or state any price, amount or range yourself. The system works out the price.
 
 Strict rules:
 - Never state, guess or calculate a price, amount, discount or total. Never mention ₹ or $ with a number.
@@ -107,6 +108,22 @@ Use true/false for yes/no answers, numbers for counts, and option names exactly 
 // Clow (price estimator) does not judge whether a service is needed; it sends those doubts to Aetheria.
 const NEED_DOUBT = /\b(do|does|should|would|will)\s+(i|we|my\s+\w+|our\s+\w+)\s+(really\s+)?need\b|\bneed\s+it\s+or\s+not\b|\bi\s+(will|'ll|might|may)\s+need\s+(it|this|that)\b|\b(is|are)\s+(it|this|that)\s+(necessary|needed|required|important)\b|\bshould\s+i\s+(get|buy|have|do|take)\b|\bnot\s+sure\s+(if|whether|what)\b|\bdon'?t\s+know\s+(if|whether)\b/i;
 const CLOW_REDIRECT = 'You shall talk to Aetheria first. It will clarify your doubts.';
+
+const ESTIMATE_FAIL_REPLY = `We couldn't generate your estimate right now. Your answers have been kept. Please try again, or contact our team at ${CONTACT.phone} or ${CONTACT.email}.`;
+const CLAIMS_ESTIMATE = /(estimate|quotation|quote)[^.]*\b(shown below|generated|ready|prepared|below)\b/i;
+
+// The model sometimes says the estimate is ready when answers are missing or no estimate exists.
+// The server decides: ask the next missing question, or say the estimate could not be made.
+export function guardReply(reply, service, missing, est) {
+  const claims = CLAIMS_ESTIMATE.test(reply);
+  if (missing.length) {
+    if (!claims) return reply;
+    const next = SERVICES[service].questions.find((q) => q.key === missing[0]);
+    return `Thanks, got that. ${next.question}`;
+  }
+  if (!est && claims) return ESTIMATE_FAIL_REPLY;
+  return reply;
+}
 
 async function handleChat(request, env) {
   let body;
@@ -160,11 +177,12 @@ async function handleChat(request, env) {
     }
   }
 
+  const missing = next.service ? missingFields(next.service, next.answers) : [];
   return json({
-    reply: safeReply(parsed.reply),
+    reply: guardReply(safeReply(parsed.reply), next.service, missing, est),
     state: next,
     estimate: est,
-    missing: next.service ? missingFields(next.service, next.answers) : [],
+    missing,
     ai_ready: true,
   });
 }
@@ -186,7 +204,8 @@ function advisorPrompt() {
 Your job:
 - Explain CIDEX services, using only the SERVICES GUIDE below.
 - Show what each service does for the client. For every feature you explain, give its benefit right after it, so the visitor sees both. Keep features and benefits in balance; do not list features alone.
-- When a visitor asks what they need or which service fits, follow the CIDEX MARKETING METHOD below: a relatable problem, why it matters, the service, its benefit, then one short invitation to contact the team.
+- When a visitor asks what they need or which service fits, use the CIDEX MARKETING METHOD below as a guide: a relatable problem, why it matters, the service, its benefit, then one short invitation to contact the team. Write these as natural sentences. Never print the words Problem, Consequence, Feature, Benefit or Call to action as labels.
+- If the visitor has not said what their business does, ask one question about it before recommending a service.
 - Explain delivery dates, refunds and cancellations, and late payments, using only the POLICY SUMMARY below.
 - Help a visitor see which service may fit, and say honestly when a service may not be needed yet.
 
@@ -209,6 +228,13 @@ Strict rules:
 - Do not promise rankings, results, sales, or that a project will be accepted.
 - Do not ask for payment details, passwords, or ID numbers.
 - For custom or large projects, or anything outside these guides, give the team contact: phone ${CONTACT.phone}, email ${CONTACT.email}.
+- Plain text only. Do not use markdown: no asterisks, no bold, no headings, no tables. Use simple dashes for lists.
+- Never describe the team's skills, experience, expertise or quality, and never say the team is good, reliable or expert. Say the team will confirm the right people for the project.
+- Personal, romantic, flirtatious or off-topic messages: reply in one short, friendly sentence saying you help with CIDEX services, then offer to help with a service. Do not explain at length what you are.
+- Keep replies short and to the point.
+- Social media packages: each package has one fixed monthly price that covers its limits. Say this plainly when a visitor asks about posts. Example: Advanced is a fixed price for up to 35 feed posts on up to 3 platforms, so the price is the same for 10 or 35 posts within that limit.
+- Feed posts mean static graphics, carousels and agreed feed content. Reels, videos, stories and filming are separate, and the team quotes them.
+- Basic and Growth cover 1 platform. Two platforms need Advanced or higher.
 
 ${MARKETING_GUIDE}
 
