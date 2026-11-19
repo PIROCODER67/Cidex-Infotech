@@ -875,7 +875,7 @@ body[data-curr="USD"] .pprice .p-inr{display:none;}
       </div>
       <div class="card" style="padding:26px;margin-top:18px">
         <div class="eyebrow" style="margin-bottom:14px">What subscribers receive</div>
-        <p style="color:var(--dim);font-size:13.5px;line-height:1.75;margin-bottom:10px">Subscribing is all or nothing. You receive everything listed below.</p>
+        <p style="color:var(--dim);font-size:13.5px;line-height:1.75;margin-bottom:10px">Six kinds of mail, all included.</p>
         <ul style="color:var(--dim);font-size:13.5px;line-height:1.75;padding-left:18px">
           <li><strong style="color:var(--ink)">New updates</strong>: new services, new features and news from CIDEX.</li>
           <li><strong style="color:var(--ink)">Resets</strong>: notice when a plan or offer we list is reset or changed.</li>
@@ -887,7 +887,7 @@ body[data-curr="USD"] .pprice .p-inr{display:none;}
       </div>
       <div class="card" style="padding:26px;margin-top:18px">
         <div class="eyebrow" style="margin-bottom:14px">Subscribe</div>
-        <p style="color:var(--dim);font-size:13.5px;line-height:1.75;margin-bottom:16px">Monthly note on what actually moved the needle — no filler, unsubscribe in one click.</p>
+        <p style="color:var(--dim);font-size:13.5px;line-height:1.75;margin-bottom:16px">Subscribing is all or nothing. You receive all six kinds of mail listed below.</p>
         <form id="subForm" style="display:flex;gap:12px;flex-wrap:wrap"><input class="inp" id="subEmail" type="email" placeholder="you@company.com" style="flex:1;min-width:220px"><button class="btn p" type="submit">SUBSCRIBE</button></form>
         <div class="err" id="eSub">Enter a valid email address.</div>
         <div class="okmsg" id="subOk">Subscribed. Welcome aboard.</div>
@@ -1001,7 +1001,7 @@ body[data-curr="USD"] .pprice .p-inr{display:none;}
   <div class="wrap sec" style="padding-top:clamp(74px,9vw,116px)">
     <div class="eyebrow">Review Budget</div>
     <h2 class="h2">Spend it like <span class="g">you mean it</span></h2>
-    <p class="lede">Move the sliders. Every number below recalculates live using our working benchmarks for Indian SMB accounts.</p>
+    <p class="lede">Move the sliders. Every number below recalculates live from assumed example rates (costs per thousand views, click and enquiry rates). These are illustrations, not guarantees. For real figures, use the Ad Planner with your own ad account numbers.</p>
     <div class="calcgrid">
       <div class="card" style="padding:30px">
         <div class="eyebrow" style="margin-bottom:8px">Monthly Ad Budget</div>
@@ -1186,7 +1186,7 @@ body[data-curr="USD"] .pprice .p-inr{display:none;}
       <button type="button" onclick="nav('pricing')">Full Pricing</button>
       <button type="button" onclick="nav('mail')">Contact us</button>
       <button type="button" onclick="document.getElementById('authModal').classList.add('on')">Client Login</button>
-      <button type="button" onclick="nav('subscribe')">Subscribe</button>
+      <button type="button" onclick="nav('mail');setTimeout(()=>{const f=document.getElementById('subEmail');if(f){f.scrollIntoView({behavior:'smooth',block:'center'});f.focus();}},450)">Subscribe</button>
     </div>
   </div>
   <div class="foot-legal">
@@ -1872,7 +1872,7 @@ $('#calcRandom').onclick=()=>{$('#budgetSlider').value=(Math.floor(Math.random()
 /* ═══════════════ CLOW TICKER ═══════════════ */
 function initTicker(){
   const cv=$('#clowTicker'),ctx=cv.getContext('2d');let W,H,raf,t=0;
-  const rows=['BTC 64,210 ▲','USD/INR 83.42','CPC ₹12.40 ▼','ROAS 3.8× ▲','CPM ₹184','CTR 2.9% ▲','CAC ₹410 ▼','AOV ₹3,120 ▲','LTV ₹18,900','META 4.1× ▲','GOOG 3.2× ▲','SEO +38% ▲'];
+  const rows=[];
   function size(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight}
   function frame(){t++;ctx.clearRect(0,0,W,H);ctx.font='11px JetBrains Mono, monospace';
     rows.forEach((r,i)=>{const y=((i*74+t*.32)%(H+80))-40;const x=(i%3)*(W/3)+24;
