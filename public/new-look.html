@@ -644,6 +644,12 @@ body[data-curr="USD"] .pprice .p-inr{display:none;}
 .ad-out>div{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--abyss);display:flex;flex-direction:column;gap:4px;}
 .ad-out strong{color:var(--ink);}
 .ad-out span{color:var(--dim);font-size:.88rem;}
+
+/* About, technology and showcase text (from the live site, new design styles) */
+.about-block{margin:28px 0;max-width:820px;}
+.about-block p,.about-block li{color:var(--dim);line-height:1.7;margin:10px 0;}
+.about-h{font-size:1.5rem;color:var(--ink);margin:22px 0 8px;}
+.about-block .hubname{margin-top:18px;}
 </style>
 </head>
 <body data-curr="INR">
@@ -829,6 +835,18 @@ body[data-curr="USD"] .pprice .p-inr{display:none;}
         <a class="contactcard" href="tel:+918777324473"><div class="ci">✆</div><div><div class="cl">Contact Number</div><div class="cv">+91 87773 24473</div></div></a>
         <a class="contactcard" href="https://wa.me/918777324473" target="_blank" rel="noopener"><div class="ci" style="background:rgba(46,230,168,.12);border-color:rgba(46,230,168,.3)">◉</div><div><div class="cl">WhatsApp</div><div class="cv">Chat with us</div></div></a>
         <a class="contactcard" href="mailto:CidexInfotech1@gmail.com"><div class="ci" style="background:rgba(255,45,155,.12);border-color:rgba(255,45,155,.3)">✉</div><div><div class="cl">Gmail</div><div class="cv">CidexInfotech1@gmail.com</div></div></a>
+      </div>
+      <div class="card" style="padding:26px;margin-top:18px">
+        <div class="eyebrow" style="margin-bottom:14px">What subscribers receive</div>
+        <p style="color:var(--dim);font-size:13.5px;line-height:1.75;margin-bottom:10px">Subscribing is all or nothing. You receive everything listed below.</p>
+        <ul style="color:var(--dim);font-size:13.5px;line-height:1.75;padding-left:18px">
+          <li><strong style="color:var(--ink)">New updates</strong>: new services, new features and news from CIDEX.</li>
+          <li><strong style="color:var(--ink)">Resets</strong>: notice when a plan or offer we list is reset or changed.</li>
+          <li><strong style="color:var(--ink)">Price changes</strong>: notice before our published prices change.</li>
+          <li><strong style="color:var(--ink)">Product mails</strong>: what we launch and how to use it.</li>
+          <li><strong style="color:var(--ink)">Offer mails</strong>: occasional offers and discounts.</li>
+          <li><strong style="color:var(--ink)">Other mails</strong>: other occasional announcements from the team.</li>
+        </ul>
       </div>
       <div class="card" style="padding:26px;margin-top:18px">
         <div class="eyebrow" style="margin-bottom:14px">Subscribe</div>
@@ -1045,6 +1063,10 @@ body[data-curr="USD"] .pprice .p-inr{display:none;}
   <p class="ad-msg" id="apMsg" role="status" aria-live="polite"></p>
   <p class="seo-note">Our management fee is charged separately from your ad spend. The ad platform charges the spend directly.</p>
 </div>
+</section>
+<section class="page" id="page-about">
+<div class="pg-head"><span class="pg-kicker">About</span><h2 class="pg-title">Digital work, scoped honestly.</h2></div>
+<div class="about-block"><span class="pg-kicker">Technology</span><h2 class="about-h">Intelligence that prices itself.</h2><p>Every service has clear starting prices, so you can get a real number without a sales call in between.</p><p>A fast, responsive site built around what you actually sell.</p><p>Ongoing technical, content, and keyword work.</p><p>Planning, posting, and community replies.</p><p>Campaign setup, bidding, and optimization.</p><p>Facebook &amp; Instagram campaigns, targeted and optimized.</p><p>Content, design, video, branding, email &amp; reporting — all priced.</p></div><div class="about-block"><span class="pg-kicker">Showcase</span><h2 class="about-h">Every discipline, at scale.</h2><p>Three groups, eleven services — browse by discipline or get in touch for a quote.</p><h3 class="hubname">Everything revolves around growth.</h3><p>Six channels, each with a clear price range before you commit.</p><h3 class="hubname">Marketing &amp; Ads</h3><h3 class="hubname">Built once, felt everywhere.</h3><p>Words, visuals, and video that carry the same voice across every channel you use.</p><h3 class="hubname">Content &amp; Creative</h3><h3 class="hubname">One service. Done right.</h3><p>A full responsive build, from first wireframe to launch day.</p><h3 class="hubname">Web</h3></div><div class="about-block"><span class="pg-kicker">About CIDEX</span><h2 class="about-h">Digital work, scoped honestly.</h2><p>Cidex Infotech runs on a simple idea: you shouldn&#x27;t have to sit through a sales call to find out what something costs. See the real price range, and if it&#x27;s a fit, our specialists take it from scope to launch.</p></div>
 </section>
 <section class="page" id="page-faq">
   <div class="fx"><div class="aurora a2" style="opacity:.2"></div><div class="aurora a3" style="opacity:.16"></div><div class="gridfx"></div><div class="grain"></div></div>
@@ -1271,6 +1293,7 @@ const NAVSTRUCT=[
  {id:'seo',label:'Free SEO Check',ic:'◎'},
  {id:'pricing',label:'Full Pricing',ic:'$'},
  {id:'budget',label:'Budget & Ad Planner',ic:'◔'},
+ {id:'about',label:'About & Technology',ic:'ⓘ'},
  {id:'faq',label:'FAQ',ic:'?'}
 ];
 function buildNav(){
