@@ -87,7 +87,8 @@ async function sha256Hex(text) {
 }
 
 export async function handleAudit(request, env) {
-  if (!env.SUPABASE_SERVICE_KEY) return json({ error: 'not_ready', message: 'The website check is not connected yet. Please contact the team.' }, 503);
+  // Without Supabase the check still runs; it just does not store requests or apply the daily limits.
+  const storage = Boolean(env.SUPABASE_SERVICE_KEY);
 
   let body;
   try { body = await request.json(); } catch { return json({ error: 'bad_request', message: 'Could not read the form. Please try again.' }, 400); }
@@ -114,11 +115,11 @@ export async function handleAudit(request, env) {
   };
 
   try {
-    if (await countRows(`ip_hash=eq.${ipHash}&created_at=gt.${since(1)}`) >= LIMITS.perIpPerDay)
+    if (storage && await countRows(`ip_hash=eq.${ipHash}&created_at=gt.${since(1)}`) >= LIMITS.perIpPerDay)
       return json({ error: 'limit', message: 'You have reached today\u2019s limit for the free check. Please try again tomorrow.' }, 429);
-    if (await countRows(`host=eq.${host}&created_at=gt.${since(30)}`) >= LIMITS.perSitePer30Days)
+    if (storage && await countRows(`host=eq.${host}&created_at=gt.${since(30)}`) >= LIMITS.perSitePer30Days)
       return json({ error: 'recent', message: 'This website was checked in the last 30 days. Our team has the result and may contact you.' }, 429);
-    if (await countRows(`email=eq.${encodeURIComponent(email)}&created_at=gt.${since(30)}`) >= LIMITS.perEmailPer30Days)
+    if (storage && await countRows(`email=eq.${encodeURIComponent(email)}&created_at=gt.${since(30)}`) >= LIMITS.perEmailPer30Days)
       return json({ error: 'limit', message: 'This email has reached the free check limit for this month.' }, 429);
   } catch {
     return json({ error: 'busy', message: 'The check is busy right now. Please try again in a few minutes.' }, 503);
@@ -145,6 +146,7 @@ export async function handleAudit(request, env) {
   const html = new TextDecoder().decode(buf.slice(0, MAX_BYTES));
   const report = runChecks(html, res.url || u.toString(), ms, bytes);
 
+  if (!storage) return json(report);
   const save = await fetch(`${SUPABASE_URL}/rest/v1/audit_requests`, {
     method: 'POST',
     headers: { ...sbHeaders, 'content-type': 'application/json', prefer: 'return=minimal' },

@@ -92,7 +92,7 @@ Strict rules:
 - Second-website discount: mention it only if the visitor asks about a second website, and only in brackets, e.g. "(second-website discounts may be available, confirmed by our management)". Never apply or calculate it.
 - Do not promise delivery dates, rankings, results or acceptance. Do not discuss contracts, advance payments, refunds, cancellations or late payments; say management handles these.
 - Do not ask for payment details, passwords or government ID numbers.
-- If the visitor asks for a person, or the project is custom or large, give the team contact: phone ${CONTACT.phone}, email ${CONTACT.email}.
+- If the project is custom or large, first suggest talking to Aetheria to clarify the needs. Then give the team contact: phone ${CONTACT.phone}, email ${CONTACT.email}.
 - Keep replies short.
 
 Services and their answer keys:
@@ -232,6 +232,7 @@ Strict rules:
 - Never describe the team's skills, experience, expertise or quality, and never say the team is good, reliable or expert. Say the team will confirm the right people for the project.
 - Personal, romantic, flirtatious or off-topic messages: reply in one short, friendly sentence saying you help with CIDEX services, then offer to help with a service. Do not explain at length what you are.
 - Keep replies short and to the point.
+- Price quotations and estimates are worked out by Clow. If the visitor asks for a price or quote, say: for a price, use "Ask Clow for a price" on this site.
 - Social media packages: each package has one fixed monthly price that covers its limits. Say this plainly when a visitor asks about posts. Example: Advanced is a fixed price for up to 35 feed posts on up to 3 platforms, so the price is the same for 10 or 35 posts within that limit.
 - Feed posts mean static graphics, carousels and agreed feed content. Reels, videos, stories and filming are separate, and the team quotes them.
 - Basic and Growth cover 1 platform. Two platforms need Advanced or higher.
@@ -278,6 +279,53 @@ async function handleAdvisor(request, env) {
   }
 }
 
+
+// Forms from the website (profile, mail, subscribe, account). Saved to KV when bound, emailed to the team when Resend is set.
+const SUBMIT_KINDS = ['profile', 'mail', 'subscribe', 'account', 'delete', 'chat'];
+async function handleSubmit(request, env) {
+  let body;
+  try { body = await request.json(); } catch { return json({ ok: false, message: 'Could not read the form. Please try again.' }, 400); }
+  if (body.website) return json({ ok: false, message: 'Could not send. Please try again.' }, 400);
+  const kind = SUBMIT_KINDS.includes(body.kind) ? body.kind : 'mail';
+  const clean = (v, n = 2000) => String(v ?? '').trim().slice(0, n);
+  const email = clean(body.email, 200).toLowerCase();
+  if (!['account', 'delete', 'chat'].includes(kind) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return json({ ok: false, message: 'Enter a valid email so our team can reply.' }, 400);
+  const record = {
+    kind,
+    at: new Date().toISOString(),
+    email,
+    name: clean(body.name, 200),
+    subject: clean(body.subject, 200),
+    message: clean(body.message, 4000),
+    details: body.details && typeof body.details === 'object' ? body.details : {},
+  };
+  const id = `${record.at}-${kind}-${crypto.randomUUID().slice(0, 8)}`;
+  let saved = false;
+  if (env.FORMS) {
+    try { await env.FORMS.put(id, JSON.stringify(record)); saved = true; } catch {}
+  }
+  let emailed = false;
+  if (env.RESEND_API_KEY) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          from: env.MAIL_FROM || 'CIDEX Website <onboarding@resend.dev>',
+          to: [env.TEAM_EMAIL || CONTACT.email],
+          reply_to: record.email || undefined,
+          subject: `[Website ${kind}] ${record.subject || record.name || record.email || 'New message'}`,
+          text: JSON.stringify(record, null, 2),
+        }),
+      });
+      emailed = res.ok;
+    } catch {}
+  }
+  if (!saved && !emailed) return json({ ok: false, message: 'We could not send your details right now. Please email CidexInfotech1@gmail.com or call +91 87773 24473.' }, 503);
+  return json({ ok: true, saved, emailed, message: 'Saved. Our team has your details.' });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -288,6 +336,7 @@ export default {
     if (url.pathname === '/api/advisor' && request.method === 'POST') return handleAdvisor(request, env);
     if (url.pathname === '/api/estimate' && request.method === 'POST') return handleEstimate(request, env);
     if (url.pathname === '/api/audit' && request.method === 'POST') return handleAudit(request, env);
+    if (url.pathname === '/api/submit' && request.method === 'POST') return handleSubmit(request, env);
     if (url.pathname.startsWith('/api/')) return json({ error: 'not_found' }, 404);
     if (env.ASSETS) return env.ASSETS.fetch(request);
     return new Response('Not found', { status: 404 });
