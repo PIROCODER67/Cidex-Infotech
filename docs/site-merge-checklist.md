@@ -8,11 +8,11 @@ Status: TODO / DONE. Each item is checked in a browser before it is marked DONE.
 - [ ] Hero with 3D matrix modes (Quantum Orb, Digital Architecture, Hybrid Universe) (`#hero`)
 - [ ] Currency switch USD/INR, desktop and mobile (`#currencyToggleDesktop`, `#currencyToggleMobile`)
 - [ ] Services section, 11 services with "Ask Aetheria about ..." buttons (`#svc-web` ... `#svc-video`)
-- [ ] Industries section, linking to the 22 industry pages (`#industries`, `/industries/*.html`)
+- [ ] Industries section, linking to the 20 industry pages (`#industries`, `/industries/*.html`)
 - [ ] Technology section (`#technology`), Showcase (`#showcase`), About (`#about`)
 - [ ] Ad planner and budget slider (`#ad-planner`, `#budgetSlider`, `#budgetResults`)
-- [ ] SEO checker, calls `/api/audit` (`#seo-check`, `#seoForm`, `#seoResult`)
-- [ ] Aetheria chat, calls `/api/advisor` (`#aiPanel`, `#advPanel`, `#advFab`)
+- [x] SEO checker, calls `/api/audit` (ported to new-look as page-seo) (`#seo-check`, `#seoForm`, `#seoResult`)
+- [x] Aetheria chat, calls `/api/advisor` (wired on new-look) (`#aiPanel`, `#advPanel`, `#advFab`)
 - [ ] Clow chat, calls `/api/chat` (`#aiFab`, `#aiPanel`)
 - [ ] "Send this chat to our team" button (`.ai-team`)
 - [ ] Login, sign-up and reset modal (`#loginOverlay`, `#authForm`, `#forgotBtn`)
@@ -33,7 +33,7 @@ Status: TODO / DONE. Each item is checked in a browser before it is marked DONE.
 - [ ] Sidebar navigation (`#sidebar`, `#sbNav`)
 - [ ] Home page (`#page-home`) with problem tiles
 - [ ] Services page (`#page-services`) and Creation, Ad, Marketing, Automation pages
-- [ ] Industries page and industry detail page (`#page-industries`, `#page-industry`)
+- [x] Industries page with 20 industry links (`#page-industries`)
 - [ ] Aetheria page (`#page-aetheria`) and Clow page (`#page-clow`), restyled, wired to the Worker
 - [ ] Calculator page (`#page-calculator`) with budget model (`#budgetSlider`, `#calcGoal`, `#calcMix`)
 - [ ] FAQ page (`#page-faq`, `#faqList`)
