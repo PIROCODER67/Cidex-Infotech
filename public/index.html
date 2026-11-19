@@ -3525,6 +3525,18 @@
 </script>
 
 <script>
+// Assistant replies are shown as plain text. Strip any markdown that slips through.
+function plainBotText(t){
+  return String(t)
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/__(.+?)__/g, '$1')
+    .replace(/^[ \t]*#{1,6}[ \t]*/gm, '')
+    .replace(/^[ \t]*\|?[ \t]*:?-{2,}[ \t]*(\|[ \t]*:?-{2,}[ \t]*)*\|?[ \t]*$/gm, '')
+    .replace(/^[ \t]*\|(.*)\|[ \t]*$/gm, function(_, row){ return row.split('|').map(function(c){ return c.trim(); }).filter(Boolean).join(' · '); })
+    .replace(/^[ \t]*[*-][ \t]+/gm, '• ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
 /* ---------- SERVICES GUIDE (talks to /api/advisor) ---------- */
 (function(){
   const fab = document.getElementById('advFab');
@@ -3542,7 +3554,7 @@
   function addText(role, text){
     const d = document.createElement('div');
     d.className = 'ai-msg ' + role;
-    d.textContent = text;
+    d.textContent = role === 'bot' ? plainBotText(text) : text;
     log.appendChild(d);
     log.scrollTop = log.scrollHeight;
     return d;
