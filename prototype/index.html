@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIDEX INFOTECH — Generational Visual Rework</title>
+<!-- FONTS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/orbitron@5.0.8/index.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/rajdhani@5.0.13/index.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk@5.0.18/index.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.20/index.min.css">
+<!-- THREE.JS FOR WEBGL 3D GRAPHICS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+/* ═══════════════ CORE VARIABLES & RESET ═══════════════ */
+:root{
+  --void:#02040a; --abyss:#050914; --deep:#081020; --surface:#0c1630; --raise:#121e42;
+  --line:rgba(100,140,255,.12); --line2:rgba(100,140,255,.25);
+  --cyan:#00e5ff; --blue:#3d7bff; --violet:#c04bff; --magenta:#ff2d9b;
+  --amber:#ffb020; --acid:#2ee6a8; --red:#ff3b5c; --gold:#e8c37a; --silver:#cfd8ea;
+  --ink:#eaf1ff; --dim:#9fb0d4; --faint:#5a6a8a;
+  --ok:#2ee6a8; --warn:#ffb020; --danger:#ff3b5c; --info:#3d7bff;
+  --sb:264px; --r:16px;
+  --grad-hero:linear-gradient(118deg,#00e5ff 0%,#3d7bff 34%,#c04bff 68%,#ff2d9b 100%);
+  --grad-warm:linear-gradient(120deg,#ffb020,#ff2d9b 55%,#c04bff);
+  --grad-cool:linear-gradient(120deg,#2ee6a8,#00e5ff 50%,#3d7bff);
+  --shadow:0 24px 60px -20px rgba(0,0,0,.95);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--void); color:var(--ink);
+  font-family:'Space Grotesk','Rajdhani',system-ui,sans-serif;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#03060f;border-left:1px solid var(--line)}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--cyan),var(--blue) 45%,var(--violet));border-radius:20px;border:2px solid #03060f}
+*{scrollbar-color:var(--blue) #03060f;scrollbar-width:thin}
+h1,h2,h3,h4,.orb{font-family:'Orbitron',sans-serif;letter-spacing:.02em}
+.mono{font-family:'JetBrains Mono',monospace}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font-family:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+.nosel{user-select:none;-webkit-user-select:none;pointer-events:none}
+
+/* ═══════════════ LOADER ═══════════════ */
+#boot{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 50% 45%,#0b1330,#02040a 70%);display:grid;place-items:center;transition:opacity .8s ease,visibility .8s}
+#boot.gone{opacity:0;visibility:hidden;pointer-events:none}
+.bootwrap{text-align:center;width:min(560px,88vw)}
+.bootmark{width:140px;height:140px;margin:0 auto 30px;position:relative}
+.bootmark svg{width:100%;height:100%;filter:drop-shadow(0 0 30px rgba(0,229,255,.6))}
+.bootmark::after{content:'';position:absolute;inset:-20px;border:1px solid rgba(0,229,255,.2);border-radius:50%;animation:spin 6s linear infinite}
+.bootmark::before{content:'';position:absolute;inset:-36px;border:1px dashed rgba(192,75,255,.18);border-radius:50%;animation:spin 10s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.boottitle{font-family:'Orbitron';font-size:clamp(24px,5vw,38px);font-weight:900;background:var(--grad-hero);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.24em}
+.bootsub{margin-top:12px;color:var(--dim);font-size:13px;letter-spacing:.38em;text-transform:uppercase}
+.bootbar{margin:34px auto 14px;height:3px;width:100%;background:rgba(100,140,255,.1);border-radius:9px;overflow:hidden}
+.bootfill{height:100%;width:0;background:var(--grad-hero);box-shadow:0 0 20px var(--cyan);transition:width .25s}
+.bootlog{font-family:'JetBrains Mono';font-size:11.5px;color:var(--faint);height:18px;letter-spacing:.06em}
+.bootpct{font-family:'Orbitron';font-size:12px;color:var(--cyan);margin-top:10px;letter-spacing:.2em}
+
+/* ═══════════════ SIDEBAR ═══════════════ */
+#sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sb);z-index:120;
+  background:linear-gradient(180deg,rgba(8,12,28,.98),rgba(4,7,18,.99));
+  border-right:1px solid var(--line);backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;transition:transform .5s cubic-bezier(.6,0,.2,1)}
+#sidebar.hidden{transform:translateX(-102%)}
+.sbtop{padding:24px 20px 16px;border-bottom:1px solid var(--line)}
+.brandrow{display:flex;align-items:center;gap:12px}
+.brandmark{width:46px;height:46px;flex:0 0 46px}
+.brandmark svg{width:100%;height:100%;filter:drop-shadow(0 0 12px rgba(232,195,122,.6))}
+.brandtxt .n{font-family:'Orbitron';font-weight:900;font-size:16px;letter-spacing:.12em;background:linear-gradient(90deg,var(--gold),#fff6df,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brandtxt .t{font-size:9px;letter-spacing:.3em;color:var(--faint);text-transform:uppercase;margin-top:4px}
+.sbbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:16px;padding:11px;border-radius:11px;font-family:'Orbitron';font-size:11px;letter-spacing:.16em;font-weight:700;transition:.3s;border:1px solid transparent}
+.sb-signin{background:linear-gradient(100deg,rgba(0,229,255,.14),rgba(61,123,255,.14));border-color:rgba(0,229,255,.35);color:#bff4ff}
+.sb-signin:hover{background:linear-gradient(100deg,rgba(0,229,255,.28),rgba(192,75,255,.24));box-shadow:0 0 26px -4px var(--cyan);transform:translateY(-1px)}
+.sb-hub{background:linear-gradient(100deg,rgba(232,195,122,.12),rgba(255,45,155,.1));border-color:rgba(232,195,122,.35);color:var(--gold)}
+.sb-hub:hover{box-shadow:0 0 26px -6px var(--gold);transform:translateY(-1px)}
+.sbnav{flex:1;overflow-y:auto;padding:16px 14px 24px}
+.sbgroup{font-size:9px;letter-spacing:.32em;color:var(--faint);text-transform:uppercase;padding:16px 12px 8px}
+.navitem{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 14px;border-radius:11px;font-size:13px;font-weight:600;color:var(--dim);border:1px solid transparent;transition:.25s;margin-bottom:4px;position:relative}
+.navitem .ic{width:16px;height:16px;flex:0 0 16px;opacity:.7}
+.navitem:hover{color:var(--ink);background:rgba(100,140,255,.06);border-color:var(--line)}
+.navitem.active{color:#fff;background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.4);box-shadow:inset 0 0 24px -8px rgba(255,255,255,.5)}
+.navitem.active::before{content:'';position:absolute;left:-14px;top:50%;transform:translateY(-50%);width:3px;height:22px;border-radius:3px;background:var(--grad-hero)}
+.navitem.sub{font-size:12px;padding-left:32px;color:var(--faint)}
+.navitem.sub:hover{color:var(--dim)}
+.sbfoot{padding:14px 18px;border-top:1px solid var(--line);font-size:9.5px;color:var(--faint);letter-spacing:.1em;display:flex;justify-content:space-between;align-items:center}
+.dotlive{width:6px;height:6px;border-radius:50%;background:var(--acid);box-shadow:0 0 10px var(--acid);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.3}}
+
+#mobtoggle{display:none;position:fixed;top:16px;left:16px;z-index:130;width:46px;height:46px;border-radius:13px;background:rgba(8,14,32,.94);border:1px solid var(--line2);backdrop-filter:blur(12px);place-items:center}
+#mobtoggle span{display:block;width:18px;height:2px;background:var(--cyan);box-shadow:0 5px 0 var(--cyan),0 -5px 0 var(--cyan);border-radius:2px}
+#scrim{display:none;position:fixed;inset:0;background:rgba(2,4,10,.75);z-index:115;backdrop-filter:blur(4px)}
+#scrim.on{display:block}
+
+/* ═══════════════ SHELL ═══════════════ */
+#shell{margin-left:var(--sb);transition:margin .5s cubic-bezier(.6,0,.2,1);min-height:100vh;position:relative}
+#shell.full{margin-left:0}
+.rights{position:fixed;top:18px;right:24px;z-index:110;font-size:10.5px;letter-spacing:.12em;color:rgba(180,200,240,.55);background:rgba(5,8,20,.6);border:1px solid var(--line);padding:7px 14px;border-radius:22px;backdrop-filter:blur(10px)}
+.page{display:none;animation:fadein .6s ease}
+.page.on{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* ═══════════════ BACKDROP FX SYSTEM ═══════════════ */
+.fx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.aurora{position:absolute;border-radius:50%;filter:blur(100px);opacity:.3;mix-blend-mode:screen}
+.a1{width:55vw;height:55vw;left:-14vw;top:-16vw;background:radial-gradient(circle,#00e5ff,transparent 66%);animation:drift1 28s ease-in-out infinite}
+.a2{width:48vw;height:48vw;right:-12vw;top:20vh;background:radial-gradient(circle,#c04bff,transparent 66%);animation:drift2 34s ease-in-out infinite}
+.a3{width:42vw;height:42vw;left:28vw;bottom:-18vw;background:radial-gradient(circle,#ff2d9b,transparent 68%);opacity:.2;animation:drift1 40s ease-in-out infinite reverse}
+@keyframes drift1{50%{transform:translate(10vw,8vh) scale(1.16)}}
+@keyframes drift2{50%{transform:translate(-9vw,-7vh) scale(1.12)}}
+.gridfx{position:absolute;inset:0;background-image:linear-gradient(rgba(100,140,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(100,140,255,.04) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse at 50% 40%,#000 20%,transparent 78%)}
+.grain{position:absolute;inset:0;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+.scan{position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 3px,rgba(0,0,0,.14) 3px 4px);opacity:.3}
+#stars{position:absolute;inset:0}
+
+/* ═══════════════ WEBGL HERO LAYOUT ═══════════════ */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: grid !important;
+  grid-template-columns: 1.2fr 1fr !important;
+  align-items: center !important;
+  padding: 0 clamp(40px, 8vw, 120px) !important;
+  overflow: hidden !important;
+}
+
+/* LEFT COLUMN: TYPOGRAPHIC ANCHOR */
+.hero-text {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  z-index: 10 !important;
+  max-width: 760px;
+}
+
+.tagline {
+  font-family: 'Orbitron';
+  font-size: clamp(13px, 1.6vw, 18px);
+  letter-spacing: .5em;
+  text-transform: uppercase;
+  margin-bottom: 32px !important;
+  align-self: flex-start !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  color: var(--amber);
+  font-weight: 700;
+}
+.tagline .tg {
+  background: var(--grad-warm);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 220% 100%;
+  animation: slide 6s linear infinite;
+}
+@keyframes slide { to { background-position: 220% 0 } }
+.tagline .ln { width: 60px; height: 2px; background: linear-gradient(90deg, var(--amber), transparent) }
+
+.herotitle {
+  font-size: clamp(56px, 9vw, 130px) !important;
+  font-weight: 900;
+  line-height: 0.88 !important;
+  letter-spacing: -.03em;
+  background: var(--grad-hero);
+  background-size: 180% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: slide 12s linear infinite;
+  filter: drop-shadow(0 12px 60px rgba(61,123,255,.5));
+  text-align: left !important;
+  margin-bottom: 28px !important;
+  transform: translateX(-2px);
+}
+
+.herosub {
+  max-width: 580px !important;
+  margin-top: 24px !important;
+  font-size: clamp(16px, 1.7vw, 20px) !important;
+  line-height: 1.75;
+  color: #b8c8e8;
+  text-align: left !important;
+  font-weight: 400;
+}
+.herosub b { color: #fff; font-weight: 700; text-shadow: 0 0 24px rgba(255,255,255,.35) }
+
+.ovarow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 42px !important;
+  justify-content: flex-start !important;
+}
+.ova {
+  position: relative;
+  padding: 15px 30px;
+  border-radius: 50px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  border: 1px solid rgba(0,229,255,.35);
+  background: rgba(10,16,36,.75);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+  transition: .3s cubic-bezier(.4,0,.2,1);
+  animation: bob 6s ease-in-out infinite;
+  box-shadow: 0 6px 24px -6px rgba(0,0,0,.6);
+}
+.ova:nth-child(2) { animation-delay: -2s; border-color: rgba(255,45,155,.35) }
+.ova:nth-child(3) { animation-delay: -4s; border-color: rgba(192,75,255,.35) }
+@keyframes bob { 50% { transform: translateY(-10px) } }
+.ova::before { content: ''; position: absolute; inset: 0; background: var(--grad-cool); opacity: .1 }
+.ova:hover { transform: translateY(-8px) scale(1.05); border-color: var(--cyan); box-shadow: 0 0 36px -10px var(--cyan) }
+.ova i { position: relative; font-style: normal; color: var(--cyan); margin-right: 12px; font-size: 15px }
+
+.scrollcue {
+  margin-top: 60px !important;
+  align-self: flex-start !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  color: var(--dim);
+  font-size: 11px;
+  letter-spacing: .38em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.mouse { width: 24px; height: 38px; border: 1.5px solid var(--line2); border-radius: 12px; position: relative }
+.mouse::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 7px;
+  transform: translateX(-50%);
+  width: 3px; height: 8px;
+  border-radius: 3px;
+  background: var(--cyan);
+  animation: wheel 1.7s infinite;
+}
+@keyframes wheel { 0% { opacity: 0; top: 7px } 40% { opacity: 1 } 100% { opacity: 0; top: 20px } }
+
+/* RIGHT COLUMN: WEBGL CANVAS CONTAINER */
+.hero-visual {
+  position: relative !important;
+  height: 100% !important;
+  min-height: 600px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 2 !important;
+}
+#liquid-core {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  cursor: crosshair;
+}
+
+@media(max-width: 960px) {
+  .hero { grid-template-columns: 1fr !important; min-height: auto !important; padding-top: 110px !important; }
+  .hero-visual { order: -1 !important; min-height: 400px !important; margin-bottom: 40px !important; }
+  .herotitle { font-size: clamp(40px, 12vw, 70px) !important }
+}
+
+/* ═══════════════ ROCK DE VONCIA (VOLUMETRIC) ═══════════════ */
+.rockstage{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 30% 20%,#0b1230,#02040a 70%)}
+.rock{position:absolute;border-radius:46% 54% 58% 42%/48% 42% 58% 52%;background:linear-gradient(150deg,#1b2450,#0c1226 60%,#161d3d);border:1px solid rgba(100,140,255,.2);box-shadow:inset -12px -16px 34px rgba(0,0,0,.8),inset 10px 12px 28px rgba(100,140,255,.08),0 0 50px -14px rgba(61,123,255,.5)}
+.rock::after{content:'';position:absolute;inset:18%;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(0,229,255,.14),transparent 60%)}
+.rock .crater{position:absolute;border-radius:50%;background:rgba(0,0,0,.4);box-shadow:inset 3px 3px 6px rgba(0,0,0,.7)}
+
+/* ═══════════════ FORMS & UI ELEMENTS ═══════════════ */
+.field{margin-bottom:18px}
+.field label{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:8px;font-family:'JetBrains Mono'}
+.inp{width:100%;padding:13px 15px;border-radius:11px;background:rgba(5,8,20,.8);border:1px solid var(--line);color:var(--ink);font-size:14px;transition:.25s;outline:none}
+.inp:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.1)}
+.inp::placeholder{color:#4a5a7a}
+select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='%2300e5ff'%3E%3Cpath d='M0 0h12L6 8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+textarea.inp{resize:vertical;min-height:120px;line-height:1.6}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.err{color:var(--danger);font-size:12px;margin-top:7px;display:none}
+.err.on{display:block}
+.okmsg{color:var(--ok);font-size:12px;margin-top:7px;display:none}
+.okmsg.on{display:block}
+
+.modal{position:fixed;inset:0;z-index:400;display:none;place-items:center;padding:24px;background:rgba(3,5,14,.78);backdrop-filter:blur(16px)}
+.modal.on{display:grid;animation:fadein .35s}
+.modalbox{width:min(480px,94vw);border-radius:20px;padding:34px;background:linear-gradient(160deg,#121c3a,#080e20);border:1px solid var(--line2);box-shadow:0 34px 100px -24px #000,0 0 70px -34px var(--cyan);position:relative;max-height:90vh;overflow-y:auto}
+.modalbox h3{font-size:22px;margin-bottom:8px}
+.modalbox p.sm{color:var(--dim);font-size:13px;line-height:1.65;margin-bottom:24px}
+.xclose{position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);color:var(--dim);display:grid;place-items:center;transition:.25s}
+.xclose:hover{color:var(--red);border-color:var(--red)}
+.authglow{position:absolute;inset:-1px;border-radius:20px;background:var(--grad-hero);opacity:.08;pointer-events:none}
+
+#toasts{position:fixed;bottom:24px;right:24px;z-index:500;display:flex;flex-direction:column;gap:12px;max-width:360px}
+.toast{padding:14px 18px;border-radius:13px;background:rgba(12,20,44,.98);border:1px solid var(--line2);border-left:3px solid var(--cyan);font-size:13px;box-shadow:var(--shadow);animation:tin .4s;display:flex;gap:12px;align-items:flex-start;backdrop-filter:blur(12px)}
+.toast.ok{border-left-color:var(--ok)}.toast.err{border-left-color:var(--danger)}.toast.warn{border-left-color:var(--warn)}
+@keyframes tin{from{opacity:0;transform:translateX(44px)}}
+
+/* ═══════════════ PUZZLA JOINDE (GLASSMORPHISM) ═══════════════ */
+.puzzla{position:relative;height:100vh;min-height:640px;overflow:hidden;display:grid;place-items:center}
+#pzCanvas{position:absolute;inset:0;width:100%;height:100%}
+.pzcopy{position:relative;z-index:3;text-align:center;max-width:860px;padding:0 28px;user-select:none;-webkit-user-select:none;pointer-events:none}
+.pzcopy .k{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.38em;color:var(--cyan);text-transform:uppercase}
+.pzcopy h1{font-size:clamp(32px,6.4vw,70px);font-weight:900;margin:18px 0;line-height:1.02;text-shadow:0 4px 44px rgba(0,0,0,.9)}
+.pzcopy p{color:#cbd8f2;font-size:clamp(14px,1.7vw,18px);line-height:1.8;text-shadow:0 2px 20px rgba(0,0,0,.95)}
+.pzhint{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:3;font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.24em;color:var(--faint);text-transform:uppercase;pointer-events:none;text-align:center}
+.horizon{height:140px;background:linear-gradient(180deg,transparent,var(--abyss) 72%);position:relative;z-index:2;margin-top:-140px;pointer-events:none}
+
+/* ═══════════════ SERVICE BOXES ═══════════════ */
+.svcgrid{display:flex;flex-direction:column;gap:16px;margin-top:38px}
+.svcrow{display:grid;grid-template-columns:1fr 96px;gap:16px;align-items:stretch}
+.svcbox{padding:22px 24px;border-radius:var(--r);border:1px solid var(--line);background:linear-gradient(150deg,rgba(18,28,58,.7),rgba(8,14,32,.82));transition:.3s;position:relative;overflow:hidden}
+.svcbox::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--svhue,var(--cyan));opacity:.7}
+.svcbox:hover{border-color:var(--svhue,var(--cyan));transform:translateX(6px);box-shadow:0 14px 38px -18px var(--svhue,var(--cyan))}
+.svchead{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.svcname{font-family:'Orbitron';font-size:15px;font-weight:700}
+.svcprice{font-family:'JetBrains Mono';font-size:13px;color:var(--amber);white-space:nowrap;padding:5px 11px;border-radius:8px;background:rgba(255,176,32,.1);border:1px solid rgba(255,176,32,.25)}
+.svcdef{color:var(--dim);font-size:13.5px;line-height:1.7;margin:12px 0 16px;max-width:660px}
+.svclink{display:inline-flex;align-items:center;gap:9px;padding:9px 16px;border-radius:10px;border:1px solid var(--line2);font-size:11px;font-family:'Orbitron';letter-spacing:.12em;font-weight:700;transition:.25s;background:rgba(5,8,20,.5)}
+.svclink:hover{border-color:var(--svhue,var(--cyan));color:var(--svhue,var(--cyan));gap:14px}
+.collect{border-radius:var(--r);border:1px dashed var(--line2);background:rgba(8,14,32,.5);display:grid;place-items:center;transition:.3s;position:relative;overflow:hidden}
+.collect:hover{border-color:var(--svhue);background:rgba(18,28,58,.8);transform:scale(1.06)}
+.collect svg{width:40px;height:40px;transition:.35s}
+.collect.taken{border-style:solid;border-color:var(--ok);background:rgba(46,230,168,.1);cursor:default}
+.collect.taken svg{opacity:.2}
+.collect.taken::after{content:'✓';position:absolute;font-size:24px;color:var(--ok);font-weight:700}
+.buildzone{margin-top:48px;padding:34px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(12,20,44,.85),rgba(5,8,20,.92));min-height:320px;position:relative;overflow:hidden}
+.buildstage{position:relative;height:300px;display:grid;place-items:center}
+.buildempty{color:var(--faint);font-size:13px;text-align:center;line-height:1.9;font-family:'JetBrains Mono';letter-spacing:.1em}
+.congrats{margin-top:24px;padding:20px 24px;border-radius:13px;background:linear-gradient(100deg,rgba(46,230,168,.16),rgba(0,229,255,.1));border:1px solid rgba(46,230,168,.4);font-size:15px;font-weight:600;color:#c9ffe9;display:none;animation:fadein .7s}
+.congrats.on{display:block}
+.progressline{height:4px;border-radius:4px;background:rgba(100,140,255,.1);overflow:hidden;margin-top:18px}
+.progressfill{height:100%;width:0;background:var(--grad-cool);transition:width .6s;box-shadow:0 0 14px var(--cyan)}
+.btnrow{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+.readtick{font-family:'JetBrains Mono';font-size:10px;color:var(--faint);letter-spacing:.16em;margin-top:16px}
+
+/* ═══════════════ SERVICES HUB ═══════════════ */
+.hubgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px;margin-top:44px}
+.hubcard{padding:32px 28px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(18,28,58,.75),rgba(6,10,24,.88));position:relative;overflow:hidden;transition:.4s cubic-bezier(.4,0,.2,1);text-align:left;animation:bob 8s ease-in-out infinite;min-height:220px;display:flex;flex-direction:column;justify-content:space-between}
+.hubcard:nth-child(2){animation-delay:-2s}.hubcard:nth-child(3){animation-delay:-4s}.hubcard:nth-child(4){animation-delay:-6s}
+.hubcard::before{content:'';position:absolute;inset:0;background:var(--hg);opacity:.1;transition:.4s}
+.hubcard::after{content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:var(--hg);filter:blur(54px);opacity:.22;right:-70px;top:-70px;transition:.4s}
+.hubcard:hover{transform:translateY(-16px) scale(1.03);border-color:rgba(255,255,255,.4);box-shadow:0 30px 70px -26px #000}
+.hubcard:hover::before{opacity:.2}
+.hubcard:hover::after{opacity:.5;transform:scale(1.35)}
+.hubnum{font-family:'JetBrains Mono';font-size:10.5px;color:var(--faint);letter-spacing:.24em;position:relative}
+.hubname{font-family:'Orbitron';font-size:28px;font-weight:900;margin:16px 0 10px;position:relative;background:var(--hg);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hubsub{font-size:13.5px;color:var(--dim);line-height:1.65;position:relative}
+.hubgo{margin-top:20px;font-family:'JetBrains Mono';font-size:11px;letter-spacing:.2em;color:var(--ink);position:relative;display:flex;align-items:center;gap:10px;transition:.35s}
+.hubcard:hover .hubgo{gap:18px}
+.blend{height:240px;background:linear-gradient(180deg,var(--void),#060c1c 40%,var(--abyss));position:relative;overflow:hidden}
+.blendline{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),var(--violet),transparent);opacity:.4}
+
+/* ═══════════════ CHAT ═══════════════ */
+.chatpage{min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:2}
+.chathead{display:flex;align-items:center;gap:20px;padding:24px clamp(20px,4vw,44px);border-bottom:1px solid var(--line);background:rgba(5,8,20,.75);backdrop-filter:blur(16px);flex-wrap:wrap}
+.botorb{width:70px;height:70px;flex:0 0 70px;border-radius:50%;position:relative;display:grid;place-items:center;overflow:hidden}
+.botorb svg{width:100%;height:100%}
+.botorb.aeth{box-shadow:0 0 38px -8px var(--magenta),inset 0 0 28px rgba(255,45,155,.3);border:1px solid rgba(255,45,155,.5)}
+.botorb.clow{box-shadow:0 0 38px -8px var(--cyan),inset 0 0 28px rgba(0,229,255,.3);border:1px solid rgba(0,229,255,.5)}
+.chatwho .hi{font-family:'Orbitron';font-size:22px;font-weight:800}
+.chatwho .st{font-size:11px;color:var(--dim);letter-spacing:.12em;margin-top:5px;display:flex;align-items:center;gap:8px}
+.chatactions{margin-left:auto;display:flex;gap:12px;flex-wrap:wrap}
+.chatbody{flex:1;overflow-y:auto;padding:28px clamp(20px,4vw,44px);display:flex;flex-direction:column;gap:18px;max-height:calc(100vh - 260px)}
+.msg{max-width:min(700px,86%);padding:16px 20px;border-radius:18px;font-size:14px;line-height:1.75;animation:fadein .4s;white-space:pre-wrap;word-break:break-word}
+.msg.bot{align-self:flex-start;background:linear-gradient(150deg,rgba(18,28,58,.92),rgba(8,14,32,.92));border:1px solid var(--line);border-bottom-left-radius:5px}
+.msg.me{align-self:flex-end;background:linear-gradient(150deg,rgba(0,229,255,.18),rgba(61,123,255,.18));border:1px solid rgba(0,229,255,.35);border-bottom-right-radius:5px}
+.msg .who{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px;opacity:.65}
+.msg.bot.aeth .who{color:var(--magenta)}.msg.bot.clow .who{color:var(--cyan)}
+.typing{display:flex;gap:6px;padding:7px 0}
+.typing i{width:8px;height:8px;border-radius:50%;background:var(--cyan);animation:tp 1.3s infinite}
+.typing i:nth-child(2){animation-delay:.25s}.typing i:nth-child(3){animation-delay:.5s}
+@keyframes tp{0%,60%,100%{opacity:.2;transform:translateY(0)}30%{opacity:1;transform:translateY(-6px)}}
+.chatbar{display:flex;gap:14px;padding:20px clamp(20px,4vw,44px);border-top:1px solid var(--line);background:rgba(5,8,20,.85);backdrop-filter:blur(16px);align-items:flex-end}
+.chatbar textarea{flex:1;min-height:54px;max-height:140px;padding:15px 18px;border-radius:13px;background:rgba(5,8,20,.92);border:1px solid var(--line);outline:none;font-size:14px;line-height:1.55;resize:none}
+.chatbar textarea:focus{border-color:var(--cyan)}
+.sendbtn{width:54px;height:54px;flex:0 0 54px;border-radius:13px;background:var(--grad-hero);display:grid;place-items:center;transition:.3s;color:#02040a}
+.sendbtn:hover{transform:scale(1.08);box-shadow:0 0 30px -8px var(--cyan)}
+.currsw{display:flex;border-radius:11px;border:1px solid var(--line2);overflow:hidden}
+.currsw button{padding:10px 16px;font-family:'Orbitron';font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--dim);transition:.25s}
+.currsw button.on{background:linear-gradient(100deg,var(--cyan),var(--blue));color:#02040a}
+.calcstrip{display:flex;gap:12px;flex-wrap:wrap;padding:14px clamp(20px,4vw,44px);border-bottom:1px solid var(--line);background:rgba(6,10,24,.5)}
+.chip{padding:8px 14px;border-radius:22px;border:1px solid var(--line);font-size:11.5px;color:var(--dim);transition:.25s;font-family:'JetBrains Mono'}
+.chip:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* ═══════════════ CALCULATOR ═══════════════ */
+.calcgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;margin-top:38px}
+.slider{width:100%;-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:linear-gradient(90deg,var(--cyan),var(--violet));outline:none;margin:18px 0}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--cyan));border:2px solid #02040a;box-shadow:0 0 18px var(--cyan);cursor:pointer}
+.slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--cyan);border:2px solid #02040a;box-shadow:0 0 18px var(--cyan);cursor:pointer}
+.bigval{font-family:'Orbitron';font-size:clamp(30px,4.8vw,48px);font-weight:900;background:var(--grad-warm);-webkit-background-clip:text;background-clip:text;color:transparent}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-top:24px}
+.stat{padding:18px;border-radius:13px;background:rgba(5,8,20,.65);border:1px solid var(--line)}
+.stat .l{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);font-family:'JetBrains Mono'}
+.stat .v{font-family:'Orbitron';font-size:22px;font-weight:800;margin-top:8px}
+.bars{display:flex;align-items:flex-end;gap:10px;height:180px;margin-top:26px;padding:16px;border-radius:13px;background:rgba(5,8,20,.55);border:1px solid var(--line)}
+.bar{flex:1;border-radius:7px 7px 0 0;position:relative;transition:height .7s cubic-bezier(.4,0,.2,1);min-height:6px}
+.bar span{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--faint);font-family:'JetBrains Mono';white-space:nowrap}
+.bar em{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:9px;font-style:normal;color:var(--dim);font-family:'JetBrains Mono'}
+.alloc{display:flex;flex-direction:column;gap:13px;margin-top:20px}
+.allocrow{display:flex;align-items:center;gap:14px;font-size:13px}
+.allocdot{width:12px;height:12px;border-radius:4px;flex:0 0 12px}
+.allocbar{flex:1;height:8px;border-radius:6px;background:rgba(100,140,255,.1);overflow:hidden}
+.allocbar i{display:block;height:100%;border-radius:6px;transition:width .7s}
+
+/* ═══════════════ INDUSTRIES ═══════════════ */
+.indgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;margin-top:40px}
+.indcard{padding:24px;border-radius:var(--r);border:1px solid var(--line);background:linear-gradient(160deg,rgba(18,28,58,.65),rgba(6,10,24,.82));text-align:left;transition:.35s;position:relative;overflow:hidden;min-height:164px;display:flex;flex-direction:column;gap:12px}
+.indcard::after{content:'';position:absolute;right:-44px;bottom:-44px;width:130px;height:130px;border-radius:50%;background:var(--ih);filter:blur(46px);opacity:.18;transition:.35s}
+.indcard:hover{transform:translateY(-8px);border-color:var(--ih);box-shadow:0 24px 50px -24px var(--ih)}
+.indcard:hover::after{opacity:.42}
+.indicon{width:38px;height:38px;position:relative}
+.indname{font-family:'Orbitron';font-size:14px;font-weight:700;position:relative;line-height:1.35}
+.indtag{font-size:12px;color:var(--dim);line-height:1.6;position:relative}
+.quote{padding:18px 22px;border-radius:13px;border-left:2px solid var(--amber);background:rgba(255,176,32,.06);font-size:13.5px;color:#e6d5b4;line-height:1.75;font-style:italic}
+.indsec{margin-top:34px;padding:28px;border-radius:var(--r);border:1px solid var(--line);background:linear-gradient(160deg,rgba(14,22,48,.75),rgba(6,10,24,.82))}
+.indsec h3{font-size:17px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.indsec h3 .n{font-family:'JetBrains Mono';font-size:10.5px;padding:5px 10px;border-radius:7px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:var(--cyan)}
+.indsec p{color:var(--dim);line-height:1.85;font-size:14px;margin-bottom:14px}
+.qa{padding:16px 0;border-bottom:1px solid var(--line)}
+.qa:last-child{border:none}
+.qa .q{font-weight:600;font-size:14px;color:var(--ink);margin-bottom:8px}
+.qa .a{font-size:13.5px;color:var(--dim);line-height:1.8}
+.svctags{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.svctag{padding:8px 14px;border-radius:9px;font-size:11.5px;border:1px solid var(--line2);background:rgba(5,8,20,.6);font-family:'JetBrains Mono';transition:.25s}
+.svctag:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* ═══════════════ FAQ ═══════════════ */
+.faqlist{margin-top:38px;display:flex;flex-direction:column;gap:13px;max-width:920px}
+.faqitem{border-radius:var(--r);border:1px solid var(--line);background:rgba(12,20,44,.65);overflow:hidden;transition:.3s}
+.faqitem.open{border-color:var(--line2);background:rgba(18,28,58,.8)}
+.faqq{width:100%;text-align:left;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;gap:20px;font-size:14.5px;font-weight:600;transition:.25s}
+.faqq:hover{color:var(--cyan)}
+.faqi{width:26px;height:26px;flex:0 0 26px;border-radius:8px;border:1px solid var(--line2);display:grid;place-items:center;font-size:16px;transition:.35s;color:var(--cyan)}
+.faqitem.open .faqi{transform:rotate(45deg);background:rgba(0,229,255,.14)}
+.faqa{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.4,0,.2,1)}
+.faqa div{padding:0 24px 22px;color:var(--dim);line-height:1.85;font-size:13.8px}
+.askbot{position:fixed;right:28px;bottom:28px;z-index:100;display:flex;flex-direction:column;align-items:center;gap:10px;transition:.35s}
+.askbot:hover{transform:translateY(-8px)}
+.askbot .o{width:68px;height:68px;border-radius:50%;overflow:hidden;border:1px solid rgba(255,45,155,.5);box-shadow:0 0 34px -8px var(--magenta);animation:bob 6s ease-in-out infinite}
+.askbot .t{font-size:10px;letter-spacing:.12em;color:var(--dim);text-align:center;max-width:94px;line-height:1.45}
+
+/* ═══════════════ LEGAL (METALLIC) ═══════════════ */
+.legalbg{position:fixed;inset:0;z-index:0;pointer-events:none;background:#02040a;overflow:hidden}
+.legalbg .veil{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(4,6,15,.96) 30%,rgba(4,6,15,.72) 62%,rgba(4,6,15,.48))}
+.jumpnav{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0 38px;position:sticky;top:0;z-index:20;padding:16px 0;background:linear-gradient(180deg,rgba(4,6,15,.98),rgba(4,6,15,.78));backdrop-filter:blur(12px)}
+.jump{padding:10px 18px;border-radius:10px;border:1px solid var(--line2);font-size:11px;font-family:'Orbitron';font-weight:700;letter-spacing:.12em;background:rgba(8,14,32,.85);transition:.25s}
+.jump:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-3px)}
+.legalblock{margin-bottom:42px;padding:34px;border-radius:18px;background:rgba(4,7,16,.92);border:1px solid rgba(232,195,122,.2);backdrop-filter:blur(8px);scroll-margin-top:96px}
+.legalblock h2{font-size:24px;color:var(--gold);margin-bottom:8px}
+.legalblock .upd{font-family:'JetBrains Mono';font-size:10px;color:var(--faint);letter-spacing:.16em;margin-bottom:24px}
+.legalclause{margin-bottom:20px}
+.legalclause h4{font-size:14px;color:#fff;margin-bottom:8px;font-family:'Space Grotesk';font-weight:700}
+.legalclause p{color:#c2cee6;line-height:1.9;font-size:14px}
+
+/* ═══════════════ FINAL PIECE (CINEMATIC) ═══════════════ */
+#finalPage{min-height:100vh;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#0d1430,#02040a 70%);transition:background 1.6s}
+#finalPage.lit{background:linear-gradient(160deg,#1a1710,#0d0c0a 40%,#14120c)}
+.fphead{text-align:center;padding:44px 28px 12px;position:relative;z-index:5}
+.blueprint{width:min(420px,84vw);height:min(420px,84vw);margin:24px auto;position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;padding:8px;border-radius:20px;border:1px dashed rgba(0,229,255,.35);background:rgba(5,8,20,.55);transition:.7s}
+#finalPage.lit .blueprint{border-color:rgba(232,195,122,.6);background:rgba(232,195,122,.06)}
+.slot{border:1px dashed rgba(100,140,255,.25);border-radius:12px;display:grid;place-items:center;font-family:'JetBrains Mono';font-size:10px;color:var(--faint);text-align:center;padding:10px;transition:.35s;letter-spacing:.12em}
+.slot.hot{border-color:var(--cyan);background:rgba(0,229,255,.14);box-shadow:inset 0 0 30px rgba(0,229,255,.2)}
+.slot.filled{border-style:solid;border-color:transparent;background:transparent}
+.dragpiece{position:absolute;width:140px;height:140px;cursor:grab;z-index:30;touch-action:none;transition:filter .35s;filter:drop-shadow(0 10px 26px rgba(0,0,0,.75))}
+.dragpiece:active{cursor:grabbing}
+.dragpiece.placed{cursor:default;z-index:20}
+.dragpiece svg{width:100%;height:100%;pointer-events:none}
+.draglabel{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono';font-size:8.5px;letter-spacing:.1em;white-space:nowrap;color:var(--dim);pointer-events:none;text-align:center}
+#flash{position:fixed;inset:0;z-index:600;background:#fff;opacity:0;pointer-events:none;transition:opacity .6s}
+#flash.on{opacity:1}
+.reveal{display:none;position:relative;z-index:6;padding:24px clamp(20px,5vw,64px) 80px;max-width:1040px;margin:0 auto}
+.reveal.on{display:block;animation:fadein 1.4s}
+.goldlogo{width:min(320px,72vw);margin:0 auto 34px;display:block;animation:logoin 1.8s cubic-bezier(.2,.8,.2,1)}
+@keyframes logoin{from{opacity:0;transform:scale(.4);filter:blur(24px)}to{opacity:1;transform:none;filter:none}}
+.goldtitle{font-family:'Orbitron';font-size:clamp(30px,5.8vw,56px);font-weight:900;text-align:center;background:linear-gradient(100deg,#e8c37a,#fff8e6 30%,#cfd8ea 55%,#e8c37a 80%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:slide 8s linear infinite;letter-spacing:.08em}
+.goldsub{text-align:center;color:#d8c9a8;font-size:15px;margin-top:14px;letter-spacing:.08em;line-height:1.75}
+.goldcard{margin-top:30px;padding:32px;border-radius:18px;background:linear-gradient(160deg,rgba(28,24,16,.92),rgba(10,9,7,.94));border:1px solid rgba(232,195,122,.3);box-shadow:0 24px 70px -28px #000}
+.goldcard h3{color:var(--gold);font-size:16px;margin:26px 0 14px;display:flex;align-items:center;gap:10px}
+.goldcard h3:first-child{margin-top:0}
+.goldcard p,.goldcard li{color:#ddd3bd;line-height:1.9;font-size:14px}
+.goldcard ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+.goldcard li::before{content:'▸';color:var(--gold);margin-right:10px}
+.goldcard code{font-family:'JetBrains Mono';font-size:12px;color:var(--silver);background:rgba(207,216,234,.08);padding:3px 8px;border-radius:6px}
+.goldsplit{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.checklist{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.ctick{padding:8px 14px;border-radius:9px;border:1px solid var(--line);font-family:'JetBrains Mono';font-size:10px;color:var(--faint);letter-spacing:.12em;transition:.35s}
+.ctick.done{border-color:var(--ok);color:var(--ok);background:rgba(46,230,168,.1)}
+
+/* ═══════════════ PRIVACY BUTTONS ═══════════════ */
+.privgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:22px;margin-top:38px}
+.privcard{padding:30px;border-radius:18px;border:1px solid rgba(255,59,92,.25);background:linear-gradient(160deg,rgba(36,12,22,.65),rgba(8,14,32,.82))}
+.privcard h3{font-size:17px;color:#ffc3ce;margin-bottom:12px}
+.privcard p{color:var(--dim);font-size:13.5px;line-height:1.75;margin-bottom:22px}
+
+/* ═══════════════ ACCOUNT ═══════════════ */
+.acctgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin-top:34px}
+.acctcard{padding:24px;border-radius:var(--r);border:1px solid var(--line);background:rgba(12,20,44,.6);backdrop-filter:blur(12px)}
+.acctcard .l{font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint)}
+.acctcard .v{font-family:'Orbitron';font-size:24px;font-weight:800;margin:10px 0 8px}
+.rankbadge{display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:22px;background:linear-gradient(100deg,rgba(232,195,122,.2),rgba(255,176,32,.14));border:1px solid rgba(232,195,122,.4);color:var(--gold);font-size:10.5px;font-family:'Orbitron';letter-spacing:.12em}
+.tbl{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+.tbl th{text-align:left;padding:12px 14px;font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);border-bottom:1px solid var(--line)}
+.tbl td{padding:14px;border-bottom:1px solid rgba(100,140,255,.07);color:var(--dim)}
+.tbl tr:last-child td{border:none}
+.pill{padding:4px 11px;border-radius:22px;font-size:10px;font-family:'JetBrains Mono'}
+.pill.ok{background:rgba(46,230,168,.14);color:var(--ok);border:1px solid rgba(46,230,168,.3)}
+.pill.warn{background:rgba(255,176,32,.14);color:var(--warn);border:1px solid rgba(255,176,32,.3)}
+.pill.info{background:rgba(61,123,255,.14);color:#9dc0ff;border:1px solid rgba(61,123,255,.3)}
+.contactgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:28px}
+.contactcard{padding:22px;border-radius:var(--r);border:1px solid var(--line);background:rgba(12,20,44,.65);display:flex;gap:16px;align-items:center;transition:.3s}
+.contactcard:hover{border-color:var(--cyan);transform:translateY(-4px)}
+.contactcard .ci{width:42px;height:42px;flex:0 0 42px;border-radius:12px;display:grid;place-items:center;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25)}
+.contactcard .cl{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);font-family:'JetBrains Mono'}
+.contactcard .cv{font-size:13.5px;margin-top:5px;font-weight:600}
+.reveal-up{opacity:0;transform:translateY(30px);transition:opacity .8s,transform .8s}
+.reveal-up.in{opacity:1;transform:none}
+
+/* ═══════════════ UTILITIES ═══════════════ */
+.wrap{max-width:1260px;margin:0 auto;padding:0 clamp(20px,4vw,48px);position:relative;z-index:2}
+.sec{padding-top:clamp(60px,9vw,110px);padding-bottom:clamp(60px,9vw,110px);position:relative;z-index:2}
+.eyebrow{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.34em;color:var(--cyan);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.eyebrow::before{content:'';width:28px;height:1px;background:var(--cyan)}
+.h2{font-size:clamp(28px,4.4vw,48px);font-weight:800;line-height:1.12}
+.h2 .g{background:var(--grad-cool);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{color:var(--dim);max-width:740px;margin-top:16px;line-height:1.8;font-size:15px}
+.card{background:linear-gradient(160deg,rgba(18,28,58,.78),rgba(8,14,32,.78));border:1px solid var(--line);border-radius:var(--r);backdrop-filter:blur(14px);box-shadow:var(--shadow)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:13px 24px;border-radius:12px;font-family:'Orbitron';font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line2);background:rgba(18,28,58,.75);transition:.3s;color:var(--ink)}
+.btn:hover{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 10px 30px -12px var(--cyan)}
+.btn.p{background:var(--grad-hero);border-color:transparent;color:#02040a}
+.btn.p:hover{box-shadow:0 12px 38px -10px var(--violet);filter:brightness(1.1)}
+.btn.g{background:linear-gradient(100deg,rgba(46,230,168,.2),rgba(0,229,255,.18));border-color:rgba(46,230,168,.45);color:#b6ffe6}
+.btn.d{background:linear-gradient(100deg,rgba(255,59,92,.2),rgba(255,45,155,.16));border-color:rgba(255,59,92,.45);color:#ffc3ce}
+.btn.gold{background:linear-gradient(100deg,rgba(232,195,122,.22),rgba(255,176,32,.16));border-color:rgba(232,195,122,.5);color:var(--gold)}
+.btn.sm{padding:10px 16px;font-size:9.5px}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
+.backbar{display:flex;align-items:center;gap:14px;padding:24px clamp(20px,4vw,48px) 0;position:relative;z-index:5}
+.backbtn{display:inline-flex;align-items:center;gap:12px;padding:11px 20px;border-radius:44px;border:1px solid var(--line2);background:rgba(8,14,32,.75);font-size:12px;font-weight:600;letter-spacing:.1em;transition:.3s;backdrop-filter:blur(10px)}
+.backbtn:hover{border-color:var(--cyan);color:var(--cyan);transform:translateX(-5px)}
+.frontand{display:flex;align-items:center;justify-content:center;gap:16px;width:100%;padding:24px;border-radius:16px;border:1px solid rgba(232,195,122,.4);background:linear-gradient(100deg,rgba(232,195,122,.14),rgba(0,229,255,.12),rgba(192,75,255,.14));font-family:'Orbitron';font-size:13px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);transition:.35s;position:relative;overflow:hidden}
+.frontand:hover{box-shadow:0 0 44px -12px var(--gold);letter-spacing:.28em}
+.frontand .ar{transition:.35s}
+.frontand:hover .ar{transform:translateX(10px)}
+.frontand small{display:block;font-family:'Space Grotesk';font-size:10px;letter-spacing:.16em;color:var(--faint);text-transform:none;font-weight:500;margin-top:5px}
+
+@media(max-width:1000px){.calcgrid{grid-template-columns:1fr}.goldsplit{grid-template-columns:1fr}}
+@media(max-width:860px){
+  :root{--sb:250px}
+  #sidebar{transform:translateX(-102%);box-shadow:0 0 70px #000}
+  #sidebar.open{transform:none}
+  #shell{margin-left:0}
+  #mobtoggle{display:grid}
+  .rights{top:18px;right:16px;font-size:9px;padding:6px 12px;max-width:54vw}
+  .svcrow{grid-template-columns:1fr 74px}
+  .row2{grid-template-columns:1fr}
+  .chatbody{max-height:none;min-height:54vh}
+  .dragpiece{width:100px;height:100px}
+  .askbot{right:16px;bottom:16px}
+  .askbot .o{width:56px;height:56px}
+  .backbar{padding-top:70px}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.05ms!important}html{scroll-behavior:auto}}
+@media(min-width:861px){.chatactions{margin-top:34px}}
+
+/* preview fixes */
+.frontand,.hubcard > *:last-child{white-space:nowrap}
+.tagline{letter-spacing:.22em}
+@media(max-width:860px){.tagline{letter-spacing:.14em;font-size:11px}}
+
+/* toasts must never block dragging or taps */
+#toasts{pointer-events:none}
+.toast{pointer-events:none}
+@media(max-width:860px){#toasts{left:12px;right:12px;bottom:14px;max-width:none}}
+
+/* account chips */
+.acchip.on{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.08)}
+.acctcard .sub{font-size:12px;color:var(--dim);line-height:1.5;margin-top:6px}
+</style>
+</head>
+<body>
+
+<!-- BOOT -->
+<div id="boot">
+  <div class="bootwrap">
+    <div class="bootmark">
+      <svg viewBox="0 0 120 120"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8c37a"/><stop offset=".5" stop-color="#fff6df"/><stop offset="1" stop-color="#00e5ff"/></linearGradient></defs>
+      <path d="M78 30 H44 a16 16 0 0 0-16 16 v28 a16 16 0 0 0 16 16 h34" fill="none" stroke="url(#bg1)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M56 34 L96 90 M96 34 L56 90" fill="none" stroke="url(#bg1)" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(0,229,255,.25)" stroke-width="1"/></svg>
+    </div>
+    <div class="boottitle">CIDEX INFOTECH</div>
+    <div class="bootsub">Welcome</div>
+    <div class="bootbar"><div class="bootfill" id="bootFill"></div></div>
+    <div class="bootlog mono" id="bootLog">initialising core…</div>
+    <div class="bootpct" id="bootPct">0%</div>
+  </div>
+</div>
+
+<button id="mobtoggle" aria-label="Menu"><span></span></button>
+<div id="scrim"></div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sbtop">
+    <div class="brandrow">
+      <div class="brandmark"><svg viewBox="0 0 120 120"><defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8c37a"/><stop offset=".55" stop-color="#fff6df"/><stop offset="1" stop-color="#c9a25c"/></linearGradient></defs><path d="M78 30 H44 a16 16 0 0 0-16 16 v28 a16 16 0 0 0 16 16 h34" fill="none" stroke="url(#sg)" stroke-width="6" stroke-linecap="round"/><path d="M56 34 L96 90 M96 34 L56 90" fill="none" stroke="url(#sg)" stroke-width="6" stroke-linecap="round"/></svg></div>
+      <div class="brandtxt"><div class="n">CIDEX</div><div class="t">Infotech</div></div>
+    </div>
+    <button class="sbbtn sb-signin" id="signinBtn">◈ SIGN IN</button>
+    <button class="sbbtn sb-hub" data-nav="home">⬡ CIDEX INFOTECH</button>
+  </div>
+  <nav class="sbnav" id="sbNav"></nav>
+  <div class="sbfoot"><span>v3.0 · GENERATIONAL</span><span style="display:flex;align-items:center;gap:6px"><i class="dotlive"></i>LIVE</span></div>
+</aside>
+
+<div class="rights">Cidex Infotech all rights reserved.</div>
+<div id="toasts"></div>
+<div id="flash"></div>
+
+<main id="shell">
+
+<!-- ══════════ HOME ══════════ -->
+<section class="page on" id="page-home">
+  <div class="fx"><div class="aurora a1"></div><div class="aurora a2"></div><div class="aurora a3"></div><div class="gridfx"></div><canvas id="stars"></canvas><div class="grain"></div><div class="scan"></div></div>
+  
+  <div class="hero">
+    <div class="hero-text">
+      <div class="tagline"><span class="ln"></span><span class="tg">But Ask First, Build Second</span></div>
+      <h1 class="herotitle">Cidex<br>Infotech</h1>
+      <p class="herosub">Digital World Partner with full potential Services. The arguably best place you can find to <b>scale your business</b> or visualise the <b>Apex of Digital Services</b>.</p>
+      <div class="ovarow">
+        <div class="ova"><i>◆</i>Modern Services, Everything you crave for</div>
+        <div class="ova"><i>◆</i>Straight Pricing, No Surprises</div>
+        <div class="ova"><i>◆</i>Full Effort to ensure best</div>
+      </div>
+      <div class="scrollcue"><span class="mouse"></span>Scroll to explore</div>
+    </div>
+    
+    <!-- WEBGL 3D CANVAS REPLACES CSS ORB -->
+    <div class="hero-visual">
+      <canvas id="liquid-core"></canvas>
+    </div>
+  </div>
+
+  <div class="wrap sec">
+    <div class="eyebrow reveal-up">Home Subsections</div>
+    <h2 class="h2 reveal-up">Your account, <span class="g">your control</span></h2>
+    <p class="lede reveal-up">Everything attached to your identity lives here. Open any panel and the sidebar steps aside so the page can breathe.</p>
+    <div class="hubgrid">
+      <button class="hubcard reveal-up" style="--hg:linear-gradient(120deg,#00e5ff,#3d7bff)" data-nav="profile"><div><div class="hubnum">01 / IDENTITY</div><div class="hubname">Edit Profile</div><div class="hubsub">Name, contact and preferences — the details we use to reach you.</div></div><div class="hubgo">OPEN →</div></button>
+      <button class="hubcard reveal-up" style="--hg:linear-gradient(120deg,#ffb020,#ff2d9b)" data-nav="account"><div><div class="hubnum">02 / LEDGER</div><div class="hubname">My Account</div><div class="hubsub">Rank, due bills, current and past orders, full transaction history.</div></div><div class="hubgo">OPEN →</div></button>
+      <button class="hubcard reveal-up" style="--hg:linear-gradient(120deg,#2ee6a8,#00e5ff)" data-nav="mail"><div><div class="hubnum">03 / CONTACT</div><div class="hubname">Mail Our Team</div><div class="hubsub">Write to us directly. Phone, WhatsApp and email live only here.</div></div><div class="hubgo">OPEN →</div></button>
+      <button class="hubcard reveal-up" style="--hg:linear-gradient(120deg,#ff3b5c,#c04bff)" data-nav="privacy"><div><div class="hubnum">04 / CONTROL</div><div class="hubname">Privacy Controls</div><div class="hubsub">Two irreversible actions, both guarded by explicit confirmation.</div></div><div class="hubgo">OPEN →</div></button>
+      <button class="hubcard reveal-up" style="--hg:linear-gradient(120deg,#e8c37a,#cfd8ea)" data-nav="legal"><div><div class="hubnum">05 / LEGAL</div><div class="hubname">Security Regulations</div><div class="hubsub">Refunds, terms, privacy and cookies — written to be read.</div></div><div class="hubgo">OPEN →</div></button>
+    </div>
+  </div>
+
+  <div class="blend"><div class="blendline" style="top:30%"></div><div class="blendline" style="top:62%;opacity:.25"></div><div class="blendline" style="top:84%;opacity:.15"></div></div>
+
+  <div class="wrap sec" style="padding-top:20px">
+    <div class="eyebrow reveal-up">Continue Downward</div>
+    <h2 class="h2 reveal-up">The floor beneath home is <span class="g">Services</span></h2>
+    <p class="lede reveal-up">Keep scrolling — the grid dissolves into the services deck. Same building, different floor.</p>
+    <div class="btnrow"><button class="btn p" data-nav="services">ENTER SERVICES DECK →</button><button class="btn" data-nav="calculator">REVIEW BUDGET</button><button class="btn" data-nav="industries">EXPLORE INDUSTRIES</button></div>
+  </div>
+</section>
+
+<!-- ══════════ EDIT PROFILE ══════════ -->
+<section class="page" id="page-profile">
+  <div class="rockstage" data-rocks></div>
+  <div class="backbar"><button class="backbtn" data-nav="home">← Return to Homepage</button></div>
+  <div class="wrap sec" style="max-width:780px">
+    <div class="eyebrow">Identity</div>
+    <h2 class="h2">Edit <span class="g">Profile</span></h2>
+    <p class="lede">Small page, quiet sky. Update what we call you and how we reach you.</p>
+    <div class="card" style="padding:30px;margin-top:30px">
+      <form id="profileForm" novalidate>
+        <div class="row2">
+          <div class="field"><label>First Name</label><input class="inp" id="pfFirst" placeholder="Syed"><div class="err" id="eFirst">First name is required.</div></div>
+          <div class="field"><label>Last Name</label><input class="inp" id="pfLast" placeholder="Hassan"></div>
+        </div>
+        <div class="field"><label>Email Address</label><input class="inp" id="pfEmail" type="email" placeholder="you@company.com"><div class="err" id="eEmail">Enter a valid email address.</div></div>
+        <div class="row2">
+          <div class="field"><label>Phone</label><input class="inp" id="pfPhone" placeholder="+91 ..."></div>
+          <div class="field"><label>Company</label><input class="inp" id="pfCompany" placeholder="Your business"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Industry</label><select class="inp" id="pfIndustry"></select></div>
+          <div class="field"><label>Currency Preference</label><select class="inp" id="pfCurr"><option value="INR">INR ₹</option><option value="USD">USD $</option></select></div>
+        </div>
+        <div class="field"><label>Preference</label><select class="inp" id="pfPref"><option>Growth & Advertising</option><option>Identity & Creation</option><option>Visibility & Marketing</option><option>Automation</option><option>Not sure yet — advise me</option></select></div>
+        <div class="field"><label>Notes for the team</label><textarea class="inp" id="pfNotes" placeholder="Anything we should know before we reply."></textarea></div>
+        <div class="btnrow" style="margin-top:10px"><button type="submit" class="btn p">SAVE CHANGES</button><button type="reset" class="btn">RESET</button><button type="button" class="btn d" id="pfSignOut">SIGN OUT</button></div>
+        <div class="okmsg" id="pfOk">Preview only: profile changes are not saved yet.</div>
+      </form>
+    </div>
+    <div style="margin-top:38px"><button class="frontand" data-nav="home"><span>Back to home</span><span class="ar">⟶</span></button></div>
+  </div>
+</section>
+
+<!-- ══════════ MY ACCOUNT ══════════ -->
+<section class="page" id="page-account">
+  <div class="rockstage" data-rocks></div>
+  <div class="backbar"><button class="backbtn" data-nav="home">← Return to Homepage</button></div>
+  <div class="wrap sec">
+    <div class="eyebrow">My account</div>
+    <h2 class="h2">My <span class="g">Account</span></h2>
+    <p class="lede">Enter your budget and the services you want. The summary updates as you type. Saved on this device only until our backend is connected.</p>
+    <div class="acctgrid">
+      <div class="acctcard"><div class="l">Name</div><div class="v" id="acName" style="font-size:18px">—</div><div class="sub" id="acEmail">Edit your profile to add your details</div></div>
+      <div class="acctcard"><div class="l">Monthly budget</div><div class="v" id="acBudget" style="color:var(--gold)">—</div><div class="sub" id="acBudgetNote">Enter a monthly budget below</div></div>
+      <div class="acctcard"><div class="l">Services chosen</div><div class="v" id="acCount" style="color:var(--cyan)">0</div><div class="sub" id="acServices">None selected yet</div></div>
+      <div class="acctcard"><div class="l">Status</div><div class="v" id="acStatus" style="font-size:16px">Not started</div><div class="sub" id="acStatusNote">Pick the services you want</div></div>
+    </div>
+    <div class="card" style="padding:26px;margin-top:22px">
+      <form id="acForm" novalidate>
+        <div class="row2">
+          <div class="field"><label>Company</label><input class="inp" id="acCompany" placeholder="Your business name"></div>
+          <div class="field"><label>Monthly budget (₹)</label><input class="inp" id="acBudgetIn" type="number" min="0" step="500" placeholder="e.g. 25000"></div>
+        </div>
+        <div class="field"><label>Services you want</label><div id="acChips" style="display:flex;flex-wrap:wrap;gap:8px"></div></div>
+        <div class="field"><label>Timeline</label><select class="inp" id="acTimeline"><option value="">Choose one</option><option>This month</option><option>Next 3 months</option><option>Just exploring</option></select></div>
+        <div class="field"><label>Anything else we should know</label><textarea class="inp" id="acNotes" rows="3" placeholder="Goals, your current website, tools you use"></textarea></div>
+        <div class="btnrow"><button class="btn p" type="submit">SAVE ON THIS DEVICE</button><button class="btn" type="button" id="acReset">CLEAR</button></div>
+        <div class="okmsg" id="acOk">Saved on this device.</div>
+      </form>
+    </div>
+    <div class="card" style="padding:26px;margin-top:22px">
+      <div class="eyebrow" style="margin-bottom:16px">Requested services</div>
+      <table class="tbl"><thead><tr><th>Service</th><th>Starting price</th><th>Status</th></tr></thead><tbody id="acRows"></tbody></table>
+      <div id="acEmpty" style="font-size:14px;color:var(--dim);padding:8px 0">No services selected yet. Tick the ones you need above.</div>
+    </div>
+    <div style="margin-top:38px"><button class="frontand" data-nav="home"><span>Back to home</span><span class="ar">⟶</span></button></div>
+  </div>
+</section>
+
+<!-- ══════════ MAIL TEAM ══════════ -->
+<section class="page" id="page-mail">
+  <div class="rockstage" data-rocks></div>
+  <div class="backbar"><button class="backbtn" data-nav="home">← Return to Homepage</button></div>
+  <div class="wrap sec" style="max-width:880px">
+    <div class="eyebrow">Contact</div>
+    <h2 class="h2">Mail Our <span class="g">Team</span></h2>
+    <p class="lede">This preview does not send messages yet. Use the contact options below.</p>
+    <div class="card" style="padding:30px;margin-top:28px">
+      <form id="mailForm" novalidate>
+        <div class="row2">
+          <div class="field"><label>Your Name</label><input class="inp" id="mlName" placeholder="Full name"><div class="err" id="eMlName">Please tell us your name.</div></div>
+          <div class="field"><label>Email</label><input class="inp" id="mlEmail" type="email" placeholder="you@company.com"><div class="err" id="eMlEmail">Enter a valid email address.</div></div>
+        </div>
+        <div class="field"><label>Subject</label><select class="inp" id="mlSubject"><option>New project enquiry</option><option>Quote request</option><option>Existing order support</option><option>Billing question</option><option>Partnership / investment</option><option>Something else</option></select></div>
+        <div class="field"><label>Message</label><textarea class="inp" id="mlMsg" placeholder="Tell us what you're trying to achieve."></textarea><div class="err" id="eMlMsg">A message of at least 10 characters helps us help you.</div></div>
+        <div class="btnrow" style="margin-top:8px"><button type="submit" class="btn g">SEND TO TEAM ⟶</button><button type="button" class="btn" id="mlCopy">COPY DRAFT</button></div>
+        <div class="okmsg" id="mlOk">Message queued. The team has it.</div>
+      </form>
+    </div>
+    <div id="contactPart" style="scroll-margin-top:26px">
+      <div class="eyebrow" style="margin-top:42px">Direct Channels</div>
+      <div class="contactgrid">
+        <a class="contactcard" href="tel:+918777324473"><div class="ci">✆</div><div><div class="cl">Contact Number</div><div class="cv">+91 87773 24473</div></div></a>
+        <a class="contactcard" href="https://wa.me/918777324473" target="_blank" rel="noopener"><div class="ci" style="background:rgba(46,230,168,.12);border-color:rgba(46,230,168,.3)">◉</div><div><div class="cl">WhatsApp</div><div class="cv">Chat with us</div></div></a>
+        <a class="contactcard" href="mailto:team@cidexinfotech.com"><div class="ci" style="background:rgba(255,45,155,.12);border-color:rgba(255,45,155,.3)">✉</div><div><div class="cl">Gmail</div><div class="cv">team@cidexinfotech.com</div></div></a>
+      </div>
+      <div class="card" style="padding:26px;margin-top:18px">
+        <div class="eyebrow" style="margin-bottom:14px">Subscribe</div>
+        <p style="color:var(--dim);font-size:13.5px;line-height:1.75;margin-bottom:16px">Monthly note on what actually moved the needle — no filler, unsubscribe in one click.</p>
+        <form id="subForm" style="display:flex;gap:12px;flex-wrap:wrap"><input class="inp" id="subEmail" type="email" placeholder="you@company.com" style="flex:1;min-width:220px"><button class="btn p" type="submit">SUBSCRIBE</button></form>
+        <div class="err" id="eSub">Enter a valid email address.</div>
+        <div class="okmsg" id="subOk">Subscribed. Welcome aboard.</div>
+      </div>
+    </div>
+    <div style="margin-top:38px"><button class="frontand" data-nav="home"><span>Back to home</span><span class="ar">⟶</span></button></div>
+  </div>
+</section>
+
+<!-- ══════════ PRIVACY CONTROLS ══════════ -->
+<section class="page" id="page-privacy">
+  <div class="rockstage" data-rocks></div>
+  <div class="backbar"><button class="backbtn" data-nav="home">← Return to Homepage</button></div>
+  <div class="wrap sec" style="max-width:880px">
+    <div class="eyebrow">Irreversible Actions</div>
+    <h2 class="h2">Privacy <span class="g" style="background:linear-gradient(120deg,#ff3b5c,#c04bff);-webkit-background-clip:text;background-clip:text">Controls</span></h2>
+    <p class="lede">Nothing here happens on a single click. Both actions require explicit confirmation and cannot be undone.</p>
+    <div class="privgrid">
+      <div class="privcard"><h3>Delete my Data</h3><p>Erases analytics history, stored preferences, saved drafts and message logs. Your account and active orders remain intact.</p><button class="btn d" id="delData">DELETE MY DATA</button></div>
+      <div class="privcard"><h3>Delete my Account</h3><p>Removes your profile, credentials and order history permanently. Active engagements must be settled first.</p><button class="btn d" id="delAcct">DELETE MY ACCOUNT</button></div>
+    </div>
+    <div style="margin-top:38px"><button class="frontand" data-nav="home"><span>Back to home</span><span class="ar">⟶</span></button></div>
+  </div>
+</section>
+
+<!-- ══════════ LEGAL ══════════ -->
+<section class="page" id="page-legal">
+  <div class="legalbg"><canvas id="legalCanvas"></canvas><div class="veil"></div></div>
+  <div class="backbar"><button class="backbtn" data-nav="home">← Return to Homepage</button></div>
+  <div class="wrap sec" style="max-width:980px;padding-top:28px">
+    <div class="eyebrow" style="color:var(--gold)">Legal</div>
+    <h2 class="h2" style="background:linear-gradient(100deg,#e8c37a,#fff6df,#cfd8ea);-webkit-background-clip:text;background-clip:text;color:transparent">Security Regulations</h2>
+    <p class="lede">Refund policy, terms, privacy and cookies in one readable document. Last reviewed 18 November 2026.</p>
+    <div class="jumpnav">
+      <button class="jump" data-jump="lg-refund">REFUND POLICY</button>
+      <button class="jump" data-jump="lg-terms">TERMS & CONDITIONS</button>
+      <button class="jump" data-jump="lg-privacy">PRIVACY POLICY</button>
+      <button class="jump" data-jump="lg-cookie">COOKIE POLICY</button>
+      <button class="jump" id="consultTeam" style="border-color:rgba(0,229,255,.5);color:var(--cyan)">CONSULT TEAM ⟶</button>
+    </div>
+    <div id="legalBody"></div>
+    <div style="margin-top:22px"><button class="frontand" data-nav="home"><span>Back to home</span><span class="ar">⟶</span></button></div>
+  </div>
+</section>
+
+<!-- ══════════ SERVICES HUB ══════════ -->
+<section class="page" id="page-services">
+  <div class="fx"><div class="aurora a1" style="opacity:.22"></div><div class="aurora a2" style="opacity:.26"></div><div class="gridfx"></div><div class="grain"></div></div>
+  <div class="wrap sec" style="padding-top:clamp(74px,9vw,116px)">
+    <div class="eyebrow">Services Deck · Prototype 3.0</div>
+    <h2 class="h2" style="font-size:clamp(32px,6vw,64px)">Four forces,<br><span class="g">one operating system</span></h2>
+    <p class="lede" style="max-width:800px">Creation gives you something real to point at. AD Services rents attention and converts it. Marketing & Strategy decides where that attention should go and proves whether it worked. Automation removes the waiting between all three. Run one alone and you get a spike; run them together and you get a machine that compounds — the site converts, the ads feed it, the analysis redirects spend, and the automation makes sure nothing sits in an inbox overnight.</p>
+    <p class="lede" style="max-width:800px;margin-top:16px">That is the whole pitch: not four invoices, one loop. Pick a force below to enter its floor.</p>
+    <div class="hubgrid">
+      <button class="hubcard" style="--hg:linear-gradient(120deg,#ffb020,#ff2d9b)" data-nav="ad"><div><div class="hubnum">FORCE 01</div><div class="hubname">Growth</div><div class="hubsub">Turning attention into opportunities</div></div><div class="hubgo">AD SERVICES →</div></button>
+      <button class="hubcard" style="--hg:linear-gradient(120deg,#00e5ff,#3d7bff)" data-nav="creation"><div><div class="hubnum">FORCE 02</div><div class="hubname">Identity</div><div class="hubsub">Building a recognisable presence</div></div><div class="hubgo">CREATION SERVICES →</div></button>
+      <button class="hubcard" style="--hg:linear-gradient(120deg,#2ee6a8,#00e5ff)" data-nav="marketing"><div><div class="hubnum">FORCE 03</div><div class="hubname">Visibility</div><div class="hubsub">Being discovered in the digital world</div></div><div class="hubgo">MARKETING & STRATEGY →</div></button>
+      <button class="hubcard" style="--hg:linear-gradient(120deg,#c04bff,#3d7bff)" data-nav="automation"><div><div class="hubnum">FORCE 04</div><div class="hubname">Automation</div><div class="hubsub">Making everyday processes smarter</div></div><div class="hubgo">AUTOMATION SERVICES →</div></button>
+    </div>
+    <div class="eyebrow" style="margin-top:60px">Resident Intelligence</div>
+    <div class="hubgrid" style="grid-template-columns:repeat(auto-fit,minmax(290px,1fr))">
+      <button class="hubcard" style="--hg:linear-gradient(120deg,#ff2d9b,#c04bff);min-height:190px" data-nav="aetheria"><div style="display:flex;gap:18px;align-items:center"><div class="botorb aeth" data-bot="aeth"></div><div><div class="hubname" style="font-size:22px;margin:0">Aetheria</div><div class="hubsub" style="margin-top:8px">The Brain · strategy, positioning, judgement</div></div></div><div class="hubgo">OPEN CHAT →</div></button>
+      <button class="hubcard" style="--hg:linear-gradient(120deg,#00e5ff,#3d7bff);min-height:190px" data-nav="clow"><div style="display:flex;gap:18px;align-items:center"><div class="botorb clow" data-bot="clow"></div><div><div class="hubname" style="font-size:22px;margin:0">Clow</div><div class="hubsub" style="margin-top:8px">The Calculator · budgets, media plans, numbers</div></div></div><div class="hubgo">OPEN CHAT →</div></button>
+    </div>
+    <div class="btnrow" style="margin-top:44px"><button class="btn" data-nav="home">↑ BACK TO HOME</button><button class="btn gold" data-nav="calculator">REVIEW BUDGET</button></div>
+  </div>
+</section>
+
+<!-- ══════════ SERVICE SUBSECTIONS (built by JS) ══════════ -->
+<section class="page" id="page-creation"></section>
+<section class="page" id="page-ad"></section>
+<section class="page" id="page-marketing"></section>
+<section class="page" id="page-automation"></section>
+
+<!-- ══════════ AETHERIA ══════════ -->
+<section class="page" id="page-aetheria">
+  <div class="fx"><div class="aurora a2" style="opacity:.28"></div><div class="aurora a3" style="opacity:.24"></div><div class="gridfx"></div><div class="grain"></div></div>
+  <div class="chatpage">
+    <div class="chathead">
+      <div class="botorb aeth" data-bot="aeth"></div>
+      <div class="chatwho"><div class="hi" id="aethHello">Hello</div><div class="st"><i class="dotlive" style="background:var(--magenta);box-shadow:0 0 10px var(--magenta)"></i>Aetheria · The Brain</div></div>
+      <div class="chatactions"><button class="btn sm g" data-sendteam="aeth">SEND TO THE TEAM</button><button class="btn sm" data-nav="clow">CLOW ⟶</button><button class="btn sm" data-nav="services">EXIT</button></div>
+    </div>
+    <div class="chatbody" id="aethBody"></div>
+    <div class="chatbar"><textarea id="aethInput" rows="1" placeholder="Ask Aetheria about strategy, positioning or direction…"></textarea><button class="sendbtn" id="aethSend" aria-label="Send">➤</button></div>
+  </div>
+</section>
+
+<!-- ══════════ CLOW ══════════ -->
+<section class="page" id="page-clow">
+  <div class="fx"><div class="aurora a1" style="opacity:.26"></div><div class="gridfx"></div><canvas id="clowTicker"></canvas><div class="grain"></div></div>
+  <div class="chatpage">
+    <div class="chathead">
+      <div class="botorb clow" data-bot="clow"></div>
+      <div class="chatwho"><div class="hi" id="clowHello">Hello</div><div class="st"><i class="dotlive"></i>Clow · The Calculator</div></div>
+      <div class="chatactions">
+        <div class="currsw" id="currSw"><button data-curr="INR" class="on">₹ INR</button><button data-curr="USD">$ USD</button></div>
+        <button class="btn sm g" data-sendteam="clow">SEND TO THE TEAM</button><button class="btn sm" data-nav="aetheria">AETHERIA ⟶</button><button class="btn sm" data-nav="services">EXIT</button>
+      </div>
+    </div>
+    <div class="calcstrip" id="clowChips"></div>
+    <div class="chatbody" id="clowBody"></div>
+    <div class="chatbar"><textarea id="clowInput" rows="1" placeholder="Ask Clow for a budget, ROAS estimate or media split…"></textarea><button class="sendbtn" id="clowSend" aria-label="Send">➤</button></div>
+  </div>
+</section>
+
+<!-- ══════════ CALCULATOR ══════════ -->
+<section class="page" id="page-calculator">
+  <div class="fx"><div class="aurora a1" style="opacity:.2"></div><div class="aurora a2" style="opacity:.2"></div><div class="gridfx"></div><div class="grain"></div></div>
+  <div class="wrap sec" style="padding-top:clamp(74px,9vw,116px)">
+    <div class="eyebrow">Review Budget</div>
+    <h2 class="h2">Spend it like <span class="g">you mean it</span></h2>
+    <p class="lede">Move the sliders. Every number below recalculates live using our working benchmarks for Indian SMB accounts.</p>
+    <div class="calcgrid">
+      <div class="card" style="padding:30px">
+        <div class="eyebrow" style="margin-bottom:8px">Monthly Ad Budget</div>
+        <div class="bigval" id="budgetVal">₹50,000</div>
+        <input type="range" class="slider" id="budgetSlider" min="5000" max="500000" step="5000" value="50000">
+        <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:10px;color:var(--faint)"><span>₹5K</span><span>₹5L</span></div>
+        <div class="row2" style="margin-top:24px">
+          <div class="field"><label>Objective</label><select class="inp" id="calcGoal"><option value="leads">Lead Generation</option><option value="sales">E-commerce Sales</option><option value="traffic">Traffic & Awareness</option><option value="local">Local Footfall</option></select></div>
+          <div class="field"><label>Channel Mix</label><select class="inp" id="calcMix"><option value="balanced">Balanced</option><option value="google">Google-heavy</option><option value="meta">Meta-heavy</option><option value="organic">Organic-first</option></select></div>
+        </div>
+        <div class="field"><label>Avg. Order / Deal Value — <span id="aovLabel" class="mono" style="color:var(--cyan)">₹3,000</span></label><input type="range" class="slider" id="aovSlider" min="300" max="60000" step="100" value="3000"></div>
+        <div class="field"><label>Close Rate — <span id="crLabel" class="mono" style="color:var(--cyan)">12%</span></label><input type="range" class="slider" id="crSlider" min="1" max="60" step="1" value="12"></div>
+        <div class="field"><label>Horizon — <span id="moLabel" class="mono" style="color:var(--cyan)">6 months</span></label><input type="range" class="slider" id="moSlider" min="1" max="24" step="1" value="6"></div>
+        <div class="btnrow" style="margin-top:12px"><button class="btn p" id="calcReset">RESET</button><button class="btn gold" id="calcRandom">RANDOMISE</button><button class="btn g" data-nav="clow">ASK CLOW ⟶</button></div>
+      </div>
+      <div>
+        <div class="card" style="padding:28px">
+          <div class="eyebrow" style="margin-bottom:16px">Projected Outcome</div>
+          <div class="statgrid">
+            <div class="stat"><div class="l">Impressions</div><div class="v" id="oImp" style="color:var(--cyan)">—</div></div>
+            <div class="stat"><div class="l">Clicks</div><div class="v" id="oClk" style="color:var(--blue)">—</div></div>
+            <div class="stat"><div class="l">Leads</div><div class="v" id="oLead" style="color:var(--violet)">—</div></div>
+            <div class="stat"><div class="l">Customers</div><div class="v" id="oCust" style="color:var(--magenta)">—</div></div>
+            <div class="stat"><div class="l">Revenue</div><div class="v" id="oRev" style="color:var(--acid)">—</div></div>
+            <div class="stat"><div class="l">ROAS</div><div class="v" id="oRoas" style="color:var(--amber)">—</div></div>
+          </div>
+          <div style="margin-top:20px;padding:16px 18px;border-radius:12px;border:1px solid var(--line);background:rgba(5,8,20,.55);font-size:13px;line-height:1.75;color:var(--dim)" id="calcVerdict"></div>
+        </div>
+        <div class="card" style="padding:28px;margin-top:20px">
+          <div class="eyebrow" style="margin-bottom:8px">Recommended Split</div>
+          <div class="alloc" id="allocList"></div>
+        </div>
+        <div class="card" style="padding:28px;margin-top:20px">
+          <div class="eyebrow" style="margin-bottom:8px">Revenue Ramp</div>
+          <div class="bars" id="rampBars" style="margin-bottom:28px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ INDUSTRIES ══════════ -->
+<section class="page" id="page-industries">
+  <div class="fx"><div class="aurora a1" style="opacity:.18"></div><div class="aurora a2" style="opacity:.18"></div><div class="gridfx"></div><canvas id="indCanvas"></canvas><div class="grain"></div></div>
+  <div class="wrap sec" style="padding-top:clamp(74px,9vw,116px)">
+    <div class="eyebrow">Industries · 20 Sectors</div>
+    <h2 class="h2">Every small industry is <span class="g">a pillar</span></h2>
+    <p class="lede">A neighbourhood clinic and a national chain run on the same physics: someone needs you, and they have to find you first. No sector is too small to deserve infrastructure.</p>
+    <div class="quote" style="margin-top:24px">"The economy is not held up by its tallest towers, but by the thousands of small foundations nobody photographs."</div>
+    <div class="indgrid" id="indGrid"></div>
+  </div>
+</section>
+<section class="page" id="page-industry"></section>
+
+<!-- ══════════ FAQ ══════════ -->
+<section class="page" id="page-faq">
+  <div class="fx"><div class="aurora a2" style="opacity:.2"></div><div class="aurora a3" style="opacity:.16"></div><div class="gridfx"></div><div class="grain"></div></div>
+  <div class="wrap sec" style="padding-top:clamp(74px,9vw,116px)">
+    <div class="eyebrow">FAQ</div>
+    <h2 class="h2">Asked, <span class="g">answered</span></h2>
+    <p class="lede">The questions that arrive in almost every first call. Tap to open.</p>
+    <div class="faqlist" id="faqList"></div>
+    <div style="height:120px"></div>
+  </div>
+  <button class="askbot" data-nav="aetheria"><div class="o" data-bot="aeth"></div><div class="t">Ask additional questions</div></button>
+</section>
+
+<!-- ══════════ FINAL PIECE ══════════ -->
+<section class="page" id="page-final">
+  <div id="finalPage">
+    <div class="fphead">
+      <div class="eyebrow" style="justify-content:center">Final piece</div>
+      <h2 class="h2" id="fpTitle">Assemble the <span class="g">whole</span></h2>
+      <p class="lede" style="margin:14px auto 0" id="fpLede">Four pieces are drifting below. Drag each into its matching slot in the blueprint above.</p>
+      <div class="checklist" id="fpTicks"></div>
+    </div>
+    <div class="blueprint" id="blueprint">
+      <div class="slot" data-slot="creation">CREATION<br>SERVICES</div>
+      <div class="slot" data-slot="ad">AD<br>SERVICES</div>
+      <div class="slot" data-slot="marketing">MARKETING &<br>STRATEGY</div>
+      <div class="slot" data-slot="automation">AUTOMATION<br>SERVICES</div>
+    </div>
+    <div id="pieceField" style="position:relative;max-width:1140px;margin:0 auto"></div>
+    <div class="reveal" id="goldReveal">
+      <svg class="goldlogo" viewBox="0 0 300 200"><defs><linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8c37a"/><stop offset=".35" stop-color="#fff8e6"/><stop offset=".62" stop-color="#cfd8ea"/><stop offset="1" stop-color="#c9a25c"/></linearGradient><filter id="gg"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <g filter="url(#gg)" fill="none" stroke="url(#gl)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M170 52 H108 a34 34 0 0 0-34 34 v28 a34 34 0 0 0 34 34 h62"/>
+          <path d="M132 56 L226 148 M226 56 L132 148"/>
+        </g>
+        <g stroke="rgba(232,195,122,.35)" stroke-width="1" fill="none"><circle cx="150" cy="100" r="88"/><path d="M20 100 h30 M250 100 h30 M150 12 v22 M150 166 v22"/></g>
+        <g fill="#e8c37a"><circle cx="108" cy="52" r="3"/><circle cx="226" cy="148" r="3"/><circle cx="74" cy="114" r="3"/></g>
+      </svg>
+      <div class="goldtitle">CIDEX-INFOTECH</div>
+      <div class="goldsub">Building Digital Experiences. Enabling Business Growth.</div>
+      <div class="goldcard">
+        <p>Cidex Infotech is a small digital services business in Kolkata, India, run by Managing Director <b style="color:#fff">Arnav Gupta</b> and founder <b style="color:#fff">Syed Shamviul Hassan</b>. We offer SEO, Google and Meta ads, social media management, email marketing, analytics, web design, branding, graphic design, content writing, and video editing. It is operated by a highly dedicated team.</p>
+        <h3>🚀 Project Overview</h3>
+        <p>Welcome to the official website development repository of CIDEX INFOTECH. This repository contains the source code and development resources for the CIDEX INFOTECH website. The website is designed to establish a professional digital presence, showcase services, communicate the company's identity, and provide visitors with an accessible way to connect with the team.</p>
+        <div class="goldsplit">
+          <div><h3>🛠️ Technology Stack</h3><ul><li>HTML5</li><li>CSS3</li><li>JavaScript</li><li>Additional libraries and tools as required by the project.</li></ul></div>
+          <div><h3>✨ Development Objectives</h3><ul><li>Modern and responsive website design.</li><li>User-friendly navigation and experience.</li><li>Consistent visual identity.</li><li>Performance optimisation.</li><li>Interactive elements and animations.</li><li>Cross-device and cross-browser compatibility.</li><li>Maintainable and scalable code structure.</li></ul></div>
+        </div>
+        <h3>📁 Project Structure</h3>
+        <ul><li><code>index.html</code> — Main website entry point.</li><li><code>css/</code> — Stylesheets.</li><li><code>js/</code> — JavaScript functionality.</li><li><code>assets/</code> — Images, icons and other visual resources.</li></ul>
+        <p style="margin-top:12px">Actual directories and filenames may differ as the project evolves.</p>
+        <h3>🔧 Development</h3>
+        <p>The website uses standard web technologies and can be developed using a code editor such as Visual Studio Code or Google Antigravity. For local development, open the project folder and run it using a local development server or suitable editor extension.</p>
+        <h3>🔒 Security and Confidentiality</h3>
+        <ul><li>This repository contains company-owned development materials.</li><li>Do not commit API keys, passwords, tokens or other credentials.</li><li>Do not upload customer information or confidential business records.</li><li>Restrict repository access to authorised contributors.</li><li>Obtain appropriate approval before distributing or publishing company source code.</li></ul>
+        <h3>📌 Project Status</h3>
+        <p><b style="color:#fff">Status: Under Development.</b> The website and its features may undergo continuous improvements, testing and optimisation.</p>
+        <h3>© Copyright</h3>
+        <p>© CIDEX INFOTECH. All rights reserved. Unauthorised distribution or commercial reuse of proprietary company materials is not permitted.</p>
+      </div>
+      <div style="margin-top:34px"><button class="frontand" data-nav="home" style="border-color:rgba(232,195,122,.6)"><span>BACK TO HOMEPAGE</span><span class="ar">⟶</span></button></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- MODALS -->
+<div class="modal" id="authModal"><div class="modalbox"><div class="authglow"></div><button class="xclose" data-close>✕</button>
+  <h3>Welcome back</h3><p class="sm">Sign in to sync your profile, orders and preferences across the deck.</p>
+  <form id="authForm" novalidate>
+    <div class="field"><label>Email</label><input class="inp" id="auEmail" type="email" placeholder="you@company.com"><div class="err" id="eAuEmail">Enter a valid email address.</div></div>
+    <div class="field"><label>Password</label><input class="inp" id="auPass" type="password" placeholder="••••••••"><div class="err" id="eAuPass">Minimum 6 characters.</div></div>
+    <div class="field"><label>Display Name</label><input class="inp" id="auName" placeholder="What should we call you?"></div>
+    <div class="btnrow" style="margin-top:8px"><button class="btn p" type="submit" style="flex:1">SIGN IN & SAVE</button></div>
+  </form>
+</div></div>
+
+<div class="modal" id="confirmModal"><div class="modalbox" style="border-color:rgba(255,59,92,.45)"><button class="xclose" data-close>✕</button>
+  <h3 id="cfTitle" style="color:#ffc3ce">Confirm action</h3><p class="sm" id="cfBody"></p>
+  <div class="field"><label>Type DELETE to confirm</label><input class="inp" id="cfInput" placeholder="DELETE" autocomplete="off"></div>
+  <div class="btnrow"><button class="btn d" id="cfGo" disabled style="flex:1">CONFIRM & EXECUTE</button><button class="btn" data-close>CANCEL</button></div>
+</div></div>
+
+<div class="modal" id="quoteModal"><div class="modalbox"><div class="authglow"></div><button class="xclose" data-close>✕</button>
+  <h3 id="qTitle">Service brief</h3><p class="sm" id="qBody"></p>
+  <div id="qMeta" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px"></div>
+  <div class="btnrow"><button class="btn p" id="qToClow" style="flex:1">GET A QUOTE FROM CLOW ⟶</button><button class="btn" data-close>CLOSE</button></div>
+</div></div>
+
+<script>
+/* ═══════════════ DATA ═══════════════ */
+const SERVICES={
+creation:[["Website Development","Custom-built, responsive sites engineered for speed, clarity and conversion.","From ₹24,999"],["Chat Bot Development","Trained conversational bots that answer, qualify and hand off to humans.","From ₹14,999"],["Custom AI Assistant","A private assistant wired into your data, tone and daily workflows.","From ₹39,999"],["Website Redesign","A full visual and structural rebuild without losing your search equity.","From ₹18,999"],["Analytics & Tracking Setup","Clean event taxonomy so every click becomes a decision you can defend.","From ₹7,999"],["Search Console Setup","Indexing, sitemaps and coverage errors resolved the right way, once.","From ₹4,999"],["Custom Dashboard","One live screen for revenue, traffic and operations. No more tab chaos.","From ₹21,999"],["Website Security Configuration","Hardened headers, WAF rules and monitored entry points.","From ₹11,999"],["Database Design","Normalised schemas and indexed queries built to survive real scale.","From ₹16,999"],["Logo, Brand & Graphic Design","Identity systems: mark, type, palette and every asset your team needs. Includes all sub-services.","From ₹12,999"],["Backup & Recovery Setup","Automated snapshots with a rehearsed restore path. Sleep properly.","From ₹6,999"],["Landing Page","Single-purpose pages written and built to convert one specific offer.","From ₹8,999"],["Presentation Design","Investor and sales decks with narrative structure, not clip-art.","From ₹5,999"]],
+ad:[["E-commerce Maintenance","Catalogue, checkout and uptime kept healthy through every sale spike.","From ₹9,999/mo"],["SEO","Technical fixes, content architecture and authority that compound monthly.","From ₹12,999/mo"],["Advertising Management","Google and Meta campaigns managed to ROAS, not to impressions.","From ₹14,999/mo"],["Social Media Management","Calendars, creative and community handled as one operating system.","From ₹11,999/mo"],["Email Marketing","Lifecycle flows and campaigns that turn a list into recurring revenue.","From ₹7,999/mo"],["Brochure Design","Print-ready collateral that carries your identity offline.","From ₹4,999"],["Video Editing","Short-form and long-form cuts paced for retention and recall.","From ₹6,999"],["Analytics & Reporting","Monthly reporting with commentary, not screenshots of dashboards.","From ₹5,999/mo"]],
+marketing:[["Research","Market, competitor and keyword research that removes guesswork.","From ₹8,999"],["Website Management","Ongoing updates, monitoring and fixes on a fixed retainer.","From ₹9,999/mo"],["AI Document Processing","Invoices, forms and contracts parsed into structured, usable data.","From ₹19,999"],["AI Data Analysis","Pattern detection and forecasting across the data you already own.","From ₹22,999"],["Business Process Consultation","Map the workflow, find the drag, redesign the sequence.","From ₹14,999"],["Website Speed Optimisation","Core Web Vitals brought into green without breaking design.","From ₹10,999"],["Accessibility Improvements","WCAG-aligned contrast, focus order and semantics, properly tested.","From ₹9,999"],["Website Migration","Host, domain or platform moves with zero lost rankings.","From ₹13,999"],["Analytics & Tracking Setup","Server-side events and consent-aware measurement built to last.","From ₹7,999"],["Conversion Tracking","Every lead source attributed end to end, including offline calls.","From ₹8,999"],["Data Visualisation","Charts and boards that make the argument for you in one glance.","From ₹11,999"],["Technical Documentation","Runbooks and API docs your next developer will actually thank you for.","From ₹6,999"],["Website Accessibility Audit","Full audit with prioritised, costed remediation plan.","From ₹7,499"]],
+automation:[["AI Automation","Agents that read, decide and act inside your existing tools.","From ₹34,999"],["Business Automation","End-to-end automation across CRM, billing, support and reporting. Includes all sub-services.","From ₹29,999"],["Email Marketing Automation","Trigger-based sequences that respond to behaviour in real time.","From ₹12,999"],["WhatsApp Business Automation","Verified API flows for orders, reminders and support at scale.","From ₹15,999"],["Workflow Automation Consulting","Audit, blueprint and rollout plan before a single node is built.","From ₹18,999"]]};
+
+const META={
+creation:{title:"Creation Services",hue:"#00e5ff",hue2:"#3d7bff",k:"Force 02 · Identity",intro:"Creation is where intent becomes an object. A site, an identity, an assistant, a dashboard — things that exist and can be used tomorrow.",body:"We build the load-bearing parts first: structure, data, security, speed. Decoration follows function, never replaces it. Everything here ships with documentation and ownership in your name.",congrats:"Congratulations! You have essentially created a whole infrastructure by combining these services.",next:"ad",nextLabel:"GO TO AD SERVICES",read:"Read Creation Services",build:"infrastructure"},
+ad:{title:"AD Services",hue:"#ff3b6b",hue2:"#ffb020",k:"Force 01 · Growth",intro:"Attention is rented, not owned. AD Services is how you rent it efficiently — and convert it before the meter runs out.",body:"Campaigns, feeds, creative and community operated as one loop. We manage to return on spend and reported commentary, not vanity impressions.",congrats:"Congratulations! You just conquered the platforms of Social Media World.",next:"marketing",nextLabel:"GO TO MARKETING & STRATEGY",read:"Read AD Services",build:"phone"},
+marketing:{title:"Marketing & Strategy",hue:"#2ee6a8",hue2:"#00e5ff",k:"Force 03 · Visibility",intro:"Strategy is deciding what not to do. This is the research, measurement and analysis layer that makes every other rupee work harder.",body:"We instrument the business, read the signal honestly, and turn it into a prioritised plan — then document it so your team can run it without us.",congrats:"Congratulations! You have unlocked your deep analysis to improve your brand.",next:"automation",nextLabel:"GO TO AUTOMATION SERVICES",read:"Read Marketing and Strategy Services",build:"scatter"},
+automation:{title:"Automation Services",hue:"#c04bff",hue2:"#3d7bff",k:"Force 04 · Automation",intro:"Automation removes the waiting. Enquiries answered at 3am, invoices parsed instantly, reports that assemble themselves.",body:"We automate the seams between your tools — carefully, with human checkpoints where judgement matters and logs where accountability matters.",congrats:"Congratulations! You have made your business Autonomous for fast services and better output.",next:null,nextLabel:null,read:"Read Automation Services",build:"robot"}};
+
+const INDUSTRIES=[
+["E-commerce & Retail","cart","#ffb020","Stores that never close, and the logistics behind them."],
+["Healthcare","cross","#2ee6a8","Clinics, diagnostics and care networks people depend on."],
+["Education","book","#3d7bff","Schools, coaching and edtech shaping the next workforce."],
+["Real Estate","tower","#ff7a1a","Builders, brokers and property managers moving big decisions."],
+["Food & Restaurants","bowl","#ff3b6b","Kitchens, cloud brands and cafés running on thin margins."],
+["Finance & Fintech","coin","#2ee6a8","Lending, payments and advisory built on trust."],
+["Travel & Tourism","plane","#00e5ff","Operators, agencies and stays selling experiences."],
+["Manufacturing","gear","#ffb020","Factories and job-work units feeding every supply chain."],
+["Logistics & Supply","truck","#3d7bff","Fleets and warehouses keeping the country moving."],
+["Legal Services","scales","#c04bff","Firms and chambers where precision is the product."],
+["Fitness & Wellness","pulse","#2ee6a8","Gyms, studios and coaches selling consistency."],
+["Beauty & Salons","spark","#ff3b6b","Salons and skincare brands living on repeat bookings."],
+["Agriculture","leaf","#2ee6a8","Farmers, FPOs and agri-input sellers at the base of everything."],
+["Automotive","wheel","#ff7a1a","Dealers, garages and EV startups in a shifting market."],
+["Media & Entertainment","play","#c04bff","Creators, studios and publishers competing for attention."],
+["IT & SaaS","chip","#00e5ff","Product teams shipping software to the world."],
+["Fashion & Apparel","tag","#ff3b6b","Labels and D2C brands where identity is inventory."],
+["Construction","crane","#ffb020","Contractors and infra firms building the visible economy."],
+["Non-Profit & NGO","heart","#2ee6a8","Mission-led organisations accountable to donors."],
+["Professional Services","case","#3d7bff","Consultants, CAs and agencies selling expertise."]];
+
+const IND_DETAIL={
+"E-commerce & Retail":{what:"Retail is the most direct exchange in the economy: a thing someone needs, delivered when they need it. Online, that exchange never sleeps — and neither does comparison shopping.",need:"Society needs retail because it converts production into access. Without distribution, manufacturing has no purpose.",qa:[["Why are our cart abandonment rates so high?","Usually friction, not price. Unexpected shipping, forced account creation and slow checkout kill more carts than competitors do. We instrument the funnel first, then fix the top three leaks."],["Do we need both a website and marketplaces?","Yes, but for different jobs. Marketplaces rent you demand; your own site owns the customer, the margin and the data. We build the site so marketplace buyers migrate to it."]],prob:"Thin margins, rising ad costs and catalogue chaos across channels. Stock mismatches trigger refunds and reviews that punish ranking.",fix:"Feed automation, unified inventory sync and margin-aware bidding. We stop ad spend on SKUs that lose money after shipping.",svc:["E-commerce Maintenance","Advertising Management","Analytics & Tracking Setup","Database Design","AI Automation"]},
+"Healthcare":{what:"Healthcare is the sector where a missed enquiry can be a person in pain. Clinics, labs and care networks operate under trust that cannot be rebuilt quickly.",need:"Accessible care depends on discoverability — patients search symptoms at midnight, not during office hours.",qa:[["Can we advertise medical services legally?","Yes, within platform and regulatory limits. We keep claims factual, avoid outcome guarantees and route sensitive targeting carefully."],["How do patients book without calling?","A WhatsApp flow plus a booking page tied to your calendar. Reminders cut no-shows dramatically."]],prob:"Phone-only booking, no-shows, and paper records that make follow-up impossible.",fix:"Online scheduling, automated reminders, and structured patient enquiry records with strict access control.",svc:["WhatsApp Business Automation","Website Development","Website Accessibility Audit","Website Security Configuration","Custom Dashboard"]},
+"Education":{what:"Education sells a future outcome, which makes proof and clarity more persuasive than discounts.",need:"Institutions turn curiosity into capability; they are the supply line for every other industry on this list.",qa:[["Our admissions enquiries drop after April. Is that normal?","Seasonality is real, but most institutes also stop nurturing. A year-round email sequence keeps warm leads from going cold."],["Should we build an app or a website?","Start with a fast, mobile-first site. Apps add maintenance cost before you have proven retention."]],prob:"Seasonal spikes, unqualified enquiries and counsellors drowning in repetitive questions.",fix:"A qualification chatbot, always-on nurture flows and a counsellor dashboard that ranks leads by intent.",svc:["Chat Bot Development","Email Marketing Automation","Landing Page","SEO","Custom Dashboard"]},
+"Real Estate":{what:"Real estate moves the largest cheque most people ever write. Trust is built long before the site visit.",need:"Shelter and workspace are foundational; the sector allocates physical space to economic activity.",qa:[["Why do our listings get views but no site visits?","Views are cheap; intent is not. Tight geographic targeting and a clear price band filter out browsers."],["Can we show inventory live?","Yes — a synced listing database with availability states, so nobody enquires about a sold unit."]],prob:"Stale listings, untracked walk-ins and long consideration cycles that lose leads to faster responders.",fix:"Live inventory, instant enquiry routing and a nurture track that stays useful for six months.",svc:["Database Design","Advertising Management","Conversion Tracking","Email Marketing Automation","Website Development"]},
+"Food & Restaurants":{what:"Food businesses sell consistency under time pressure. A ten-minute delay is a review, and a review is next month's covers.",need:"Feeding people is the oldest service there is; hospitality is how communities gather.",qa:[["Aggregators take a huge cut. Can we go direct?","Partly. A direct ordering page plus WhatsApp reorders recovers regulars at near-zero commission while aggregators keep bringing new customers."],["Do photos really matter that much?","Enormously. Menu photography and short video are the highest-ROI creative spend in this sector."]],prob:"Commission squeeze, inconsistent footfall and no ownership of customer contact data.",fix:"Direct ordering, a loyalty flow on WhatsApp, and geo-targeted ads timed to hunger windows.",svc:["WhatsApp Business Automation","Video Editing","Advertising Management","Landing Page","Social Media Management"]},
+"Finance & Fintech":{what:"Financial services trade on credibility. One unclear disclosure or one broken form erodes years of trust.",need:"Capital allocation lets businesses and households act on plans instead of waiting.",qa:[["How do we lower cost per qualified lead?","Qualify before the form. Two filtering questions raise CPL slightly and cut cost per funded case sharply."],["Is our site compliant enough?","We audit disclosures, consent capture and data handling, then document the gaps for your compliance officer."]],prob:"High CPL, low trust signals, and manual document collection that stalls onboarding.",fix:"AI document processing, consent-aware tracking and landing pages built around proof rather than promises.",svc:["AI Document Processing","Analytics & Tracking Setup","Website Security Configuration","Landing Page","Business Process Consultation"]},
+"Travel & Tourism":{what:"Travel sells anticipation. The booking is the transaction; the memory is the product.",need:"Movement of people connects markets, spreads income and sustains entire regional economies.",qa:[["Our season is only four months. What do we do the rest of the year?","Build an audience in the off-season with content and email, then convert it in peak at a fraction of paid cost."],["Why do travellers abandon at payment?","Currency confusion, unclear cancellation terms and missing trust badges. All fixable in a week."]],prob:"Brutal seasonality, OTA dependency and enquiry handling that fails across time zones.",fix:"Always-on enquiry automation, off-season nurture and a booking flow with transparent terms.",svc:["Email Marketing Automation","Chat Bot Development","SEO","Video Editing","Website Speed Optimisation"]},
+"Manufacturing":{what:"Manufacturing is where raw material becomes useful objects. Its buyers are rational, technical and impatient with vague marketing.",need:"Everything downstream — retail, healthcare, construction — depends on someone actually making the thing.",qa:[["Do B2B manufacturers really need SEO?","Yes. Procurement engineers search part specs and tolerances. Ranking for those terms brings buyers, not browsers."],["Can our catalogue be searchable by spec?","That is a database problem, and a solvable one. Faceted search over your spec sheet is a standard build."]],prob:"Invisible online, RFQs arriving by scattered email, and no visibility into which enquiry became an order.",fix:"Spec-searchable catalogue, structured RFQ capture and pipeline tracking from enquiry to dispatch.",svc:["Database Design","SEO","Technical Documentation","Custom Dashboard","Business Automation"]},
+"Logistics & Supply":{what:"Logistics is the circulatory system. When it works nobody notices; when it fails everyone does.",need:"Goods have no value in the wrong place. Movement creates the utility.",qa:[["Can customers track shipments without calling us?","Yes — a status page plus WhatsApp notifications removes most 'where is my order' calls."],["Our drivers use different apps. Can it be unified?","We consolidate into one dashboard fed by whatever your fleet already runs."]],prob:"Support load dominated by status calls, fragmented fleet data and manual invoicing.",fix:"Automated status notifications, a unified operations dashboard and invoice generation on delivery events.",svc:["WhatsApp Business Automation","Custom Dashboard","Business Automation","AI Data Analysis","Website Development"]},
+"Legal Services":{what:"Legal practice sells precision and discretion. Marketing must be sober, accurate and free of exaggeration.",need:"Contracts, rights and disputes need a referee; commerce cannot function without enforceability.",qa:[["Can law firms advertise in India?","Within Bar Council restrictions. We focus on informative content and visibility rather than promotional claims."],["How do we look credible online?","Clear practice areas, published expertise, accessible typography and a fast secure site. Substance over slogans."]],prob:"Referral-only growth, dated websites and hours lost to intake questions.",fix:"Authoritative content architecture, an intake assistant that gathers facts before consultation, and hardened security.",svc:["SEO","Technical Documentation","Chat Bot Development","Website Security Configuration","Website Redesign"]},
+"Fitness & Wellness":{what:"Fitness sells adherence. The signup is easy; the sixth week is the business.",need:"Preventive health reduces the burden on every clinical system downstream.",qa:[["Why do members quit in month two?","Onboarding, not motivation. A structured first-30-days sequence measurably improves retention."],["Can we fill off-peak slots?","Yes — targeted offers to lapsed and flexible-schedule members, sent automatically."]],prob:"Churn, seasonal January spikes and manual renewal chasing.",fix:"Behaviour-triggered retention flows, class booking automation and a cohort retention dashboard.",svc:["Email Marketing Automation","WhatsApp Business Automation","Custom Dashboard","Social Media Management","Landing Page"]},
+"Beauty & Salons":{what:"Beauty is a repeat-purchase business disguised as a one-off service. The relationship is the asset.",need:"Personal care is tied to dignity and confidence — demand is steady and deeply local.",qa:[["How do we get clients back sooner?","Service-cycle reminders. If a colour lasts eight weeks, message at week seven."],["Instagram gets likes but no bookings. Why?","No path. A booking link in bio plus a fast mobile page converts attention into appointments."]],prob:"No-shows, empty weekday slots and bookings trapped in DMs.",fix:"WhatsApp booking with deposits, automated reminders and a rebooking cycle keyed to each service.",svc:["WhatsApp Business Automation","Social Media Management","Landing Page","Logo, Brand & Graphic Design","Email Marketing"]},
+"Agriculture":{what:"Agriculture is the base layer. Every other sector on this page sits on top of it.",need:"Food security is not optional, and the people producing it deserve the same tooling as any tech company.",qa:[["Our buyers are rural and on basic phones. Will a website help?","A lightweight, low-bandwidth page plus WhatsApp works better than an app. We optimise for 3G realities."],["Can we sell direct to consumers?","FPOs increasingly do. A simple catalogue and order flow removes two middlemen."]],prob:"Price opacity, middleman dependence and no direct channel to end buyers.",fix:"Lightweight catalogue sites, WhatsApp order flows and market-price content that earns organic reach.",svc:["Website Development","WhatsApp Business Automation","SEO","Website Speed Optimisation","Logo, Brand & Graphic Design"]},
+"Automotive":{what:"Automotive combines a high-ticket purchase with a long service tail. The second sale matters more than the first.",need:"Mobility expands labour markets and personal freedom; servicing keeps that mobility safe.",qa:[["EV buyers research differently. How do we reach them?","Comparison content and range/charging answers rank well and pre-qualify serious buyers."],["Can service reminders be automatic?","Yes, keyed to purchase date and mileage estimates. It is the cheapest revenue you are not collecting."]],prob:"Showroom-only thinking, lost service customers and untracked test-drive requests.",fix:"Test-drive booking flows, service-cycle automation and inventory pages that stay current.",svc:["Conversion Tracking","WhatsApp Business Automation","Database Design","Advertising Management","SEO"]},
+"Media & Entertainment":{what:"Media competes for the scarcest resource left: attention. Distribution and packaging decide outcomes.",need:"Stories, information and culture are how societies understand themselves.",qa:[["Our content is good but reach is flat. Why?","Usually packaging and cadence. Thumbnails, hooks and posting rhythm move reach more than production budget."],["Should we own a site if we live on platforms?","Absolutely. Platforms change rules overnight; your site and list are the only assets you control."]],prob:"Algorithm dependency, no owned audience and monetisation limited to platform payouts.",fix:"Owned-site hub, newsletter automation and a repurposing pipeline that multiplies each shoot.",svc:["Video Editing","Email Marketing","Social Media Management","Website Development","Data Visualisation"]},
+"IT & SaaS":{what:"Software scales beautifully and explains itself terribly. Most SaaS sites describe features instead of outcomes.",need:"Software is leverage — it lets small teams do work that previously needed large ones.",qa:[["Trials sign up but never activate. What now?","Instrument the activation event, then rebuild onboarding around reaching it in under five minutes."],["Do developers read marketing pages?","They read docs. Good documentation is a conversion asset, not an afterthought."]],prob:"Leaky activation, churn from unclear value and documentation debt.",fix:"Product analytics, activation-focused onboarding copy and docs that double as SEO surface.",svc:["Analytics & Tracking Setup","Technical Documentation","Custom Dashboard","Website Redesign","AI Automation"]},
+"Fashion & Apparel":{what:"Fashion sells identity at margin. Brand coherence is worth more than any single campaign.",need:"Clothing is necessity; choice is expression. The sector employs enormous numbers of skilled hands.",qa:[["Returns are eating our margin. Can marketing fix that?","Partly — accurate sizing content, real fit photography and honest product copy reduce expectation gaps."],["How many creatives do we actually need?","More variants than you think, refreshed faster. We build a modular creative system, not one hero shoot."]],prob:"High returns, creative fatigue and inventory sitting in the wrong size curve.",fix:"Fit-focused content, rapid creative iteration and demand analysis feeding buying decisions.",svc:["Video Editing","AI Data Analysis","Advertising Management","Logo, Brand & Graphic Design","E-commerce Maintenance"]},
+"Construction":{what:"Construction turns capital into permanent assets. Reputation travels by word of mouth and, increasingly, by search.",need:"Infrastructure is the physical precondition for every other economic activity.",qa:[["Our projects are big and rare. Does digital matter?","One qualified contract pays for years of visibility. Presence is about being found at the moment of tender."],["Can we showcase completed work properly?","A structured project portfolio with specs, timelines and photography is your strongest sales asset."]],prob:"Invisible capability, no portfolio discipline and enquiry handling that depends on one person's phone.",fix:"Project portfolio architecture, tender-intent SEO and centralised enquiry capture.",svc:["Website Development","SEO","Video Editing","Presentation Design","Business Process Consultation"]},
+"Non-Profit & NGO":{what:"Non-profits carry a double burden: do the work, then prove the work. Transparency is the currency.",need:"They serve needs markets ignore, and they hold institutions accountable.",qa:[["Donors give once and disappear. How do we retain them?","Impact reporting on a schedule. Show what their specific amount did, automatically."],["Can we accept donations without heavy fees?","Yes, with a direct payment page and UPI options routed to your registered account."]],prob:"Donor churn, manual reporting and grant applications that consume programme time.",fix:"Automated impact updates, a clean donation flow and document automation for grant paperwork.",svc:["Email Marketing Automation","AI Document Processing","Website Development","Data Visualisation","Presentation Design"]},
+"Professional Services":{what:"Consultants, CAs and agencies sell judgement. The website's job is to demonstrate thinking, not claim it.",need:"Specialist expertise lets businesses buy capability they cannot justify hiring full-time.",qa:[["How do we justify premium fees online?","Publish depth. Case notes, methodology and specificity signal competence far better than testimonials alone."],["Can proposals be generated faster?","Yes — templated document automation with your scope library cuts proposal time by hours."]],prob:"Feast-or-famine pipeline, proposal overhead and no differentiation in a crowded market.",fix:"Authority content, proposal automation and a nurture list that keeps past clients warm.",svc:["AI Document Processing","SEO","Presentation Design","Email Marketing","Business Process Consultation"]}};
+
+const FAQ=[["How do projects usually start?","With a conversation, not a contract. You tell us the outcome you need, we map the smallest build that gets there, and only then quote. Ask first, build second — it is literally our tagline."],["Do you publish fixed prices?","Yes. Every service page lists a starting price in INR. Final scope is confirmed in writing before work begins, so there are no surprise line items later."],["How long does a website take?","A landing page is typically 5–8 working days. A full multi-page site with CMS and analytics is 3–5 weeks. Timelines are agreed per milestone, and you see progress weekly."],["Who owns the code and the designs?","You do, fully, on final payment. Source files, repositories, ad accounts and analytics properties are handed over in your name — never held hostage."],["Can we work with our existing site?","Often that is the smarter move. We audit what you have, keep what performs, and rebuild only what is broken. Redesign and migration are separate services for exactly this reason."],["Do you run ads on your own accounts?","Never. Google Ads, Meta Business Manager and GA4 stay under your ownership. We operate as invited users, so your data and billing history remain yours."],["What does the monthly retainer include?","Agreed hours, monitoring, backups, security patching, and a written monthly report with commentary — not just exported charts. Unused hours roll over one month."],["Are Aetheria and Clow real AI?","They are our own assistants. Aetheria handles strategy questions; Clow estimates budgets and media plans. They run in preview mode for now; live AI replies are coming soon."],["Do you sign NDAs?","Routinely, and before any access to your systems. We also never commit credentials, customer records or confidential material to any repository."],["Where is the team based?","Kolkata, India. Founder Syed Shamviul Hassan, with Arnav Gupta as Management Director and Website Developer. We work IST and overlap comfortably with EU and US-East mornings."],["What if I only need one small thing?","That is fine. Search Console setup, a speed pass, a single deck — small jobs are quoted the same transparent way as large ones."],["How do refunds work?","Milestone-based. Work not yet started is fully refundable; completed milestones are billed for delivered output. Full terms sit under Security Regulations → Refund Policy."]];
+
+const LEGAL=[["refund","Refund Policy",[["Milestone structure","Every engagement is split into named milestones with a defined deliverable and value. Payments are collected per milestone, never as one opaque lump sum."],["Before work begins","Any amount paid for a milestone that has not been started is refunded in full within 7 working days of a written request."],["Work in progress","If a milestone is underway, we bill only for the documented hours and assets already produced. The remainder is returned."],["Delivered milestones","Completed and approved milestones are non-refundable, because the output has already been transferred to you."],["Retainers","Monthly retainers may be cancelled with 15 days' notice. Unused hours roll forward one month and are not encashed."],["Third-party spend","Ad budgets, domains, licences and hosting paid to third parties are outside our control and cannot be refunded by CIDEX INFOTECH."]]],
+["terms","Terms & Conditions",[["Scope and change","The agreed scope document governs delivery. New requests are quoted as additions rather than absorbed silently, which protects both timeline and quality."],["Client responsibilities","You provide brand assets, account access and approvals within agreed windows. Delays in approval shift the delivery date, not the price."],["Ownership","On full payment, all custom code, design files and content produced for you transfer to you. Our internal tooling and reusable libraries remain ours, licensed to you perpetually."],["Accounts","Advertising, analytics and hosting accounts are created in your name. We act as authorised users and remove our access on request."],["Confidentiality","Both parties treat commercial, technical and customer information as confidential. NDAs are signed before system access where requested."],["Liability","Our aggregate liability is limited to fees paid for the affected milestone. We are not liable for third-party platform policy changes or outages."],["Termination","Either party may end an engagement in writing. Work completed to that date is invoiced; all assets produced are handed over."]]],
+["privacy","Privacy Policy",[["What we collect","Contact details you submit, project correspondence, and aggregated analytics such as page views and device class. We do not buy contact lists."],["Why we collect it","To reply to enquiries, deliver contracted work, secure the site, and understand which pages are useful. Nothing else."],["Legal basis","Consent for marketing contact, contractual necessity for delivery, and legitimate interest for security logging."],["Retention","Enquiry records are kept 24 months. Project records are kept for the statutory accounting period. Analytics is retained 14 months."],["Processors","Hosting, email and analytics providers acting under contract. Data is never sold, rented or shared for advertising."],["Your rights","Access, correction, export and erasure. Use Privacy Controls → Delete my Data, or write to the team and we action it within 30 days."],["Children","Our services are business-facing and not directed at anyone under 18."]]],
+["cookie","Cookie Policy",[["Essential","Session and security cookies required for sign-in and form protection. These cannot be disabled while staying logged in."],["Preference","Stores theme, currency selection (INR/USD) and dismissed notices so the site remembers you."],["Analytics","Aggregated measurement of page performance and navigation paths. IP addresses are truncated before storage."],["Marketing","Only set with consent, and only on pages where a campaign pixel is genuinely needed for attribution."],["Control","You can clear non-essential cookies at any time from Privacy Controls, or block them in your browser without losing core functionality."]]]];
+
+/* ═══════════════ STATE ═══════════════ */
+const ST={page:'home',user:null,curr:'INR',read:{creation:false,ad:false,marketing:false,automation:false},order:['creation','ad','marketing','automation'],collected:{creation:new Set(),ad:new Set(),marketing:new Set(),automation:new Set()},finalUnlocked:false,finalDone:false,aethMsgs:[],clowMsgs:[],industry:null};
+const RATE=83;
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const fmt=n=>ST.curr==='INR'?'₹'+Math.round(n).toLocaleString('en-IN'):'$'+Math.round(n/RATE).toLocaleString('en-US');
+const fmtN=n=>Math.round(n).toLocaleString('en-IN');
+function toast(msg,type=''){const t=document.createElement('div');t.className='toast '+type;t.innerHTML='<span>'+(type==='ok'?'✓':type==='err'?'✕':type==='warn'?'!':'◈')+'</span><span>'+msg+'</span>';$('#toasts').appendChild(t);setTimeout(()=>{t.style.transition='.45s';t.style.opacity='0';t.style.transform='translateX(44px)';setTimeout(()=>t.remove(),450)},3800)}
+
+/* ═══════════════ SVG LIB ═══════════════ */
+function botSVG(kind){
+const c=kind==='aeth'?['#ff2d9b','#c04bff','#ffd9ec']:['#00e5ff','#3d7bff','#d6f7ff'];
+const wing=kind==='aeth'
+?`<path d="M22 40 Q4 16 14 8 Q26 14 32 34 Z" fill="${c[1]}" opacity=".85"/><path d="M78 40 Q96 16 86 8 Q74 14 68 34 Z" fill="${c[1]}" opacity=".85"/><path d="M24 52 Q8 44 12 34 Q24 38 30 48 Z" fill="${c[0]}" opacity=".6"/><path d="M76 52 Q92 44 88 34 Q76 38 70 48 Z" fill="${c[0]}" opacity=".6"/>`
+:`<path d="M22 42 L6 12 L20 10 L34 34 Z" fill="${c[1]}" opacity=".9"/><path d="M78 42 L94 12 L80 10 L66 34 Z" fill="${c[1]}" opacity=".9"/><path d="M24 54 L10 40 L20 36 L32 50 Z" fill="${c[0]}" opacity=".65"/><path d="M76 54 L90 40 L80 36 L68 50 Z" fill="${c[0]}" opacity=".65"/>`;
+return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="b${kind}" cx=".38" cy=".3"><stop offset="0" stop-color="#2a3560"/><stop offset="1" stop-color="#0a0f22"/></radialGradient><radialGradient id="g${kind}" cx=".5" cy=".5"><stop offset="0" stop-color="${c[0]}" stop-opacity=".55"/><stop offset="1" stop-color="${c[0]}" stop-opacity="0"/></radialGradient></defs>
+<circle cx="50" cy="52" r="46" fill="url(#g${kind})"/>${wing}
+<circle cx="50" cy="52" r="30" fill="url(#b${kind})" stroke="${c[0]}" stroke-width="1.6"/>
+<path d="M22 44 a28 28 0 0 1 56 0" fill="none" stroke="#cfd8ea" stroke-width="4" opacity=".55"/>
+<rect x="16" y="44" width="9" height="17" rx="4" fill="#1a2340" stroke="${c[0]}" stroke-width="1.4"/>
+<rect x="75" y="44" width="9" height="17" rx="4" fill="#1a2340" stroke="${c[0]}" stroke-width="1.4"/>
+<circle cx="79.5" cy="52.5" r="2.6" fill="${c[0]}"/>
+<ellipse cx="50" cy="53" rx="22" ry="19" fill="#05080f"/>
+<rect x="38" y="46" width="9" height="6" rx="1.6" fill="${c[0]}"/><rect x="53" y="46" width="9" height="6" rx="1.6" fill="${c[0]}"/>
+<rect x="38" y="52" width="4" height="3" rx="1" fill="${c[0]}" opacity=".8"/><rect x="58" y="52" width="4" height="3" rx="1" fill="${c[0]}" opacity=".8"/>
+<path d="M44 61 q6 6 12 0" fill="none" stroke="${c[0]}" stroke-width="2" stroke-linecap="round"/>
+<rect x="42" y="76" width="16" height="7" rx="2.5" fill="#1a2340" stroke="${c[0]}" stroke-width="1.2"/>
+<path d="M62 80 q10 8 4 14" fill="none" stroke="#39456e" stroke-width="2.4"/>
+<circle cx="66" cy="95" r="3.4" fill="#1a2340" stroke="${c[0]}" stroke-width="1.2"/>
+${kind==='aeth'?`<path d="M12 66 q-3-4 1-6 q3-1 3 3 q0-4 3-3 q4 2 1 6 l-4 4 z" fill="${c[0]}" opacity=".8"/>`:`<path d="M12 66 q-3-4 1-6 q3-1 3 3 q0-4 3-3 q4 2 1 6 l-4 4 z" fill="${c[0]}" opacity=".8"/>`}
+</svg>`;
+}
+function pieceSVG(key,label){
+const m=META[key];const id='pz'+key;
+return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${m.hue}" stop-opacity=".9"/><stop offset="1" stop-color="${m.hue2}" stop-opacity=".75"/></linearGradient><filter id="f${id}"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<path d="M30 30 H80 a20 20 0 0 1 40 0 H170 V80 a20 20 0 0 0 0 40 V170 H120 a20 20 0 0 0-40 0 H30 V120 a20 20 0 0 1 0-40 Z" fill="url(#${id})" fill-opacity=".22" stroke="url(#${id})" stroke-width="3" filter="url(#f${id})"/>
+<path d="M30 30 H80 a20 20 0 0 1 40 0 H170 V80 a20 20 0 0 0 0 40 V170 H120 a20 20 0 0 0-40 0 H30 V120 a20 20 0 0 1 0-40 Z" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="1"/>
+<text x="100" y="98" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="15" font-weight="800" fill="#fff">${label.split(' ')[0]}</text>
+<text x="100" y="118" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="12" fill="${m.hue}">${label.split(' ').slice(1).join(' ')}</text></svg>`;
+}
+const ICONS={cart:'<path d="M4 6h4l4 18h18l4-12H10"/><circle cx="14" cy="30" r="2.5"/><circle cx="27" cy="30" r="2.5"/>',cross:'<path d="M14 4h8v10h10v8H22v10h-8V22H4v-8h10z"/>',book:'<path d="M5 6h11v26H5zM18 6h13v26H18zM16 6v26"/>',tower:'<path d="M8 32V10l10-6 10 6v22M13 16h4M19 16h4M13 22h4M19 22h4"/>',bowl:'<path d="M4 16h28a14 14 0 0 1-28 0zM16 4v8M11 8v4M21 8v4"/>',coin:'<circle cx="18" cy="18" r="13"/><path d="M18 10v16M14 14h8M14 20h8"/>',plane:'<path d="M2 20l32-12-8 26-8-10-8 6z"/>',gear:'<circle cx="18" cy="18" r="7"/><path d="M18 2v6M18 28v6M2 18h6M28 18h6M7 7l4 4M25 25l4 4M29 7l-4 4M11 25l-4 4"/>',truck:'<path d="M2 10h18v14H2zM20 15h7l5 5v4h-12z"/><circle cx="9" cy="27" r="3"/><circle cx="25" cy="27" r="3"/>',scales:'<path d="M18 4v26M8 30h20M6 12h24M6 12l-4 8h8zM30 12l-4 8h8z"/>',pulse:'<path d="M2 18h7l4-10 6 20 4-10h11"/>',spark:'<path d="M18 2l4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/>',leaf:'<path d="M30 6C10 6 4 18 6 30c12 2 24-4 24-24zM6 30L22 14"/>',wheel:'<circle cx="18" cy="18" r="14"/><circle cx="18" cy="18" r="5"/><path d="M18 4v9M18 23v9M4 18h9M23 18h9"/>',play:'<circle cx="18" cy="18" r="14"/><path d="M14 11l12 7-12 7z"/>',chip:'<rect x="9" y="9" width="18" height="18" rx="2"/><path d="M14 2v7M22 2v7M14 27v7M22 27v7M2 14h7M2 22h7M27 14h7M27 22h7"/>',tag:'<path d="M4 4h14l14 14-14 14L4 18z"/><circle cx="12" cy="12" r="3"/>',crane:'<path d="M6 32V6h22M6 6l14 10M20 6v10M20 16v6M14 22h12v8H14z"/>',heart:'<path d="M18 30C6 22 2 16 6 10c4-5 10-2 12 3 2-5 8-8 12-3 4 6 0 12-12 20z"/>',case:'<rect x="3" y="11" width="30" height="19" rx="2"/><path d="M12 11V6h12v5M3 20h30"/>'};
+function indIcon(k,c){return `<svg viewBox="0 0 36 36" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]||ICONS.chip}</svg>`}
+const COLLECT={
+creation:i=>`<svg viewBox="0 0 40 40" fill="none" stroke="#00e5ff" stroke-width="1.6"><rect x="6" y="${26-i%3*6}" width="28" height="9" rx="2" fill="rgba(0,229,255,.18)"/><rect x="10" y="${16-i%3*6}" width="20" height="9" rx="2" fill="rgba(61,123,255,.18)"/><circle cx="14" cy="${20-i%3*6}" r="1.4" fill="#00e5ff"/><circle cx="26" cy="${20-i%3*6}" r="1.4" fill="#00e5ff"/></svg>`,
+ad:i=>{const t=['<path d="M20 32C8 24 5 18 9 13c3-4 8-2 11 3 3-5 8-7 11-3 4 5 1 11-11 19z"/>','<path d="M8 14h6l8-6v24l-8-6H8zM26 14a8 8 0 0 1 0 12"/>','<path d="M6 8h28v18H20l-8 7v-7H6z"/>','<path d="M10 20l6 6 14-14M8 30h24"/>'][i%4];return `<svg viewBox="0 0 40 40" fill="none" stroke="#ff3b6b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${t}</svg>`},
+marketing:i=>{const t=['<path d="M26 6l8 8-18 18-8 2 2-8z"/><path d="M22 10l8 8"/>','<path d="M20 4a10 10 0 0 1 6 18v4h-12v-4a10 10 0 0 1 6-18zM14 30h12M16 34h8"/>','<path d="M8 4h18l6 6v26H8zM14 26l5-6 4 4 6-8"/>','<circle cx="20" cy="20" r="14"/><path d="M20 6v14l10 6"/>'][i%4];return `<svg viewBox="0 0 40 40" fill="none" stroke="#2ee6a8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${t}</svg>`},
+automation:i=>{const t=['<rect x="10" y="12" width="20" height="16" rx="4"/><circle cx="16" cy="19" r="2" fill="#c04bff"/><circle cx="24" cy="19" r="2" fill="#c04bff"/><path d="M20 6v6M14 32h12"/>','<rect x="6" y="8" width="28" height="18" rx="2"/><path d="M14 30h12"/><text x="20" y="21" font-size="8" fill="#c04bff" text-anchor="middle" stroke="none" font-family="monospace">1011</text>','<circle cx="20" cy="16" r="8"/><path d="M8 34c0-7 5-11 12-11s12 4 12 11"/>','<rect x="8" y="10" width="24" height="16" rx="2"/><text x="20" y="21" font-size="7" fill="#c04bff" text-anchor="middle" stroke="none" font-family="monospace">01001</text><path d="M16 30h8"/>'][i%4];return `<svg viewBox="0 0 40 40" fill="none" stroke="#c04bff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${t}</svg>`}};
+
+/* ═══════════════ NAV ═══════════════ */
+const NAVSTRUCT=[
+ {g:'Main'},
+ {id:'home',label:'Home',ic:'⌂'},
+ {id:'profile',label:'Edit Profile',sub:1},
+ {id:'account',label:'My Account',sub:1},
+ {id:'mail',label:'Mail Our Team',sub:1},
+ {id:'privacy',label:'Privacy Controls',sub:1},
+ {id:'legal',label:'Security Regulations',sub:1},
+ {g:'Services'},
+ {id:'services',label:'Services Hub',ic:'⬡'},
+ {id:'creation',label:'Creation Services',sub:1},
+ {id:'ad',label:'AD Services',sub:1},
+ {id:'marketing',label:'Marketing & Strategy',sub:1},
+ {id:'automation',label:'Automation Services',sub:1},
+ {id:'aetheria',label:'Aetheria the Brain',sub:1},
+ {id:'clow',label:'Clow the Calculator',sub:1},
+ {g:'Tools'},
+ {id:'calculator',label:'Calculator',ic:'∑'},
+ {id:'industries',label:'Industries',ic:'▦'},
+ {id:'faq',label:'FAQ',ic:'?'}
+];
+function buildNav(){
+  $('#sbNav').innerHTML=NAVSTRUCT.map(n=>n.g?`<div class="sbgroup">${n.g}</div>`:
+   `<button class="navitem${n.sub?' sub':''}" data-nav="${n.id}">${n.ic?`<span class="ic">${n.ic}</span>`:''}<span>${n.label}</span></button>`).join('');
+}
+const FULLPAGES=new Set(['profile','account','mail','privacy','legal','creation','ad','marketing','automation','aetheria','clow','industry','final']);
+let cleanupFns=[];
+function nav(id,opts={}){
+  if(id==='final'&&!ST.finalUnlocked){toast('That page opens only after all four Read gates.','warn');return}
+  cleanupFns.forEach(f=>{try{f()}catch(e){}});cleanupFns=[];
+  ST.page=id;
+  if(id==='account')try{renderAccount()}catch(e){}
+  $$('.page').forEach(p=>p.classList.remove('on'));
+  const el=$('#page-'+id);if(el)el.classList.add('on');
+  const full=FULLPAGES.has(id);
+  $('#sidebar').classList.toggle('hidden',full);
+  $('#shell').classList.toggle('full',full);
+  $('#sidebar').classList.remove('open');$('#scrim').classList.remove('on');
+  $$('.navitem').forEach(b=>b.classList.toggle('active',b.dataset.nav===id||(id==='industry'&&b.dataset.nav==='industries')));
+  window.scrollTo({top:0,behavior:'instant'in document.documentElement.style?'instant':'auto'});
+  if(['creation','ad','marketing','automation'].includes(id))initServicePage(id);
+  if(id==='legal')initLegalCanvas();
+  if(id==='industries')initIndCanvas();
+  if(id==='clow')initTicker();
+  if(id==='final')initFinal();
+  if(id==='aetheria'||id==='clow')updateHello();
+  if(id==='calculator')calc();
+  observeReveals();
+}
+document.addEventListener('click',e=>{
+  const n=e.target.closest('[data-nav]');if(n){nav(n.dataset.nav);return}
+  const c=e.target.closest('[data-close]');if(c){c.closest('.modal').classList.remove('on');return}
+  const j=e.target.closest('[data-jump]');if(j){const t=$('#'+j.dataset.jump);if(t)t.scrollIntoView({behavior:'smooth',block:'start'});return}
+});
+$('#mobtoggle').onclick=()=>{$('#sidebar').classList.toggle('open');$('#scrim').classList.toggle('on')};
+$('#scrim').onclick=()=>{$('#sidebar').classList.remove('open');$('#scrim').classList.remove('on')};
+
+/* ═══════════════ REVEAL ═══════════════ */
+let revObs;
+function observeReveals(){
+  if(!revObs)revObs=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');revObs.unobserve(x.target)}}),{threshold:.12});
+  $$('.reveal-up:not(.in)').forEach(el=>revObs.observe(el));
+}
+
+/* ═══════════════ STARFIELD ═══════════════ */
+(function(){
+  const cv=$('#stars'),cx=cv.getContext('2d');let pts=[],raf,w,h;
+  function size(){w=cv.width=cv.offsetWidth;h=cv.height=cv.offsetHeight;pts=Array.from({length:Math.min(110,Math.floor(w*h/14000))},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.5+.3,s:Math.random()*.22+.04,o:Math.random()*.6+.2}))}
+  function loop(){cx.clearRect(0,0,w,h);for(const p of pts){p.y-=p.s;if(p.y<-4){p.y=h+4;p.x=Math.random()*w}cx.beginPath();cx.arc(p.x,p.y,p.r,0,6.283);cx.fillStyle=`rgba(${p.r>1.1?'0,229,255':'160,190,255'},${p.o})`;cx.fill()}raf=requestAnimationFrame(loop)}
+  size();loop();addEventListener('resize',size);
+})();
+
+/* ═══════════════ ROCK DE VONCIA ═══════════════ */
+function initRocks(stage){
+  stage.innerHTML='';
+  const rocks=[];const N=4;
+  for(let i=0;i<N;i++){
+    const d=document.createElement('div');d.className='rock';
+    const sz=70+Math.random()*90;
+    d.style.width=sz+'px';d.style.height=sz*.86+'px';
+    for(let c=0;c<3;c++){const cr=document.createElement('div');cr.className='crater';const cs=8+Math.random()*14;cr.style.width=cs+'px';cr.style.height=cs+'px';cr.style.left=(15+Math.random()*60)+'%';cr.style.top=(15+Math.random()*60)+'%';d.appendChild(cr)}
+    stage.appendChild(d);
+    rocks.push({el:d,x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.34,vy:(Math.random()-.5)*.28,rot:Math.random()*360,vr:(Math.random()-.5)*.14,sz});
+  }
+  let raf;
+  function tick(){
+    const W=stage.offsetWidth||innerWidth,H=stage.offsetHeight||innerHeight;
+    for(let i=0;i<rocks.length;i++){
+      const a=rocks[i];
+      for(let j=i+1;j<rocks.length;j++){
+        const b=rocks[j];const dx=b.x-a.x,dy=b.y-a.y;const dist=Math.hypot(dx,dy)||1;const min=(a.sz+b.sz)*.72;
+        if(dist<min){const f=(min-dist)/min*.05;const nx=dx/dist,ny=dy/dist;a.vx-=nx*f;a.vy-=ny*f;b.vx+=nx*f;b.vy+=ny*f}
+      }
+      a.x+=a.vx;a.y+=a.vy;a.rot+=a.vr;
+      const sp=Math.hypot(a.vx,a.vy);if(sp>.6){a.vx*=.6/sp;a.vy*=.6/sp}
+      if(a.x<-a.sz)a.x=W+a.sz;if(a.x>W+a.sz)a.x=-a.sz;
+      if(a.y<-a.sz)a.y=H+a.sz;if(a.y>H+a.sz)a.y=-a.sz;
+      a.el.style.transform=`translate(${a.x}px,${a.y}px) rotate(${a.rot}deg)`;
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  tick();cleanupFns.push(()=>cancelAnimationFrame(raf));
+}
+
+/* ═══════════════ PUZZLA JOINDE ═══════════════ */
+function initPuzzla(canvas,key){
+  const ctx=canvas.getContext('2d');const m=META[key];
+  let W,H,raf,mx=-9999,my=-9999,pieces=[];
+  function size(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;build()}
+  function build(){
+    pieces=[];const n=innerWidth<700?5:8;
+    for(let i=0;i<n;i++){
+      const s=(i===0?Math.min(W,H)*.52:60+Math.random()*130);
+      pieces.push({x:Math.random()*W,y:Math.random()*H,s,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*6.28,vr:(Math.random()-.5)*.004,main:i===0,alpha:i===0?.9:.28+Math.random()*.3});
+    }
+    pieces[0].x=W*.5;pieces[0].y=H*.48;pieces[0].vx=.12;pieces[0].vy=.08;
+  }
+  function path(p){
+    const s=p.s,h=s/2,k=s*.13;
+    ctx.beginPath();
+    ctx.moveTo(-h,-h);ctx.lineTo(-k,-h);ctx.arc(0,-h,k,Math.PI,0,true);ctx.lineTo(h,-h);
+    ctx.lineTo(h,-k);ctx.arc(h,0,k,-Math.PI/2,Math.PI/2,false);ctx.lineTo(h,h);
+    ctx.lineTo(k,h);ctx.arc(0,h,k,0,Math.PI,false);ctx.lineTo(-h,h);
+    ctx.lineTo(-h,k);ctx.arc(-h,0,k,Math.PI/2,-Math.PI/2,false);ctx.closePath();
+  }
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    for(const p of pieces){
+      const dx=p.x-mx,dy=p.y-my,d=Math.hypot(dx,dy);const R=p.s*.85+90;
+      if(d<R&&d>1){const f=(1-d/R)*2.6;p.vx+=(dx/d)*f*.12;p.vy+=(dy/d)*f*.12;p.vr+=(dx/d)*.0006}
+      p.vx*=.985;p.vy*=.985;
+      const sp=Math.hypot(p.vx,p.vy);if(sp>4.2){p.vx*=4.2/sp;p.vy*=4.2/sp}
+      if(sp<.06){p.vx+=(Math.random()-.5)*.05;p.vy+=(Math.random()-.5)*.05}
+      p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;
+      const pad=p.s*.7;
+      if(p.x<-pad)p.x=W+pad;if(p.x>W+pad)p.x=-pad;
+      if(p.y<-pad)p.y=H+pad;if(p.y>H+pad)p.y=-pad;
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);
+      const g=ctx.createLinearGradient(-p.s/2,-p.s/2,p.s/2,p.s/2);
+      g.addColorStop(0,m.hue);g.addColorStop(1,m.hue2);
+      path(p);ctx.globalAlpha=p.alpha*.2;ctx.fillStyle=g;ctx.fill();
+      ctx.globalAlpha=p.alpha;ctx.lineWidth=p.main?3:1.6;ctx.strokeStyle=g;
+      ctx.shadowBlur=p.main?34:16;ctx.shadowColor=m.hue;ctx.stroke();ctx.shadowBlur=0;
+      if(p.main){
+        ctx.globalAlpha=.95;ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+        const fs=Math.max(13,p.s*.085);ctx.font=`800 ${fs}px Orbitron, sans-serif`;
+        const words=m.title.split(' ');
+        if(words.length>2){ctx.fillText(words.slice(0,2).join(' '),0,-fs*.6);ctx.fillText(words.slice(2).join(' '),0,fs*.7)}
+        else{ctx.fillText(words[0],0,-fs*.55);ctx.fillStyle=m.hue;ctx.fillText(words.slice(1).join(' '),0,fs*.7)}
+      }
+      ctx.restore();
+    }
+    raf=requestAnimationFrame(frame);
+  }
+  function move(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;mx=t.clientX-r.left;my=t.clientY-r.top}
+  function leave(){mx=my=-9999}
+  const host=canvas.parentElement;
+  host.addEventListener('mousemove',move);host.addEventListener('mouseleave',leave);
+  host.addEventListener('touchmove',move,{passive:true});host.addEventListener('touchend',leave);
+  size();frame();addEventListener('resize',size);
+  cleanupFns.push(()=>{cancelAnimationFrame(raf);removeEventListener('resize',size);host.removeEventListener('mousemove',move);host.removeEventListener('mouseleave',leave);host.removeEventListener('touchmove',move);host.removeEventListener('touchend',leave)});
+}
+
+/* ═══════════════ SERVICE PAGES ═══════════════ */
+function initServicePage(key){
+  const m=META[key],list=SERVICES[key],host=$('#page-'+key);
+  const taken=ST.collected[key];
+  host.innerHTML=`
+  <div class="backbar" style="position:absolute;top:0;left:0;z-index:10"><button class="backbtn" data-nav="services">← Return to Services</button></div>
+  <div class="puzzla"><canvas id="pz-${key}"></canvas>
+    <div class="pzcopy nosel"><div class="k">${m.k}</div><h1>${m.title}</h1><p>${m.intro}</p><p style="margin-top:14px;opacity:.85">${m.body}</p></div>
+    <div class="pzhint">Move your cursor across the piece — it slips away · scroll to begin</div>
+  </div>
+  <div class="horizon"></div>
+  <div class="wrap sec" style="padding-top:20px">
+    <div class="eyebrow" style="color:${m.hue}">${list.length} Services · Transparent Starting Prices</div>
+    <h2 class="h2">What we <span class="g" style="background:linear-gradient(120deg,${m.hue},${m.hue2});-webkit-background-clip:text;background-clip:text">actually deliver</span></h2>
+    <p class="lede">Each box carries a two-line definition and a starting price. Collect the object beside every box to assemble the picture at the bottom.</p>
+    <div class="svcgrid">${list.map((s,i)=>`
+      <div class="svcrow" style="--svhue:${m.hue}">
+        <div class="svcbox">
+          <div class="svchead"><div class="svcname">${s[0]}</div><div class="svcprice">${s[2]}</div></div>
+          <div class="svcdef">${s[1]}</div>
+          <button class="svclink" data-quote="${key}|${i}">VIEW BRIEF <span>⟶</span></button>
+        </div>
+        <button class="collect${taken.has(i)?' taken':''}" data-collect="${key}|${i}" aria-label="Collect piece">${COLLECT[key](i)}</button>
+      </div>`).join('')}</div>
+    <div class="buildzone">
+      <div class="eyebrow" style="color:${m.hue}">Assembly Zone</div>
+      <div class="buildstage" id="stage-${key}"></div>
+      <div class="progressline"><div class="progressfill" id="prog-${key}"></div></div>
+      <div class="readtick" id="cnt-${key}"></div>
+      <div class="congrats" id="cg-${key}">${m.congrats}</div>
+    </div>
+    <div class="btnrow">
+      <button class="btn gold" data-nav="clow">GET A QUOTE</button>
+      ${m.next?`<button class="btn p" data-next="${m.next}">${m.nextLabel} ⟶</button>`:`<button class="btn p" data-nav="aetheria">TALK TO AETHERIA ⟶</button><button class="btn" data-nav="mail">CONTACT OUR TEAM</button>`}
+      <button class="btn g" data-read="${key}">${m.read.toUpperCase()}</button>
+      <button class="btn" data-nav="services">GO TO SERVICE PAGE</button>
+    </div>
+    <div class="readtick" id="gate-${key}"></div>
+    <div style="margin-top:30px"><button class="frontand" data-nav="services"><span>Back to home</span><span class="ar">⟶</span></button></div>
+  </div>`;
+  initPuzzla($('#pz-'+key),key);
+  renderStage(key);
+  updateGate(key);
+}
+function renderStage(key){
+  const m=META[key],total=SERVICES[key].length,got=ST.collected[key].size;
+  const stage=$('#stage-'+key);if(!stage)return;
+  $('#prog-'+key).style.width=(got/total*100)+'%';
+  $('#cnt-'+key).textContent=`COLLECTED ${got} / ${total}`;
+  $('#cg-'+key).classList.toggle('on',got===total);
+  if(got===0){stage.innerHTML=`<div class="buildempty">EMPTY PLOT<br><span style="opacity:.6">Click the objects beside each service box.<br>They land here.</span></div>`;return}
+  const p=got/total;
+  if(m.build==='infrastructure'){
+    const floors=Math.ceil(p*6);
+    let b='';for(let i=0;i<floors;i++){const w=170-i*16;b+=`<rect x="${(300-w)/2}" y="${230-i*32}" width="${w}" height="28" rx="3" fill="rgba(0,229,255,.14)" stroke="#00e5ff" stroke-width="1.4"/>`;for(let k=0;k<Math.max(2,Math.floor(w/34));k++)b+=`<rect x="${(300-w)/2+12+k*30}" y="${236-i*32}" width="12" height="12" rx="2" fill="${i%2?'#3d7bff':'#00e5ff'}" opacity="${.3+p*.6}"/>`}
+    stage.innerHTML=`<svg viewBox="0 0 300 260" style="width:min(340px,80%);height:100%"><line x1="20" y1="258" x2="280" y2="258" stroke="#3d7bff" stroke-width="2"/>${b}${p===1?'<path d="M150 30 l8 16 -8 -4 -8 4z" fill="#ffb020"/><circle cx="150" cy="24" r="4" fill="#ffb020"><animate attributeName="opacity" values="1;.3;1" dur="1.6s" repeatCount="indefinite"/></circle>':''}</svg>`;
+  }else if(m.build==='phone'){
+    let icons='';const n=Math.min(got,8);for(let i=0;i<n;i++){const col=i%2,row=Math.floor(i/2);icons+=`<g transform="translate(${118+col*40},${86+row*36})"><rect width="30" height="26" rx="6" fill="rgba(255,59,107,.18)" stroke="#ff3b6b" stroke-width="1.2"/><circle cx="15" cy="13" r="5" fill="#ff3b6b" opacity=".7"/></g>`}
+    const gh=p*70;
+    stage.innerHTML=`<svg viewBox="0 0 300 260" style="width:min(340px,80%);height:100%"><rect x="96" y="20" width="108" height="220" rx="18" fill="rgba(10,16,36,.9)" stroke="#ff3b6b" stroke-width="2"/><rect x="106" y="34" width="88" height="192" rx="10" fill="#05080f"/>${icons}${p>.5?`<polyline points="112,214 132,${214-gh*.4} 152,${214-gh*.6} 172,${214-gh*.85} 188,${214-gh}" fill="none" stroke="#2ee6a8" stroke-width="2.4"/><circle cx="188" cy="${214-gh}" r="4" fill="#2ee6a8"/>`:''}${p===1?'<text x="150" y="60" text-anchor="middle" font-family="Orbitron" font-size="13" fill="#ffb020">▲ '+Math.round(180+p*220)+'%</text>':''}</svg>`;
+  }else if(m.build==='scatter'){
+    let s='';for(let i=0;i<got;i++){const a=i*2.399,r=30+((i*37)%110);const x=150+Math.cos(a)*r,y=130+Math.sin(a)*r*.72;s+=`<g transform="translate(${x},${y})" opacity="${.4+p*.6}"><circle r="9" fill="rgba(46,230,168,.16)" stroke="#2ee6a8" stroke-width="1.2"/><path d="M-4 2 l3 3 5-6" stroke="#2ee6a8" stroke-width="1.4" fill="none"/></g>`}
+    const clouds=p>.4?`<g opacity="${p}"><rect x="14" y="20" width="112" height="34" rx="12" fill="rgba(0,229,255,.1)" stroke="#00e5ff" stroke-width="1"/><text x="70" y="41" text-anchor="middle" font-size="9" fill="#9fe9ff" font-family="Space Grotesk">"Traffic doubled in 90 days."</text><rect x="176" y="196" width="112" height="34" rx="12" fill="rgba(255,45,155,.1)" stroke="#ff2d9b" stroke-width="1"/><text x="232" y="217" text-anchor="middle" font-size="9" fill="#ffc7e6" font-family="Space Grotesk">"Finally, numbers we trust."</text></g>`:'';
+    stage.innerHTML=`<svg viewBox="0 0 300 260" style="width:min(400px,92%);height:100%">${clouds}${s}${p===1?'<circle cx="150" cy="130" r="26" fill="none" stroke="#ffb020" stroke-width="2"/><text x="150" y="135" text-anchor="middle" font-size="11" fill="#ffb020" font-family="Orbitron">INSIGHT</text>':''}</svg>`;
+  }else{
+    let sc='';const n=Math.min(got,5);for(let i=0;i<n;i++){const a=-Math.PI*.82+i*(Math.PI*.64/Math.max(1,n-1));const x=150+Math.cos(a)*104,y=140+Math.sin(a)*74;sc+=`<g transform="translate(${x-30},${y-20})"><rect width="60" height="40" rx="4" fill="rgba(192,75,255,.14)" stroke="#c04bff" stroke-width="1.2"/><text x="30" y="24" text-anchor="middle" font-size="9" fill="#dba6ff" font-family="monospace">${['10110','01001','11010','00111','10101'][i]}</text></g>`}
+    stage.innerHTML=`<svg viewBox="0 0 300 260" style="width:min(400px,92%);height:100%">${sc}<g transform="translate(150,150)"><ellipse cx="0" cy="46" rx="46" ry="9" fill="rgba(192,75,255,.2)"/><path d="M-34 40 h68 l-8 -12 h-52z" fill="rgba(61,123,255,.25)" stroke="#3d7bff" stroke-width="1.4"/><rect x="-20" y="-6" width="40" height="34" rx="10" fill="rgba(20,29,63,.95)" stroke="#c04bff" stroke-width="1.6"/><circle cx="0" cy="-24" r="17" fill="rgba(20,29,63,.95)" stroke="#c04bff" stroke-width="1.6"/><rect x="-9" y="-28" width="6" height="5" rx="1.5" fill="#c04bff"/><rect x="3" y="-28" width="6" height="5" rx="1.5" fill="#c04bff"/><path d="M-6 -18 q6 5 12 0" stroke="#c04bff" stroke-width="1.6" fill="none"/><path d="M-20 4 l-22 -14 M20 4 l22 -14" stroke="#c04bff" stroke-width="2"/></g>${p===1?'<text x="150" y="248" text-anchor="middle" font-size="10" fill="#2ee6a8" font-family="Orbitron">AUTONOMOUS · ONLINE</text>':''}</svg>`;
+  }
+}
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-collect]');
+  if(c&&!c.classList.contains('taken')){
+    const [k,i]=c.dataset.collect.split('|');ST.collected[k].add(+i);c.classList.add('taken');renderStage(k);
+    const total=SERVICES[k].length,got=ST.collected[k].size;
+    if(got===total)toast(META[k].congrats,'ok');else toast(`Collected ${got}/${total}. Scroll down to see it assemble.`);
+    return;
+  }
+  const q=e.target.closest('[data-quote]');
+  if(q){const [k,i]=q.dataset.quote.split('|');const s=SERVICES[k][+i];
+    $('#qTitle').textContent=s[0];$('#qBody').textContent=s[1];
+    $('#qMeta').innerHTML=`<span class="svcprice">${s[2]}</span><span class="svctag">${META[k].title}</span><span class="svctag">Ownership transferred on delivery</span>`;
+    $('#quoteModal').classList.add('on');return}
+  const r=e.target.closest('[data-read]');
+  if(r){handleRead(r.dataset.read);return}
+  const n=e.target.closest('[data-next]');
+  if(n){nav(n.dataset.next);return}
+});
+$('#qToClow').onclick=()=>{$('#quoteModal').classList.remove('on');nav('clow');setTimeout(()=>{clowPush('me','I want a quote for '+$('#qTitle').textContent+'.');clowReply($('#qTitle').textContent)},350)};
+
+function handleRead(key){
+  const idx=ST.order.indexOf(key);
+  const prior=ST.order.slice(0,idx).every(k=>ST.read[k]);
+  if(!prior){toast('Read gate locked. Follow the sequence: Creation → AD → Marketing → Automation.','warn');updateGate(key);return}
+  ST.read[key]=true;
+  updateGate(key);
+  if(key==='automation'&&ST.order.every(k=>ST.read[k])){
+    ST.finalUnlocked=true;
+    toast('All four gates ticked. Opening Final piece…','ok');
+    setTimeout(()=>nav('final'),700);
+  }
+}
+function updateGate(key){
+  const el=$('#gate-'+key);if(!el)return;
+  const done=ST.order.filter(k=>ST.read[k]).length;
+  el.innerHTML=`READ GATE · ${ST.order.map(k=>`<span style="color:${ST.read[k]?'var(--ok)':'var(--faint)'}">${ST.read[k]?'☑':'☐'} ${META[k].title.split(' ')[0]}</span>`).join(' &nbsp; ')} &nbsp;·&nbsp; ${done}/4`;
+}
+
+/* ═══════════════ FINAL PIECE ═══════════════ */
+function initFinal(){
+  const fp=$('#finalPage');fp.classList.remove('lit');
+  $('#goldReveal').classList.remove('on');
+  $('#fpTitle').style.display='';$('#fpLede').style.display='';
+  $('#blueprint').style.display='';$('#pieceField').style.display='';
+  $('#fpTicks').innerHTML=ST.order.map(k=>`<span class="ctick done">☑ ${META[k].title}</span>`).join('');
+  $$('.slot').forEach(s=>{s.classList.remove('filled','hot');s.innerHTML=s.dataset.slot.toUpperCase()+'<br>SERVICES'});
+  const field=$('#pieceField');field.innerHTML='';
+  ST.finalDone=false;
+  const placed=new Set();
+  const keys=[...ST.order];
+  
+  const slotCenters={};
+  setTimeout(()=>{
+    $$('.slot').forEach(s=>{
+      const r=s.getBoundingClientRect();
+      const fr=field.getBoundingClientRect();
+      slotCenters[s.dataset.slot]={
+        x:r.left+r.width/2-fr.left,
+        y:r.top+r.height/2-fr.top,
+        w:r.width,h:r.height
+      };
+    });
+  },100);
+
+  keys.forEach((k,i)=>{
+    const d=document.createElement('div');d.className='dragpiece';d.dataset.key=k;
+    d.innerHTML=pieceSVG(k,META[k].title)+`<div class="draglabel">${META[k].title}</div>`;
+    field.appendChild(d);
+    const fw=field.offsetWidth||900;
+    const mobile=innerWidth<860;
+    const size=mobile?96:120;
+    const cols=mobile?2:keys.length;
+    const gapX=Math.max(6,(fw-cols*size)/(cols+1));
+    const col=mobile?i%2:i, row=mobile?Math.floor(i/2):0;
+    d.style.width=d.style.height=size+'px';
+    d.style.left=(gapX+col*(size+gapX))+'px';
+    d.style.top=(24+row*(size+28))+'px';
+    field.style.height=(mobile?2*size+84:size+64)+'px';
+    
+    let drag=false,ox=0,oy=0;
+    function down(ev){
+      if(d.classList.contains('placed'))return;
+      drag=true;d.style.zIndex=60;d.style.filter='drop-shadow(0 0 26px '+META[k].hue+')';
+      const t=ev.touches?ev.touches[0]:ev;const r=d.getBoundingClientRect();
+      ox=t.clientX-r.left;oy=t.clientY-r.top;ev.preventDefault();
+    }
+    function move(ev){
+      if(!drag)return;const t=ev.touches?ev.touches[0]:ev;
+      const fr=field.getBoundingClientRect();
+      let x=t.clientX-fr.left-ox,y=t.clientY-fr.top-oy;
+      x=Math.max(-40,Math.min(fr.width-size+40,x));y=Math.max(-900,Math.min(fr.height-size+40,y));
+      d.style.left=x+'px';d.style.top=y+'px';
+      
+      const slot=$(`.slot[data-slot="${k}"]`);
+      if(slot && slotCenters[k]){
+        const sc=slotCenters[k];
+        const dx=(x+size/2)-sc.x, dy=(y+size/2)-sc.y;
+        slot.classList.toggle('hot', Math.hypot(dx,dy)<60);
+      }
+      ev.preventDefault();
+    }
+    function up(ev){
+      if(!drag)return;drag=false;d.style.zIndex=30;d.style.filter='';
+      const slot=$(`.slot[data-slot="${k}"]`);
+      if(!slot || !slotCenters[k]) return;
+      
+      const sc=slotCenters[k];
+      const dcx=parseFloat(d.style.left)+size/2;
+      const dcy=parseFloat(d.style.top)+size/2;
+      const dist=Math.hypot(dcx-sc.x, dcy-sc.y);
+      
+      slot.classList.remove('hot');
+      if(dist<60){
+        const fr=field.getBoundingClientRect();
+        d.style.left=(sc.x-size/2)+'px';
+        d.style.top=(sc.y-size/2)+'px';
+        d.classList.add('placed');slot.classList.add('filled');slot.innerHTML='';
+        d.querySelector('.draglabel').style.display='none';
+        placed.add(k);toast(`${META[k].title} locked in. ${placed.size}/4`,'ok');
+        if(placed.size===4)setTimeout(finale,500);
+      }
+    }
+    d.addEventListener('mousedown',down);d.addEventListener('touchstart',down,{passive:false});
+    addEventListener('mousemove',move);addEventListener('touchmove',move,{passive:false});
+    addEventListener('mouseup',up);addEventListener('touchend',up);
+    cleanupFns.push(()=>{removeEventListener('mousemove',move);removeEventListener('touchmove',move);removeEventListener('mouseup',up);removeEventListener('touchend',up)});
+  });
+}
+function finale(){
+  if(ST.finalDone)return;ST.finalDone=true;
+  const fl=$('#flash');fl.classList.add('on');
+  setTimeout(()=>{
+    $('#finalPage').classList.add('lit');
+    $('#fpTitle').style.display='none';$('#fpLede').style.display='none';
+    $('#blueprint').style.display='none';$('#pieceField').style.display='none';$('#fpTicks').style.display='none';
+    $('#goldReveal').classList.add('on');
+    window.scrollTo({top:0,behavior:'smooth'});
+    fl.classList.remove('on');
+    toast('Puzzle complete. Welcome to CIDEX INFOTECH.','ok');
+  },620);
+}
+
+/* ═══════════════ LEGAL CANVAS ═══════════════ */
+function initLegalCanvas(){
+  const cv=$('#legalCanvas'),ctx=cv.getContext('2d');let W,H,raf,t=0;
+  function size(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight}
+  function chain(x0,y0,x1,y1,n,hue){
+    for(let i=0;i<n;i++){
+      const p=i/(n-1),x=x0+(x1-x0)*p,y=y0+(y1-y0)*p+Math.sin(t*.008+i*.5)*7;
+      const a=Math.atan2(y1-y0,x1-x0)+(i%2?Math.PI/2:0);
+      ctx.save();ctx.translate(x,y);ctx.rotate(a);
+      ctx.beginPath();ctx.ellipse(0,0,20,10,0,0,6.283);
+      ctx.strokeStyle=i%2?hue:'#7b5cff';ctx.lineWidth=3.4;ctx.globalAlpha=.55;
+      ctx.shadowBlur=16;ctx.shadowColor=hue;ctx.stroke();ctx.restore();
+    }
+  }
+  function lock(x,y,s,hue){
+    ctx.save();ctx.translate(x,y+Math.sin(t*.012)*9);ctx.globalAlpha=.75;
+    ctx.strokeStyle=hue;ctx.lineWidth=3;ctx.shadowBlur=26;ctx.shadowColor=hue;
+    ctx.beginPath();ctx.arc(0,-s*.42,s*.3,Math.PI,0);ctx.stroke();
+    ctx.beginPath();ctx.roundRect(-s*.46,-s*.16,s*.92,s*.72,8);
+    ctx.fillStyle='rgba(20,30,70,.5)';ctx.fill();ctx.stroke();
+    ctx.beginPath();ctx.arc(0,s*.12,s*.1,0,6.283);ctx.moveTo(0,s*.2);ctx.lineTo(0,s*.36);ctx.stroke();
+    ctx.globalAlpha=.28;ctx.beginPath();ctx.ellipse(0,s*.1,s*.95,s*.3,-.28,0,6.283);ctx.lineWidth=1.2;ctx.stroke();
+    ctx.restore();
+  }
+  function frame(){
+    t++;ctx.clearRect(0,0,W,H);
+    ctx.globalAlpha=.1;ctx.strokeStyle='#3d7bff';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=70){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+    for(let y=0;y<H;y+=70){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+    ctx.globalAlpha=1;
+    chain(-40,-20,W*.42,H*.3,12,'#00e5ff');
+    chain(W*.62,H*1.05,W+50,H*.55,13,'#c04bff');
+    lock(W*.84,H*.3,Math.min(150,W*.16),'#00e5ff');
+    lock(W*.13,H*.62,Math.min(96,W*.11),'#c04bff');
+    raf=requestAnimationFrame(frame);
+  }
+  size();frame();addEventListener('resize',size);
+  cleanupFns.push(()=>{cancelAnimationFrame(raf);removeEventListener('resize',size)});
+}
+function buildLegal(){
+  $('#legalBody').innerHTML=LEGAL.map(([id,title,clauses])=>`
+   <div class="legalblock" id="lg-${id}"><h2>${title}</h2><div class="upd">LAST REVIEWED · 18 NOV 2026 · CIDEX INFOTECH, KOLKATA</div>
+   ${clauses.map(([h,p],i)=>`<div class="legalclause"><h4>${i+1}. ${h}</h4><p>${p}</p></div>`).join('')}</div>`).join('');
+}
+$('#consultTeam').onclick=()=>{nav('mail');setTimeout(()=>{const c=$('#contactPart');if(c)c.scrollIntoView({behavior:'smooth',block:'start'})},260)};
+
+/* ═══════════════ INDUSTRIES ═══════════════ */
+function buildIndustries(){
+  $('#indGrid').innerHTML=INDUSTRIES.map(([n,ic,c,tag],i)=>`
+   <button class="indcard" style="--ih:${c}" data-ind="${i}"><div class="indicon">${indIcon(ic,c)}</div><div class="indname">${n}</div><div class="indtag">${tag}</div></button>`).join('');
+  $('#pfIndustry').innerHTML='<option value="">Select industry</option>'+INDUSTRIES.map(i=>`<option>${i[0]}</option>`).join('');
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-ind]');if(!b)return;
+  openIndustry(+b.dataset.ind);
+});
+function openIndustry(i){
+  const [name,ic,c,tag]=INDUSTRIES[i];const d=IND_DETAIL[name];
+  ST.industry=i;
+  $('#page-industry').innerHTML=`
+  <div class="fx"><div class="aurora a1" style="opacity:.18;background:radial-gradient(circle,${c},transparent 66%)"></div><div class="aurora a2" style="opacity:.16"></div><div class="gridfx"></div><div class="grain"></div></div>
+  <div class="backbar"><button class="backbtn" data-nav="industries">← Return to Industries</button></div>
+  <div class="wrap sec" style="max-width:960px;padding-top:26px">
+    <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+      <div style="width:64px;height:64px;border-radius:16px;border:1px solid ${c}55;background:${c}14;display:grid;place-items:center">${indIcon(ic,c)}</div>
+      <div><div class="eyebrow" style="color:${c}">Sector ${String(i+1).padStart(2,'0')} / 20</div><h2 class="h2" style="color:${c}">${name}</h2></div>
+    </div>
+    <p class="lede">${tag}</p>
+    <div class="indsec"><h3><span class="n">01</span>The industry & why society needs it</h3><p>${d.what}</p><p>${d.need}</p></div>
+    <div class="indsec"><h3><span class="n">02</span>Questions we're asked</h3>${d.qa.map(([q,a])=>`<div class="qa"><div class="q">${q}</div><div class="a">${a}</div></div>`).join('')}</div>
+    <div class="indsec"><h3><span class="n">03</span>The problem & the fix</h3><p><b style="color:#ffc3ce">Problem.</b> ${d.prob}</p><p><b style="color:#b6ffe6">How Cidex solves it.</b> ${d.fix}</p></div>
+    <div class="indsec"><h3><span class="n">04</span>Services that move the needle for you</h3><p>Based on how ${name.toLowerCase()} businesses actually buy, these are the engagements we would recommend first — in this order.</p>
+      <div class="svctags">${d.svc.map(s=>`<button class="svctag" data-nav="services">${s}</button>`).join('')}</div>
+      <div class="btnrow"><button class="btn p" data-nav="clow">GET A QUOTE ⟶</button><button class="btn g" data-nav="aetheria">ASK AETHERIA</button><button class="btn" data-nav="mail">CONTACT OUR TEAM</button></div>
+    </div>
+    <div class="quote" style="margin-top:24px">"${name} is not a small sector. It is a load-bearing wall in an economy that only notices it when it cracks."</div>
+    <div style="margin-top:30px"><button class="frontand" data-nav="industries"><span>Back to home</span><span class="ar">⟶</span></button></div>
+  </div>`;
+  nav('industry');
+}
+function initIndCanvas(){
+  const cv=$('#indCanvas'),ctx=cv.getContext('2d');let W,H,raf,t=0,towers=[];
+  function size(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;towers=Array.from({length:26},(_,i)=>({x:(i/26)*W+Math.random()*20,w:22+Math.random()*40,h:60+Math.random()*220,hue:['#00e5ff','#3d7bff','#c04bff','#ffb020'][i%4]}))}
+  function frame(){t++;ctx.clearRect(0,0,W,H);
+    for(const tw of towers){
+      ctx.globalAlpha=.13;ctx.fillStyle=tw.hue;ctx.fillRect(tw.x,H-tw.h,tw.w,tw.h);
+      ctx.globalAlpha=.3;ctx.strokeStyle=tw.hue;ctx.lineWidth=1;ctx.strokeRect(tw.x,H-tw.h,tw.w,tw.h);
+      for(let y=H-tw.h+10;y<H-8;y+=16)for(let x=tw.x+5;x<tw.x+tw.w-6;x+=12){
+        const on=(Math.sin(t*.01+x*.3+y*.2)+1)/2;
+        ctx.globalAlpha=.06+on*.16;ctx.fillStyle=tw.hue;ctx.fillRect(x,y,5,7)}
+    }
+    ctx.globalAlpha=1;raf=requestAnimationFrame(frame)}
+  size();frame();addEventListener('resize',size);
+  cleanupFns.push(()=>{cancelAnimationFrame(raf);removeEventListener('resize',size)});
+}
+
+/* ═══════════════ FAQ ═══════════════ */
+function buildFAQ(){
+  $('#faqList').innerHTML=FAQ.map(([q,a],i)=>`
+   <div class="faqitem"><button class="faqq" data-faq="${i}"><span>${q}</span><span class="faqi">+</span></button><div class="faqa"><div>${a}</div></div></div>`).join('');
+  $$('[data-faq]').forEach(b=>b.onclick=()=>{
+    const item=b.parentElement,ans=item.querySelector('.faqa'),open=item.classList.contains('open');
+    $$('.faqitem.open').forEach(o=>{o.classList.remove('open');o.querySelector('.faqa').style.maxHeight='0'});
+    if(!open){item.classList.add('open');ans.style.maxHeight=ans.scrollHeight+'px'}
+  });
+}
+
+/* ═══════════════ CALCULATOR ═══════════════ */
+const MIXES={balanced:[['Google Search',.34,'#00e5ff'],['Meta Ads',.30,'#3d7bff'],['SEO & Content',.20,'#2ee6a8'],['Creative & Video',.10,'#ff2d9b'],['Analytics & CRO',.06,'#ffb020']],
+google:[['Google Search',.54,'#00e5ff'],['Meta Ads',.16,'#3d7bff'],['SEO & Content',.16,'#2ee6a8'],['Creative & Video',.08,'#ff2d9b'],['Analytics & CRO',.06,'#ffb020']],
+meta:[['Google Search',.16,'#00e5ff'],['Meta Ads',.52,'#3d7bff'],['SEO & Content',.14,'#2ee6a8'],['Creative & Video',.12,'#ff2d9b'],['Analytics & CRO',.06,'#ffb020']],
+organic:[['Google Search',.14,'#00e5ff'],['Meta Ads',.14,'#3d7bff'],['SEO & Content',.46,'#2ee6a8'],['Creative & Video',.16,'#ff2d9b'],['Analytics & CRO',.10,'#ffb020']]};
+const GOALS={leads:{cpm:180,ctr:.028,lp:.09,label:'lead generation'},sales:{cpm:220,ctr:.022,lp:.035,label:'e-commerce sales'},traffic:{cpm:90,ctr:.04,lp:.02,label:'traffic & awareness'},local:{cpm:140,ctr:.034,lp:.11,label:'local footfall'}};
+function calc(){
+  const B=+$('#budgetSlider').value,aov=+$('#aovSlider').value,cr=+$('#crSlider').value/100,mo=+$('#moSlider').value;
+  const g=GOALS[$('#calcGoal').value],mix=MIXES[$('#calcMix').value];
+  $('#budgetVal').textContent=fmt(B);$('#aovLabel').textContent=fmt(aov);$('#crLabel').textContent=Math.round(cr*100)+'%';$('#moLabel').textContent=mo+' month'+(mo>1?'s':'');
+  const imp=B/g.cpm*1000,clk=imp*g.ctr,leads=clk*g.lp,cust=leads*cr,rev=cust*aov,roas=rev/B;
+  $('#oImp').textContent=fmtN(imp);$('#oClk').textContent=fmtN(clk);$('#oLead').textContent=fmtN(leads);$('#oCust').textContent=fmtN(cust);$('#oRev').textContent=fmt(rev);$('#oRoas').textContent=roas.toFixed(2)+'×';
+  $('#oRoas').style.color=roas>=3?'var(--acid)':roas>=1.5?'var(--warn)':'var(--danger)';
+  $('#calcVerdict').innerHTML=roas>=3
+    ? `<b style="color:var(--acid)">Healthy.</b> At ${roas.toFixed(2)}× on ${g.label}, this budget pays for itself with room to scale. Increase spend ~20% per month while ROAS holds above 2.5×.`
+    : roas>=1.5?`<b style="color:var(--warn)">Marginal.</b> ${roas.toFixed(2)}× works only if your gross margin is above ${Math.ceil(100/roas)}%. Lift close rate or deal value before adding budget.`
+    : `<b style="color:var(--danger)">Underwater.</b> ${roas.toFixed(2)}× will burn cash. Fix the offer, the landing page or the targeting before spending more — we'd start with Conversion Tracking and a Landing Page rebuild.`;
+  $('#allocList').innerHTML=mix.map(([n,p,c])=>`<div class="allocrow"><span class="allocdot" style="background:${c}"></span><span style="width:118px;font-size:12.5px">${n}</span><span class="allocbar"><i style="width:${p*100}%;background:${c}"></i></span><span class="mono" style="font-size:11.5px;color:var(--dim);width:78px;text-align:right">${fmt(B*p)}</span></div>`).join('');
+  const bars=[];for(let i=0;i<Math.min(mo,12);i++){const ramp=1-Math.exp(-(i+1)/3.2);bars.push(rev*ramp*(1+i*.035))}
+  const mx=Math.max(...bars,1);
+  $('#rampBars').innerHTML=bars.map((v,i)=>`<div class="bar" style="height:${Math.max(6,v/mx*100)}%;background:linear-gradient(180deg,${['#00e5ff','#3d7bff','#c04bff','#ff2d9b','#ffb020','#2ee6a8'][i%6]},rgba(10,16,36,.4))"><em>${ST.curr==='INR'?'₹':'$'}${Math.round((ST.curr==='INR'?v:v/RATE)/1000)}k</em><span>M${i+1}</span></div>`).join('');
+}
+['budgetSlider','aovSlider','crSlider','moSlider','calcGoal','calcMix'].forEach(id=>{const el=$('#'+id);el.addEventListener('input',calc);el.addEventListener('change',calc)});
+$('#calcReset').onclick=()=>{$('#budgetSlider').value=50000;$('#aovSlider').value=3000;$('#crSlider').value=12;$('#moSlider').value=6;$('#calcGoal').value='leads';$('#calcMix').value='balanced';calc();toast('Calculator reset to baseline.')};
+$('#calcRandom').onclick=()=>{$('#budgetSlider').value=(Math.floor(Math.random()*99)+1)*5000;$('#aovSlider').value=(Math.floor(Math.random()*590)+3)*100;$('#crSlider').value=Math.floor(Math.random()*45)+3;$('#moSlider').value=Math.floor(Math.random()*20)+3;const gk=Object.keys(GOALS),mk=Object.keys(MIXES);$('#calcGoal').value=gk[Math.floor(Math.random()*4)];$('#calcMix').value=mk[Math.floor(Math.random()*4)];calc();toast('Randomised scenario loaded.','ok')};
+
+/* ═══════════════ CLOW TICKER ═══════════════ */
+function initTicker(){
+  const cv=$('#clowTicker'),ctx=cv.getContext('2d');let W,H,raf,t=0;
+  const rows=['BTC 64,210 ▲','USD/INR 83.42','CPC ₹12.40 ▼','ROAS 3.8× ▲','CPM ₹184','CTR 2.9% ▲','CAC ₹410 ▼','AOV ₹3,120 ▲','LTV ₹18,900','META 4.1× ▲','GOOG 3.2× ▲','SEO +38% ▲'];
+  function size(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight}
+  function frame(){t++;ctx.clearRect(0,0,W,H);ctx.font='11px JetBrains Mono, monospace';
+    rows.forEach((r,i)=>{const y=((i*74+t*.32)%(H+80))-40;const x=(i%3)*(W/3)+24;
+      ctx.globalAlpha=.13;ctx.fillStyle=r.includes('▲')?'#2ee6a8':r.includes('▼')?'#ff3b5c':'#00e5ff';ctx.fillText(r,x,y)});
+    ctx.globalAlpha=1;raf=requestAnimationFrame(frame)}
+  size();frame();addEventListener('resize',size);
+  cleanupFns.push(()=>{cancelAnimationFrame(raf);removeEventListener('resize',size)});
+}
+
+/* ═══════════════ CHAT ═══════════════ */
+const AETH_INTRO="Hello — I'm Aetheria, the brain of Cidex Infotech.\n\nI think in positioning, sequencing and trade-offs. Tell me what your business does and where it feels stuck, and I'll tell you what I'd fix first and what I'd deliberately leave alone.\n\nI'm not a sales script. If the honest answer is \"don't spend money on that yet,\" that's what you'll get.";
+const CLOW_INTRO="Hey — Clow here, the calculator.\n\nI turn budgets into numbers you can argue with: impressions, clicks, leads, CAC and ROAS. Give me a monthly budget and an objective, or tap a quick prompt below.\n\nSwitch ₹ INR / $ USD any time — every figure I quote follows your selection.";
+function updateHello(){
+  const n=ST.user?.name||ST.user?.first;
+  $('#aethHello').textContent='Hello'+(n?', '+n:'');
+  $('#clowHello').textContent='Hello'+(n?', '+n:'');
+}
+function bubble(kind,who,text,cls){
+  const d=document.createElement('div');d.className='msg '+cls+(kind?' '+kind:'');
+  d.innerHTML=`<div class="who">${who}</div><div>${text.replace(/</g,'&lt;')}</div>`;return d;
+}
+function aethPush(cls,text){const b=$('#aethBody');b.appendChild(bubble('aeth',cls==='me'?'You':'Aetheria',text,cls));b.scrollTop=b.scrollHeight;ST.aethMsgs.push({cls,text})}
+function clowPush(cls,text){const b=$('#clowBody');b.appendChild(bubble('clow',cls==='me'?'You':'Clow',text,cls));b.scrollTop=b.scrollHeight;ST.clowMsgs.push({cls,text})}
+function typing(body,kind){const d=document.createElement('div');d.className='msg bot '+kind;d.innerHTML='<div class="typing"><i></i><i></i><i></i></div>';body.appendChild(d);body.scrollTop=body.scrollHeight;return d}
+function aethReply(q){
+  const body=$('#aethBody');const t=typing(body,'aeth');
+  setTimeout(()=>{t.remove();aethPush('bot',aethAnswer(q))},700+Math.random()*500);
+}
+function aethAnswer(q){
+  const s=q.toLowerCase();
+  if(/seo|rank|google search/.test(s))return "SEO is a compounding asset, not a campaign. My sequence: fix crawl and index issues, then build the three pages that match your highest-intent queries, then earn links through genuinely useful content.\n\nIf you need revenue this month, ads come first and SEO runs underneath. Anyone promising page one in 30 days is selling you a story.";
+  if(/budget|cost|price|cheap|afford/.test(s))return "Budget questions belong to Clow — he'll model it properly. My view on sequencing though: never split a small budget across five channels. Pick one, prove it, then widen.\n\nA ₹30,000 budget concentrated on one channel beats ₹6,000 scattered across five, every single time.";
+  if(/brand|logo|identity|design/.test(s))return "Identity is recognition, not decoration. Before we draw anything I want three answers: who you're for, what you refuse to do, and what you want remembered.\n\nA logo without those answers is just a shape. With them, it's a shortcut to trust.";
+  if(/automat|workflow|whatsapp|email/.test(s))return "Automate the seams, not the judgement. Answering \"what are your hours\" at 2am — automate. Deciding whether to refund an angry customer — keep a human.\n\nStart with the single task your team repeats most often. One reliable automation beats ten fragile ones.";
+  if(/competitor|market|different|stand out/.test(s))return "Differentiation is usually a positioning problem wearing a marketing costume. Most businesses in your category say the same four things.\n\nFind the claim your competitors are structurally unable to make, then build proof for it. That's the whole exercise.";
+  if(/invest|fund|scale|grow/.test(s))return "Scale only what already works. If a channel isn't profitable at ₹20,000, it will not become profitable at ₹2,00,000 — it will just lose money faster.\n\nProve unit economics, document the playbook, then pour fuel on it. Your question matters to us, so I take it seriously.";
+  if(/hi|hello|hey|start/.test(s))return "Hello. Tell me two things: what you sell, and what's currently frustrating you about how customers find you.\n\nFrom there I can be specific rather than generic.";
+  return "Here's how I'd approach that.\n\nFirst, define the outcome in one sentence — not \"more traffic,\" but \"12 qualified enquiries a month.\" Then find the single biggest constraint between you and it. Usually it's one of three: nobody knows you exist, people know but don't believe you, or they believe you but the process is painful.\n\nTell me which of those three it is, and I'll give you the actual sequence I'd run. Preview mode: replies come from Cidex's built-in strategy playbooks. Live AI answers are coming soon.";
+}
+function clowReply(q){
+  const body=$('#clowBody');const t=typing(body,'clow');
+  setTimeout(()=>{t.remove();clowPush('bot',clowAnswer(q))},650+Math.random()*450);
+}
+function clowAnswer(q){
+  const s=q.toLowerCase();
+  const num=(s.match(/(\d[\d,]*)\s*(k|lakh|lac|l)?/)||[])[0];
+  let budget=null;
+  if(num){let v=parseFloat(num.replace(/,/g,''));if(/k/.test(num))v*=1000;else if(/lakh|lac|l\b/.test(num))v*=100000;if(v>=1000)budget=v}
+  const svcMatch=Object.entries(SERVICES).flatMap(([k,arr])=>arr.map(a=>[k,a])).find(([k,a])=>s.includes(a[0].toLowerCase().split(' ')[0])&&a[0].length>6);
+  if(svcMatch){const [k,a]=svcMatch;return `${a[0]} — ${a[2]}.\n\n${a[1]}\n\nWhat that starting price covers: discovery, the core build, one revision round and handover documentation. Anything beyond that is quoted as a named addition before we start, never after.\n\nWant me to model the return side? Give me your average deal value and close rate.`}
+  if(budget){
+    const g=GOALS.leads,imp=budget/g.cpm*1000,clk=imp*g.ctr,leads=clk*g.lp,cust=leads*.12,rev=cust*3000;
+    return `Modelling ${fmt(budget)}/month on lead generation, balanced mix:\n\n• Impressions ≈ ${fmtN(imp)}\n• Clicks ≈ ${fmtN(clk)} @ 2.8% CTR\n• Leads ≈ ${fmtN(leads)} @ 9% landing rate\n• Customers ≈ ${fmtN(cust)} @ 12% close\n• Revenue ≈ ${fmt(rev)} on a ${fmt(3000)} deal\n• ROAS ≈ ${(rev/budget).toFixed(2)}×\n\nSplit I'd recommend: Google ${fmt(budget*.34)}, Meta ${fmt(budget*.30)}, SEO/content ${fmt(budget*.20)}, creative ${fmt(budget*.10)}, measurement ${fmt(budget*.06)}.\n\nThese are planning benchmarks, not guarantees. Open Review Budget to move the sliders against your real numbers.`;
+  }
+  if(/roas|return|profit/.test(s))return "ROAS = revenue ÷ ad spend. But ROAS alone lies — a 3× ROAS on a 25% margin business loses money.\n\nBreak-even ROAS = 1 ÷ gross margin. At 40% margin you need 2.5× just to stand still. Tell me your margin and I'll give you the real threshold.";
+  if(/cpc|cpm|ctr|cac/.test(s))return "Working Indian SMB benchmarks we plan against:\n\n• CPM: ₹90–220 depending on objective\n• CTR: 2.2%–4.0% on cold audiences\n• CPC: ₹8–28\n• Landing conversion: 3.5% (e-comm) to 11% (local)\n• CAC: derive it, don't guess it — spend ÷ new customers\n\nIf your CAC exceeds one-third of first-year customer value, the model needs fixing before the budget does.";
+  if(/usd|dollar|inr|rupee|currency/.test(s))return `You're currently viewing in ${ST.curr}. Toggle ₹ INR / $ USD at the top and every figure I produce switches with you. I convert at ₹${RATE} to the dollar for planning purposes.`;
+  if(/hi|hello|hey/.test(s))return "Hey. Give me a monthly budget and what you're trying to buy with it — leads, sales, traffic or footfall — and I'll model it end to end.\n\nOr name a service and I'll quote it.";
+  return "I can model that. To be precise I need three inputs:\n\n1. Monthly budget\n2. Objective — leads, sales, traffic or local footfall\n3. Average deal value and close rate\n\nGive me those and I'll return impressions, clicks, leads, customers, revenue and ROAS in "+ST.curr+". Or tap a quick prompt above, or open Review Budget for the full slider model.\n\nPreview mode: estimates use Cidex's benchmark tables. Live AI estimates are coming soon.";
+}
+function initChat(){
+  aethPush('bot',AETH_INTRO);clowPush('bot',CLOW_INTRO);
+  const send=(kind)=>{
+    const inp=$(kind==='aeth'?'#aethInput':'#clowInput');const v=inp.value.trim();if(!v)return;
+    inp.value='';inp.style.height='auto';
+    if(kind==='aeth'){aethPush('me',v);aethReply(v)}else{clowPush('me',v);clowReply(v)}
+  };
+  $('#aethSend').onclick=()=>send('aeth');$('#clowSend').onclick=()=>send('clow');
+  [['#aethInput','aeth'],['#clowInput','clow']].forEach(([sel,k])=>{
+    const el=$(sel);
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(k)}});
+    el.addEventListener('input',()=>{el.style.height='auto';el.style.height=Math.min(130,el.scrollHeight)+'px'});
+  });
+  const chips=['Model ₹50,000 for leads','What is break-even ROAS?','Quote SEO','Quote WhatsApp automation','CPC benchmarks'];
+  $('#clowChips').innerHTML=chips.map(c=>`<button class="chip" data-chip="${c}">${c}</button>`).join('');
+  $$('[data-chip]').forEach(b=>b.onclick=()=>{clowPush('me',b.dataset.chip);clowReply(b.dataset.chip)});
+}
+$$('[data-sendteam]').forEach(b=>b.onclick=()=>{
+  const k=b.dataset.sendteam;const msgs=k==='aeth'?ST.aethMsgs:ST.clowMsgs;
+  if(msgs.length<2){toast('Have a conversation first, then send the transcript.','warn');return}
+  toast('Preview only: transcripts are not sent yet.','warn');
+  const body=$(k==='aeth'?'#aethBody':'#clowBody');
+  body.appendChild(bubble(k,k==='aeth'?'Aetheria':'Clow','✓ Transcript forwarded to the Cidex team. A human will pick this up — you can also reach us directly from Mail Our Team.','bot'));
+  body.scrollTop=body.scrollHeight;
+});
+$('#currSw').onclick=e=>{const b=e.target.closest('[data-curr]');if(!b)return;
+  ST.curr=b.dataset.curr;$$('#currSw button').forEach(x=>x.classList.toggle('on',x===b));
+  clowPush('bot',`Currency switched to ${ST.curr==='INR'?'₹ INR':'$ USD'}. All figures from here follow that selection.`);
+  calc();toast('Currency set to '+ST.curr,'ok');
+};
+
+/* ═══════════════ AUTH ═══════════════ */
+$('#signinBtn').onclick=()=>{
+  if(ST.user){nav('profile');toast('Already signed in — taking you to Edit Profile.');return}
+  $('#authModal').classList.add('on');
+};
+$('#authForm').onsubmit=e=>{
+  e.preventDefault();
+  const em=$('#auEmail').value.trim(),pw=$('#auPass').value,nm=$('#auName').value.trim();
+  const okE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em),okP=pw.length>=6;
+  $('#eAuEmail').classList.toggle('on',!okE);$('#eAuPass').classList.toggle('on',!okP);
+  if(!okE||!okP)return;
+  ST.user={email:em,name:nm||em.split('@')[0],first:nm?nm.split(' ')[0]:em.split('@')[0]};
+  $('#pfFirst').value=ST.user.first;$('#pfEmail').value=em;
+  $('#signinBtn').innerHTML='◈ '+ST.user.name.toUpperCase().slice(0,14);
+  $('#authModal').classList.remove('on');
+  updateHello();toast('Signed in. Redirecting to Edit Profile.','ok');
+  setTimeout(()=>nav('profile'),400);
+};
+$('#profileForm').onsubmit=e=>{
+  e.preventDefault();
+  const f=$('#pfFirst').value.trim(),em=$('#pfEmail').value.trim();
+  const okF=!!f,okE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+  $('#eFirst').classList.toggle('on',!okF);$('#eEmail').classList.toggle('on',!okE);
+  $('#pfOk').classList.toggle('on',okF&&okE);
+  if(!okF||!okE){toast('Fix the highlighted fields.','err');return}
+  ST.curr=$('#pfCurr').value;$$('#currSw button').forEach(x=>x.classList.toggle('on',x.dataset.curr===ST.curr));
+  ST.user={...(ST.user||{}),first:f,name:f,email:em};
+  $('#signinBtn').innerHTML='◈ '+f.toUpperCase().slice(0,14);
+  updateHello();calc();toast('Preview only: profile changes are not saved yet.','warn');
+};
+$('#pfSignOut').onclick=()=>{ST.user=null;$('#signinBtn').innerHTML='◈ SIGN IN';$('#profileForm').reset();$('#pfOk').classList.remove('on');updateHello();toast('Signed out.','warn');nav('home')};
+$('#mailForm').onsubmit=e=>{
+  e.preventDefault();
+  const n=$('#mlName').value.trim(),em=$('#mlEmail').value.trim(),ms=$('#mlMsg').value.trim();
+  const okN=!!n,okE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em),okM=ms.length>=10;
+  $('#eMlName').classList.toggle('on',!okN);$('#eMlEmail').classList.toggle('on',!okE);$('#eMlMsg').classList.toggle('on',!okM);
+  $('#mlOk').classList.toggle('on',okN&&okE&&okM);
+  if(!okN||!okE||!okM){toast('Check the highlighted fields.','err');return}
+  toast('Preview only: this form does not send messages yet.','warn');
+  $('#mailForm').reset();
+};
+$('#mlCopy').onclick=()=>{
+  const txt=`${$('#mlName').value}\n${$('#mlEmail').value}\n${$('#mlSubject').value}\n\n${$('#mlMsg').value}`;
+  navigator.clipboard?.writeText(txt).then(()=>toast('Draft copied to clipboard.','ok')).catch(()=>toast('Clipboard unavailable in this context.','warn'));
+};
+$('#subForm').onsubmit=e=>{
+  e.preventDefault();const v=$('#subEmail').value.trim();const ok=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  $('#eSub').classList.toggle('on',!ok);$('#subOk').classList.toggle('on',ok);
+  if(ok){toast('Subscribed. One note a month, no filler.','ok');$('#subEmail').value=''}
+};
+let cfAction=null;
+function askConfirm(title,body,fn){
+  $('#cfTitle').textContent=title;$('#cfBody').textContent=body;$('#cfInput').value='';$('#cfGo').disabled=true;
+  cfAction=fn;$('#confirmModal').classList.add('on');
+}
+$('#cfInput').oninput=e=>{$('#cfGo').disabled=e.target.value.trim().toUpperCase()!=='DELETE'};
+$('#cfGo').onclick=()=>{if(cfAction)cfAction();$('#confirmModal').classList.remove('on');cfAction=null};
+$('#delData').onclick=()=>askConfirm('Delete my Data','This erases analytics history, preferences, saved drafts and message logs. Your account and active orders remain. This cannot be undone.',()=>{
+  ST.aethMsgs=[];ST.clowMsgs=[];$('#aethBody').innerHTML='';$('#clowBody').innerHTML='';aethPush('bot',AETH_INTRO);clowPush('bot',CLOW_INTRO);
+  Object.keys(ST.collected).forEach(k=>ST.collected[k].clear());
+  toast('All stored data erased. Account retained.','ok');
+});
+$('#delAcct').onclick=()=>askConfirm('Delete my Account','This permanently removes your profile, credentials and order history. Active engagements must be settled first. This cannot be undone.',()=>{
+  ST.user=null;ST.read={creation:false,ad:false,marketing:false,automation:false};ST.finalUnlocked=false;
+  Object.keys(ST.collected).forEach(k=>ST.collected[k].clear());
+  $('#signinBtn').innerHTML='◈ SIGN IN';$('#profileForm').reset();updateHello();
+  toast('Preview only: nothing was deleted.','warn');setTimeout(()=>nav('home'),600);
+});
+
+/* ═══════════════ ACCOUNT TABLES ═══════════════ */
+function readAccount(){
+  return {
+    company:($('#acCompany')?.value||'').trim(),
+    budget:$('#acBudgetIn')?.value||'',
+    timeline:$('#acTimeline')?.value||'',
+    notes:($('#acNotes')?.value||'').trim(),
+    services:[...document.querySelectorAll('#acChips input:checked')].map(c=>c.value)
+  };
+}
+function renderAccount(d){
+  d=d||readAccount();
+  const u=ST.user;
+  $('#acName').textContent=u?(u.name||u.first||'Signed in'):'Not signed in';
+  $('#acEmail').textContent=u?.email||'Edit your profile to add your details';
+  const budget=parseFloat(d.budget);
+  $('#acBudget').textContent=budget>0?'₹'+budget.toLocaleString('en-IN'):'—';
+  $('#acBudgetNote').textContent=budget>0?'Per month':'Enter a monthly budget below';
+  $('#acCount').textContent=d.services.length;
+  const names=d.services.map(v=>{const [k,i]=v.split('|');return SERVICES[k][+i][0]});
+  $('#acServices').textContent=names.length?names.join(', '):'None selected yet';
+  $('#acStatus').textContent=!d.services.length?'Not started':(budget>0?'Ready for a quote':'Add a budget');
+  $('#acStatusNote').textContent=!d.services.length?'Pick the services you want':(budget>0?'Use GET A QUOTE on a service page to request pricing':'A budget helps us size the plan');
+  $('#acRows').innerHTML=d.services.map(v=>{const [k,i]=v.split('|');const s=SERVICES[k][+i];return `<tr><td style="color:var(--ink)">${s[0]}</td><td class="mono">${s[2]}</td><td><span class="pill info">NOT REQUESTED</span></td></tr>`}).join('');
+  $('#acEmpty').style.display=d.services.length?'none':'block';
+}
+function buildAccount(){
+  const KEY='cidex_account_v1';
+  const chips=$('#acChips');
+  chips.innerHTML=Object.keys(SERVICES).map(k=>SERVICES[k].map((s,i)=>`<label class="chip acchip" style="cursor:pointer"><input type="checkbox" value="${k}|${i}" style="display:none"> ${s[0]}</label>`).join('')).join('');
+  const syncChips=()=>chips.querySelectorAll('input').forEach(c=>c.closest('label').classList.toggle('on',c.checked));
+  let saved={};
+  try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){saved={}}
+  $('#acCompany').value=saved.company||'';
+  $('#acBudgetIn').value=saved.budget||'';
+  $('#acTimeline').value=saved.timeline||'';
+  $('#acNotes').value=saved.notes||'';
+  chips.querySelectorAll('input').forEach(c=>{c.checked=(saved.services||[]).includes(c.value)});
+  syncChips();
+  $('#acForm').addEventListener('input',()=>{syncChips();renderAccount()});
+  $('#acForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    try{localStorage.setItem(KEY,JSON.stringify(readAccount()))}catch(err){}
+    $('#acOk').classList.add('on');
+    toast('Saved on this device.','ok');
+  });
+  $('#acReset').onclick=()=>{
+    $('#acForm').reset();syncChips();
+    try{localStorage.removeItem(KEY)}catch(err){}
+    $('#acOk').classList.remove('on');
+    renderAccount();
+  };
+  renderAccount();
+}
+
+/* ═══════════════ BOOT ═══════════════ */
+function boot(){
+  const logs=['initialising core…','mounting sidebar protocol…','loading asteroids…','calibrating puzzle…','waking Aetheria…','waking Clow…','decrypting legal pages…','rendering deck…','ready.'];
+  let i=0;
+  $('#bootFill').style.width='100%';
+  $('#bootPct').textContent='100%';
+  $('#bootLog').textContent='ready.';
+  const showNext=()=>{
+    if(i<logs.length){
+      $('#bootLog').textContent=logs[i];
+      i++;
+      setTimeout(showNext,120);
+    } else {
+      setTimeout(()=>{
+        $('#boot').classList.add('gone');
+        observeReveals();
+      },300);
+    }
+  };
+  showNext();
+}
+
+/* ═══════════════ WEBGL LIQUID CORE (THREE.JS) ═══════════════ */
+function initWebGLHero() {
+  const canvas = document.getElementById('liquid-core');
+  if (!canvas || typeof THREE === 'undefined') return;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
+  camera.position.z = 4.5;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uColor1: { value: new THREE.Color('#00e5ff') },
+      uColor2: { value: new THREE.Color('#c04bff') },
+      uColor3: { value: new THREE.Color('#ff2d9b') }
+    },
+    vertexShader: `
+      uniform float uTime;
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      
+      vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
+      vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
+      float snoise(vec3 v){ 
+        const vec2 C = vec2(1.0/6.0, 1.0/3.0) ;
+        const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+        vec3 i  = floor(v + dot(v, C.yyy) );
+        vec3 x0 = v - i + dot(i, C.xxx) ;
+        vec3 g = step(x0.yzx, x0.xyz);
+        vec3 l = 1.0 - g;
+        vec3 i1 = min( g.xyz, l.zxy );
+        vec3 i2 = max( g.xyz, l.zxy );
+        vec3 x1 = x0 - i1 + 1.0 * C.xxx;
+        vec3 x2 = x0 - i2 + 2.0 * C.xxx;
+        vec3 x3 = x0 - 1. + 3.0 * C.xxx;
+        i = mod(i, 289.0 );
+        vec4 p = permute( permute( permute( i.z + vec4(0.0, i1.z, i2.z, 1.0 )) + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+        float n_ = 1.0/7.0;
+        vec3 ns = n_ * D.wyz - D.xzx;
+        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+        vec4 x_ = floor(j * ns.z);
+        vec4 y_ = floor(j - 7.0 * x_ );
+        vec4 x = x_ *ns.x + ns.yyyy;
+        vec4 y = y_ *ns.x + ns.yyyy;
+        vec4 h = 1.0 - abs(x) - abs(y);
+        vec4 b0 = vec4( x.xy, y.xy );
+        vec4 b1 = vec4( x.zw, y.zw );
+        vec4 s0 = floor(b0)*2.0 + 1.0;
+        vec4 s1 = floor(b1)*2.0 + 1.0;
+        vec4 sh = -step(h, vec4(0.0));
+        vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+        vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+        vec3 p0 = vec3(a0.xy,h.x); vec3 p1 = vec3(a0.zw,h.y);
+        vec3 p2 = vec3(a1.xy,h.z); vec3 p3 = vec3(a1.zw,h.w);
+        vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+        p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+        vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+        m = m * m;
+        return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+      }
+
+      void main() {
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = position;
+        float noise = snoise(position * 1.2 + uTime * 0.35) * 0.45;
+        vec3 newPos = position + normal * noise;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float uTime;
+      uniform vec3 uColor1;
+      uniform vec3 uColor2;
+      uniform vec3 uColor3;
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+
+      void main() {
+        float fresnel = pow(1.0 - abs(vNormal.z), 3.5);
+        float mix1 = sin(vPosition.y * 2.5 + uTime * 0.8) * 0.5 + 0.5;
+        float mix2 = cos(vPosition.x * 2.5 - uTime * 0.6) * 0.5 + 0.5;
+        
+        vec3 color = mix(uColor1, uColor2, mix1);
+        color = mix(color, uColor3, mix2 * fresnel);
+        color += fresnel * uColor1 * 2.0;
+        
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `
+  });
+
+  const geometry = new THREE.IcosahedronGeometry(1.4, 64);
+  const mesh = new THREE.Mesh(geometry, material);
+  scene.add(mesh);
+
+  let mouseX = 0, mouseY = 0;
+  window.addEventListener('mousemove', (e) => {
+    mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+    mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+  });
+
+  const clock = new THREE.Clock();
+  function animate() {
+    requestAnimationFrame(animate);
+    material.uniforms.uTime.value = clock.getElapsedTime();
+    mesh.rotation.y = mouseX * 0.6 + clock.getElapsedTime() * 0.15;
+    mesh.rotation.x = mouseY * 0.4;
+    renderer.render(scene, camera);
+  }
+
+  const resizeObserver = new ResizeObserver(() => {
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (canvas.width !== width || canvas.height !== height) {
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    }
+  });
+  resizeObserver.observe(canvas);
+  animate();
+}
+
+function init(){
+  buildNav();buildLegal();buildIndustries();buildFAQ();buildAccount();initChat();
+  $$('[data-bot]').forEach(el=>el.innerHTML=botSVG(el.dataset.bot));
+  $$('[data-rocks]').forEach(s=>{
+    const obs=new MutationObserver(()=>{if(s.closest('.page').classList.contains('on')){initRocks(s);obs.disconnect()}});
+    obs.observe(s.closest('.page'),{attributes:true,attributeFilter:['class']});
+  });
+  const rockObs=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting&&!x.target.dataset.init){x.target.dataset.init='1';initRocks(x.target)}}),{threshold:.01});
+  $$('[data-rocks]').forEach(s=>rockObs.observe(s));
+  calc();updateHello();observeReveals();boot();
+  
+  // Initialize WebGL Hero
+  const heroObs = new MutationObserver(() => {
+    if (document.getElementById('page-home').classList.contains('on') && document.getElementById('liquid-core')) {
+      initWebGLHero();
+      heroObs.disconnect();
+    }
+  });
+  heroObs.observe(document.getElementById('shell'), { attributes: true, subtree: true, attributeFilter: ['class'] });
+  if (document.getElementById('page-home').classList.contains('on')) setTimeout(initWebGLHero, 300);
+
+  addEventListener('keydown',e=>{if(e.key==='Escape')$$('.modal.on').forEach(m=>m.classList.remove('on'))});
+  $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on')}));
+}
+init();
+</script>
+</body>
+</html>
