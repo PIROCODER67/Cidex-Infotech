@@ -613,6 +613,7 @@ textarea.inp{resize:vertical;min-height:120px;line-height:1.6}
 .cookie-banner a{color:var(--cyan);}
 .cookie-banner button{border:1px solid var(--line2);background:transparent;color:var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer;font:inherit;}
 .cookie-banner button.accept{background:var(--grad-hero);color:#02040a;border:0;font-weight:700;}
+.on-chat .fab-row,.on-chat .cookie-banner{display:none !important;}
 </style>
 </head>
 <body>
@@ -1750,9 +1751,57 @@ function aethAnswer(q){
   if(/hi|hello|hey|start/.test(s))return "Hello. Tell me two things: what you sell, and what's currently frustrating you about how customers find you.\n\nFrom there I can be specific rather than generic.";
   return "Here's how I'd approach that.\n\nFirst, define the outcome in one sentence — not \"more traffic,\" but \"12 qualified enquiries a month.\" Then find the single biggest constraint between you and it. Usually it's one of three: nobody knows you exist, people know but don't believe you, or they believe you but the process is painful.\n\nTell me which of those three it is, and I'll give you the actual sequence I'd run. Preview mode: replies come from Cidex's built-in strategy playbooks. Live AI answers are coming soon.";
 }
-function clowReply(q){
+// Clow runs on the Worker (/api/chat). The Worker keeps the question flow and works out the price.
+let CLOW_STATE={service:null,answers:{}};
+function clowCard(est,body){
+  const cur=ST.curr==='USD'?'USD':'INR';
+  const card=document.createElement('div');
+  card.className='clow-card';
+  card.style.cssText='align-self:stretch;border:1px solid var(--line2);border-radius:var(--r);padding:16px;background:var(--surface);margin:6px 0;';
+  const head=document.createElement('div');
+  head.style.cssText='font-weight:700;color:var(--ink);font-size:1rem;';
+  head.textContent=est.label||'Estimate';
+  card.appendChild(head);
+  if(est.status==='team'){
+    const p=document.createElement('p');p.style.cssText='color:var(--dim);font-size:.9rem;margin:8px 0 0;';
+    p.textContent=est.reason+' Phone: '+est.contact.phone+' · '+est.contact.email;
+    card.appendChild(p);
+  } else {
+    const period=document.createElement('div');
+    period.style.cssText='color:var(--dim);font-size:.82rem;margin:4px 0 8px;';
+    period.textContent=(est.status==='from'?'Starting price, ':'Estimate, ')+(est.period==='monthly'?'per month':'one-time')+' · excludes GST';
+    card.appendChild(period);
+    est.lines.forEach(function(l){
+      const row=document.createElement('div');row.style.cssText='display:flex;justify-content:space-between;gap:12px;font-size:.9rem;color:var(--ink);padding:4px 0;';
+      const a=document.createElement('span');a.textContent=l.label;
+      const b=document.createElement('span');b.textContent=l[cur];
+      row.appendChild(a);row.appendChild(b);card.appendChild(row);
+    });
+    const tot=document.createElement('div');tot.style.cssText='display:flex;justify-content:space-between;font-weight:700;color:var(--ink);border-top:1px solid var(--line);margin-top:6px;padding-top:6px;';
+    tot.innerHTML='';const ta=document.createElement('span');ta.textContent='Total';const tb=document.createElement('span');tb.textContent=est.total[cur];
+    tot.appendChild(ta);tot.appendChild(tb);card.appendChild(tot);
+    const notes=[est.scope_note,est.rounding_note,cur==='USD'?est.usd_note:'',est.from_note].filter(Boolean).join(' ');
+    const note=document.createElement('p');note.style.cssText='color:var(--dim);font-size:.78rem;margin:10px 0 0;';
+    note.textContent=(est.disclaimer||'')+(notes?' '+notes:'')+' Management confirms final GST and any contract terms.';
+    card.appendChild(note);
+  }
+  body.appendChild(card);
+  body.scrollTop=body.scrollHeight;
+}
+async function clowReply(q){
   const body=$('#clowBody');const t=typing(body,'clow');
-  setTimeout(()=>{t.remove();clowPush('bot',clowAnswer(q))},650+Math.random()*450);
+  const first=ST.clowMsgs.findIndex(m=>m.cls==='me');
+  const messages=ST.clowMsgs.slice(first<0?0:first).map(m=>({role:m.cls==='me'?'user':'assistant',content:m.text}));
+  let data=null;
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages,state:CLOW_STATE})});
+    data=await res.json();
+  }catch(e){ data=null; }
+  t.remove();
+  if(!data||!data.reply){ clowPush('bot',clowAnswer(q)); return; }
+  if(data.state) CLOW_STATE=data.state;
+  clowPush('bot',data.reply);
+  if(data.estimate) clowCard(data.estimate,body);
 }
 function clowAnswer(q){
   const s=q.toLowerCase();
@@ -1860,7 +1909,7 @@ function askConfirm(title,body,fn){
 $('#cfInput').oninput=e=>{$('#cfGo').disabled=e.target.value.trim().toUpperCase()!=='DELETE'};
 $('#cfGo').onclick=()=>{if(cfAction)cfAction();$('#confirmModal').classList.remove('on');cfAction=null};
 $('#delData').onclick=()=>askConfirm('Delete my Data','This erases analytics history, preferences, saved drafts and message logs. Your account and active orders remain. This cannot be undone.',()=>{
-  ST.aethMsgs=[];ST.clowMsgs=[];$('#aethBody').innerHTML='';$('#clowBody').innerHTML='';aethPush('bot',AETH_INTRO);clowPush('bot',CLOW_INTRO);
+  ST.aethMsgs=[];ST.clowMsgs=[];CLOW_STATE={service:null,answers:{}};$('#aethBody').innerHTML='';$('#clowBody').innerHTML='';aethPush('bot',AETH_INTRO);clowPush('bot',CLOW_INTRO);
   Object.keys(ST.collected).forEach(k=>ST.collected[k].clear());
   toast('All stored data erased. Account retained.','ok');
 });
@@ -2200,6 +2249,13 @@ init();
   }
   document.getElementById('cookieAccept').onclick=()=>choose('accept');
   document.getElementById('cookieDecline').onclick=()=>choose('decline');
+})();
+</script>
+<script>
+/* On the chat pages the floating buttons and cookie banner would cover the message box */
+(function(){
+  const base=nav;
+  nav=function(id,opts){ const r=base(id,opts); document.body.classList.toggle('on-chat', id==='clow'||id==='aetheria'); return r; };
 })();
 </script>
 </body>
