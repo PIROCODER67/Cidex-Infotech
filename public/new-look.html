@@ -602,6 +602,17 @@ textarea.inp{resize:vertical;min-height:120px;line-height:1.6}
 .ind-tile{display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid var(--line2);border-radius:var(--r);background:var(--surface);color:var(--ink);text-decoration:none;}
 .ind-tile span{color:var(--dim);font-size:.86rem;}
 .ind-tile:hover{border-color:var(--cyan);}
+
+/* Floating buttons and cookie banner (ported from the live site) */
+.fab-row{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:10px;align-items:flex-end;z-index:900;}
+.fab-row a,.fab-row button{border:1px solid var(--line2);background:var(--surface);color:var(--ink);border-radius:999px;padding:10px 16px;font:inherit;font-size:.86rem;cursor:pointer;text-decoration:none;box-shadow:var(--shadow);}
+.fab-row .fab-main{background:var(--grad-hero);color:#02040a;border:0;font-weight:700;}
+.cookie-banner{position:fixed;left:16px;right:16px;bottom:16px;max-width:720px;margin:0 auto;background:var(--surface);border:1px solid var(--line2);border-radius:var(--r);padding:16px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;z-index:950;box-shadow:var(--shadow);}
+.cookie-banner[hidden]{display:none;}
+.cookie-banner p{margin:0;flex:1;min-width:220px;color:var(--dim);font-size:.88rem;}
+.cookie-banner a{color:var(--cyan);}
+.cookie-banner button{border:1px solid var(--line2);background:transparent;color:var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer;font:inherit;}
+.cookie-banner button.accept{background:var(--grad-hero);color:#02040a;border:0;font-weight:700;}
 </style>
 </head>
 <body>
@@ -2166,6 +2177,30 @@ init();
 })();
 
   
+</script>
+<div class="fab-row">
+  <a href="https://wa.me/918777324473?text=Hi%20CIDEX%2C%20I%20would%20like%20to%20discuss%20a%20project." target="_blank" rel="noopener" id="fabWa">WhatsApp us</a>
+  <button type="button" id="fabAeth" onclick="nav('aetheria')">Talk to Aetheria</button>
+  <button type="button" class="fab-main" id="fabClow" onclick="nav('clow')">Ask Clow for a price</button>
+</div>
+<div class="cookie-banner" id="cookieBanner" hidden>
+  <p>We use cookies and local storage to remember your currency choice. Please review our <a href="#" onclick="nav('legal');return false;">Cookie Policy</a>.</p>
+  <div><button type="button" class="accept" id="cookieAccept">Accept</button> <button type="button" id="cookieDecline">Decline</button></div>
+</div>
+<script>
+/* Cookie banner: remembers the choice on this device; the page works without storage */
+(function(){
+  const bar=document.getElementById('cookieBanner');
+  let seen=null;
+  try{ seen=localStorage.getItem('cidex_cookie_choice'); }catch(e){}
+  if(!seen) bar.hidden=false;
+  function choose(v){
+    try{ localStorage.setItem('cidex_cookie_choice', v); }catch(e){}
+    bar.hidden=true;
+  }
+  document.getElementById('cookieAccept').onclick=()=>choose('accept');
+  document.getElementById('cookieDecline').onclick=()=>choose('decline');
+})();
 </script>
 </body>
 </html>
