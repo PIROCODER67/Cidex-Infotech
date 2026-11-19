@@ -9,6 +9,7 @@ binding = "ASSETS"
 run_worker_first = true
 
 [vars]
-OPENAI_MODEL = "gpt-6-astra"   # confirm the exact model ID in the OpenAI dashboard before deploy
+OPENAI_BASE_URL = "https://api.airouter.in/v1"   # Air Router endpoint; change back to https://api.openai.com/v1 to use OpenAI directly
+OPENAI_MODEL = "openai/gpt-4o-mini"   # model ID as listed by GET /v1/models on Air Router
 USD_INR_RATE = "94"            # fixed rate, updated weekly
 # OPENAI_API_KEY is NOT set here. Add it as a secret (see README.md).
