@@ -3698,6 +3698,13 @@ function plainBotText(t){
 
     est.lines.forEach(function(l){ line(card, l.label, l[cur]); });
 
+    if(est.scope_note){
+      const scope = document.createElement('div');
+      scope.className = 'ai-note';
+      scope.textContent = est.scope_note;
+      card.appendChild(scope);
+    }
+
     const notes = [est.rounding_note, cur === 'USD' ? est.usd_note : '', est.from_note].filter(Boolean).join(' ');
     const note = document.createElement('div');
     note.className = 'ai-note';

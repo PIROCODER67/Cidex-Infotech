@@ -34,7 +34,7 @@ const Q = {
   ],
   social: [
     { key: 'platforms', type: 'number', question: 'How many social media platforms?' },
-    { key: 'posts', type: 'number', question: 'How many feed posts per month?' },
+    { key: 'posts', type: 'number', question: 'How many feed posts per month? (static graphics, carousels and agreed feed content; reels and videos are asked separately)' },
     { key: 'reels', type: 'number', question: 'How many reels or videos per month? (0 if none)' },
   ],
   design: [
@@ -192,7 +192,8 @@ function calcSocial(a) {
   const tiers = [['Social Media Basic', 10000, 1, 15], ['Social Media Growth', 20000, 1, 25], ['Social Media Advanced', 40000, 3, 35], ['Social Media Full-service', 75000, 3, 60]];
   const t = tiers.find((x) => a.platforms <= x[2] && a.posts <= x[3]);
   if (!t) return team('More than 3 platforms or 60 posts needs a team quote.');
-  return { status: 'estimate', lines: [{ label: t[0], inr: t[1] }], period: 'monthly' };
+  const note = `${t[0]} is one fixed monthly price. It covers up to ${t[3]} feed posts on up to ${t[2]} platform${t[2] > 1 ? 's' : ''}, so the price does not change with the number of posts inside that limit. Reels and videos are not included and are quoted separately.`;
+  return { status: 'estimate', lines: [{ label: t[0], inr: t[1] }], period: 'monthly', note };
 }
 
 function calcDesign(a) {
@@ -338,6 +339,7 @@ export function estimate(serviceId, rawAnswers = {}, opts = {}) {
     ...base,
     status: result.status, // 'estimate' or 'from'
     period: result.period,
+    note: result.note || '',
     lines: result.lines,
     totalInr: total,
     rounded: total !== subtotal,

@@ -29,6 +29,7 @@ function display(result) {
       status: result.status,
       label: result.label,
       period: result.period,
+      scope_note: result.note || '',
       lines: result.lines.map((l) => ({ label: l.label, INR: fmtINR(l.inr), USD: fmtUSD(l.inr, rate) })),
       total: { INR: fmtINR(result.totalInr), USD: fmtUSD(result.totalInr, rate) },
       rounded: result.rounded,
@@ -231,6 +232,9 @@ Strict rules:
 - Never describe the team's skills, experience, expertise or quality, and never say the team is good, reliable or expert. Say the team will confirm the right people for the project.
 - Personal, romantic, flirtatious or off-topic messages: reply in one short, friendly sentence saying you help with CIDEX services, then offer to help with a service. Do not explain at length what you are.
 - Keep replies short and to the point.
+- Social media packages: each package has one fixed monthly price that covers its limits. Say this plainly when a visitor asks about posts. Example: Advanced is a fixed price for up to 35 feed posts on up to 3 platforms, so the price is the same for 10 or 35 posts within that limit.
+- Feed posts mean static graphics, carousels and agreed feed content. Reels, videos, stories and filming are separate, and the team quotes them.
+- Basic and Growth cover 1 platform. Two platforms need Advanced or higher.
 
 ${MARKETING_GUIDE}
 

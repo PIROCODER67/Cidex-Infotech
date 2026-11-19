@@ -50,3 +50,10 @@ test('guard: says the estimate could not be made when complete but none exists',
 test('guard: leaves normal replies alone', () => {
   assert.equal(guardReply('How many pages do you need?', 'website', ['pages'], null), 'How many pages do you need?');
 });
+
+test('social: the estimate says what the package covers and that reels are separate', () => {
+  const r = social(2, 10);
+  assert.match(r.note, /fixed monthly price/);
+  assert.match(r.note, /up to 35 feed posts on up to 3 platforms/);
+  assert.match(r.note, /Reels and videos are not included/);
+});
