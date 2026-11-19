@@ -614,9 +614,39 @@ textarea.inp{resize:vertical;min-height:120px;line-height:1.6}
 .cookie-banner button{border:1px solid var(--line2);background:transparent;color:var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer;font:inherit;}
 .cookie-banner button.accept{background:var(--grad-hero);color:#02040a;border:0;font-weight:700;}
 .on-chat .fab-row,.on-chat .cookie-banner{display:none !important;}
+
+/* Pricing page (content from the live site, new design styles) */
+.pcard{cursor:default;}
+.pprice{display:flex;gap:10px;align-items:baseline;margin:14px 0 6px;font-weight:700;color:var(--ink);}
+.pprice .p-inr,.pprice .p-usd{font-size:1.05rem;}
+body[data-curr="INR"] .pprice .p-usd{display:none;}
+body[data-curr="USD"] .pprice .p-inr{display:none;}
+.pask{margin-top:8px;}
+
+/* Budget fit and ad planner (logic from the live site, new design styles) */
+.fit-tool{max-width:820px;border:1px solid var(--line2);border-radius:var(--r);padding:22px;background:var(--surface);display:flex;flex-direction:column;gap:14px;}
+.fit-readout{font-size:2rem;font-weight:700;color:var(--ink);}
+.fit-sub{font-size:.9rem;color:var(--dim);font-weight:400;}
+#fitSlider{width:100%;accent-color:var(--cyan);}
+.fit-labels{display:flex;justify-content:space-between;color:var(--dim);font-size:.78rem;font-family:'JetBrains Mono',monospace;}
+.fit-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;}
+.bi-card{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--abyss);}
+.bi-card.dim{opacity:.55;}
+.bi-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.bi-name{color:var(--ink);font-weight:600;font-size:.92rem;}
+.bi-level{color:var(--cyan);font-size:.82rem;}
+.bi-steps{display:flex;gap:6px;margin:10px 0 6px;}
+.bi-steps span{flex:1;height:6px;border-radius:99px;background:var(--line2);}
+.bi-steps span.on{background:var(--grad-cool);}
+.bi-next{color:var(--dim);font-size:.8rem;}
+.fit-summary,.ad-msg{color:var(--dim);font-size:.9rem;margin:0;}
+.ad-out{display:grid;gap:10px;}
+.ad-out>div{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--abyss);display:flex;flex-direction:column;gap:4px;}
+.ad-out strong{color:var(--ink);}
+.ad-out span{color:var(--dim);font-size:.88rem;}
 </style>
 </head>
-<body>
+<body data-curr="INR">
 
 <!-- BOOT -->
 <div id="boot">
@@ -987,6 +1017,35 @@ textarea.inp{resize:vertical;min-height:120px;line-height:1.6}
 </form>
 <div id="seoResult" hidden></div>
 </section>
+<section class="page" id="page-pricing">
+<div class="pg-head"><span class="pg-kicker">Price list</span><h2 class="pg-title">Our main services and starting prices.</h2></div>
+<p class="pg-lede">Starting prices for each main CIDEX service. Exact numbers depend on scope, so contact us for a straight answer on where you would land. All prices exclude GST, and the team confirms your final price in a written quotation before any work starts.</p>
+<div class="hubgrid"><div class="hubcard pcard"><div class="hubnum">ONE-TIME</div><div class="hubname">Website Development</div><div class="hubsub">A business website, designed and built to load fast on phones and computers.</div><div class="pprice"><span class="p-inr">from ₹10,000–₹80,000</span><span class="p-usd">from $110–$850</span></div><button type="button" class="jump pask" onclick="askAeth(&#x27;Website Development&#x27;)">Ask Aetheria about Website Development →</button></div><div class="hubcard pcard"><div class="hubnum">PER MONTH</div><div class="hubname">SEO</div><div class="hubsub">Making your site and content easier for people searching for your business to find.</div><div class="pprice"><span class="p-inr">from ₹6,000–₹25,000</span><span class="p-usd">from $60–$270</span></div><button type="button" class="jump pask" onclick="askAeth(&#x27;SEO&#x27;)">Ask Aetheria about SEO →</button></div><div class="hubcard pcard"><div class="hubnum">PER MONTH</div><div class="hubname">Advertising Management</div><div class="hubsub">Planning and running your Google and Meta ads. The ad budget is paid to the platform, not to us.</div><div class="pprice"><span class="p-inr">from ₹10,000–₹40,000</span><span class="p-usd">from $110–$430</span></div><button type="button" class="jump pask" onclick="askAeth(&#x27;Advertising Management&#x27;)">Ask Aetheria about Advertising Management →</button></div><div class="hubcard pcard"><div class="hubnum">PER MONTH</div><div class="hubname">Social Media Management</div><div class="hubsub">Ongoing planning, posting and replies on your social media accounts.</div><div class="pprice"><span class="p-inr">from ₹10,000–₹75,000</span><span class="p-usd">from $110–$800</span></div><button type="button" class="jump pask" onclick="askAeth(&#x27;Social Media Management&#x27;)">Ask Aetheria about Social Media Management →</button></div><div class="hubcard pcard"><div class="hubnum">ONE-TIME</div><div class="hubname">Logo &amp; Brand Design</div><div class="hubsub">A logo, and where needed a full brand kit, so your business looks consistent everywhere.</div><div class="pprice"><span class="p-inr">from ₹5,000–₹25,000</span><span class="p-usd">from $50–$270</span></div><button type="button" class="jump pask" onclick="askAeth(&#x27;Logo &amp; Brand Design&#x27;)">Ask Aetheria about Logo &amp; Brand Design →</button></div><div class="hubcard pcard"><div class="hubnum">PER PROJECT</div><div class="hubname">Video Editing</div><div class="hubsub">Turning your raw footage into a polished video ready to post.</div><div class="pprice"><span class="p-inr">from ₹4,700–₹7,050</span><span class="p-usd">from $50–$75</span></div><button type="button" class="jump pask" onclick="askAeth(&#x27;Video Editing&#x27;)">Ask Aetheria about Video Editing →</button></div><div class="hubcard pcard"><div class="hubnum">PER PROJECT</div><div class="hubname">Research</div><div class="hubsub">Finding, checking and organising information into a clear report with sources.</div><div class="pprice"><span class="p-inr">from ₹5,000–₹30,000</span><span class="p-usd">from $50–$320</span></div><button type="button" class="jump pask" onclick="askAeth(&#x27;Research&#x27;)">Ask Aetheria about Research →</button></div><div class="hubcard pcard"><div class="hubnum">ONE-TIME</div><div class="hubname">AI Automation</div><div class="hubsub">Connecting your tools so routine tasks run on their own.</div><div class="pprice"><span class="p-inr">from ₹25,000–₹40,000</span><span class="p-usd">from $270–$430</span></div><button type="button" class="jump pask" onclick="askAeth(&#x27;AI Automation&#x27;)">Ask Aetheria about AI Automation →</button></div><div class="hubcard pcard"><div class="hubnum">ONE-TIME</div><div class="hubname">Business Automation</div><div class="hubsub">Digital systems that organise your team&#x27;s tasks, performance and everyday processes.</div><div class="pprice"><span class="p-inr">from ₹3,000–₹40,000</span><span class="p-usd">from $30–$430</span></div><button type="button" class="jump pask" onclick="askAeth(&#x27;Business Automation&#x27;)">Ask Aetheria about Business Automation →</button></div><div class="hubcard pcard"><div class="hubnum">PER MONTH</div><div class="hubname">Website Management</div><div class="hubsub">Regular updates, checks and backups so your website keeps working.</div><div class="pprice"><span class="p-inr">from ₹3,000–₹20,000</span><span class="p-usd">from $30–$210</span></div><button type="button" class="jump pask" onclick="askAeth(&#x27;Website Management&#x27;)">Ask Aetheria about Website Management →</button></div><div class="hubcard pcard"><div class="hubnum">ONE-TIME</div><div class="hubname">Email Marketing</div><div class="hubsub">Designing and sending email campaigns to people who have agreed to hear from you.</div><div class="pprice"><span class="p-inr">from ₹2,500–₹20,000</span><span class="p-usd">from $30–$210</span></div><button type="button" class="jump pask" onclick="askAeth(&#x27;Email Marketing&#x27;)">Ask Aetheria about Email Marketing →</button></div></div>
+</section>
+<section class="page" id="page-budget">
+<div class="pg-head"><span class="pg-kicker">Plan it</span><h2 class="pg-title">What fits your monthly budget?</h2></div>
+<p class="pg-lede">Drag the slider and we show which of our monthly services fit inside it, live. No form, no email required.</p>
+<div class="fit-tool">
+  <div class="fit-readout"><span id="fitValue">$300</span> <span class="fit-sub">per month</span></div>
+  <input type="range" id="fitSlider" min="0" max="1000" step="10" value="300" aria-label="Monthly marketing budget">
+  <div class="fit-labels"><span>Just starting</span><span>Going all in</span></div>
+  <div class="fit-results" id="fitResults"></div>
+  <p class="fit-summary" id="fitSummary"></p>
+  <button type="button" class="jump" onclick="nav('mail')">Get an exact plan →</button>
+</div>
+<div class="pg-head" style="margin-top:56px"><span class="pg-kicker">Plan it</span><h2 class="pg-title">What could your ad budget bring?</h2></div>
+<p class="pg-lede">Enter your own numbers from your ad account and website. We do not guess results: this only does the arithmetic.</p>
+<div class="seo-form">
+  <div class="seo-grid">
+    <div class="seo-field"><label for="apBudget">Monthly ad budget</label><input id="apBudget" type="number" min="0" step="100" placeholder="e.g. 20000" inputmode="decimal"></div>
+    <div class="seo-field"><label for="apCpc">Average cost per click</label><input id="apCpc" type="number" min="0" step="0.5" placeholder="from your ad account" inputmode="decimal"></div>
+    <div class="seo-field"><label for="apConv">Clicks that become enquiries (%)</label><input id="apConv" type="number" min="0" max="100" step="0.1" placeholder="from your form or calls" inputmode="decimal"></div>
+  </div>
+  <div id="apOut" class="ad-out" aria-live="polite"></div>
+  <p class="ad-msg" id="apMsg" role="status" aria-live="polite"></p>
+  <p class="seo-note">Our management fee is charged separately from your ad spend. The ad platform charges the spend directly.</p>
+</div>
+</section>
 <section class="page" id="page-faq">
   <div class="fx"><div class="aurora a2" style="opacity:.2"></div><div class="aurora a3" style="opacity:.16"></div><div class="gridfx"></div><div class="grain"></div></div>
   <div class="wrap sec" style="padding-top:clamp(74px,9vw,116px)">
@@ -1210,6 +1269,8 @@ const NAVSTRUCT=[
  {id:'calculator',label:'Calculator',ic:'∑'},
  {id:'industries',label:'Industries',ic:'▦'},
  {id:'seo',label:'Free SEO Check',ic:'◎'},
+ {id:'pricing',label:'Full Pricing',ic:'$'},
+ {id:'budget',label:'Budget & Ad Planner',ic:'◔'},
  {id:'faq',label:'FAQ',ic:'?'}
 ];
 function buildNav(){
@@ -1846,7 +1907,7 @@ $$('[data-sendteam]').forEach(b=>b.onclick=()=>{
   body.scrollTop=body.scrollHeight;
 });
 $('#currSw').onclick=e=>{const b=e.target.closest('[data-curr]');if(!b)return;
-  ST.curr=b.dataset.curr;$$('#currSw button').forEach(x=>x.classList.toggle('on',x===b));
+  ST.curr=b.dataset.curr;document.body.dataset.curr=ST.curr;if(window.refreshBudgetFit)window.refreshBudgetFit();$$('#currSw button').forEach(x=>x.classList.toggle('on',x===b));
   clowPush('bot',`Currency switched to ${ST.curr==='INR'?'₹ INR':'$ USD'}. All figures from here follow that selection.`);
   calc();toast('Currency set to '+ST.curr,'ok');
 };
@@ -2257,6 +2318,106 @@ init();
   const base=nav;
   nav=function(id,opts){ const r=base(id,opts); document.body.classList.toggle('on-chat', id==='clow'||id==='aetheria'); return r; };
 })();
+</script>
+<script>
+function askAeth(topic){ nav('aetheria'); const i=document.getElementById('aethInput'); if(i){ i.value='Tell me about '+topic+' and what it includes.'; i.focus(); } }
+</script>
+<script>
+
+function currentCurrency(){ return document.body.dataset.curr==='USD' ? 'USD' : 'INR'; }
+/* Budget fit: which monthly services the visitor's budget reaches (live-site logic, new IDs) */
+(function(){
+  const SERVICES = [{"name": "SEO", "tiers": ["Foundation", "Visibility", "Growth", "Market leadership"], "usd": [60, 270], "inr": [6000, 25000]}, {"name": "Advertising Management", "tiers": ["Focused campaigns", "Multi-channel reach", "Full-funnel strategy"], "usd": [110, 430], "inr": [10000, 40000]}, {"name": "Social Media Management", "tiers": ["Consistent presence", "Audience growth", "Full-channel strategy"], "usd": [110, 800], "inr": [10000, 75000]}, {"name": "Website Management", "tiers": ["Essential upkeep", "Monitored care", "Proactive support", "Full ownership"], "usd": [30, 210], "inr": [3000, 20000]}];
+  const slider=document.getElementById('fitSlider');
+  const valEl=document.getElementById('fitValue');
+  const resEl=document.getElementById('fitResults');
+  const sumEl=document.getElementById('fitSummary');
+  function cur(){ return document.body.dataset.curr==='USD' ? 'USD' : 'INR'; }
+  function render(){
+    const currency=cur();
+    const symbol=currency==='INR' ? '₹' : '$';
+    const locale=currency==='INR' ? 'en-IN' : 'en-US';
+    const max=currency==='INR' ? 50000 : 1000;
+    const step=currency==='INR' ? 500 : 10;
+    const prevMax=parseInt(slider.max,10);
+    if(prevMax!==max){
+      const ratio=prevMax ? parseInt(slider.value,10)/prevMax : 0.3;
+      slider.max=max; slider.step=step; slider.value=Math.round((ratio*max)/step)*step;
+    }
+    const budget=parseInt(slider.value,10);
+    slider.style.setProperty('--fill', ((budget/parseInt(slider.max,10))*100)+'%');
+    valEl.textContent=symbol+budget.toLocaleString(locale);
+    const range=currency==='INR' ? 'inr' : 'usd';
+    const fmt=function(v){ return symbol+v.toLocaleString(locale); };
+    const items=SERVICES.map(function(s){
+      const low=s[range][0], high=s[range][1];
+      const n=s.tiers.length;
+      const starts=s.tiers.map(function(_,k){ return Math.round(low+(high-low)*k/n); });
+      let reached=-1;
+      starts.forEach(function(st,k){ if(budget>=st) reached=k; });
+      return {name:s.name,tiers:s.tiers,starts:starts,reached:reached,low:low};
+    });
+    resEl.innerHTML=items.map(function(it){
+      const label=it.reached>=0 ? it.tiers[it.reached] : 'Starts at '+fmt(it.low);
+      const next=it.reached<it.tiers.length-1 ? 'Next: '+it.tiers[it.reached+1]+' from '+fmt(it.starts[it.reached+1]) : 'Full range reached';
+      const steps=it.tiers.map(function(_,k){ return '<span class="'+(k<=it.reached?'on':'')+'"></span>'; }).join('');
+      return '<div class="bi-card'+(it.reached>=0?'':' dim')+'"><div class="bi-head"><span class="bi-name">'+it.name+'</span><span class="bi-level">'+label+'</span></div><div class="bi-steps">'+steps+'</div><div class="bi-next">'+next+'</div></div>';
+    }).join('');
+    const inReach=items.filter(function(it){ return it.reached>=0; }).length;
+    sumEl.textContent=inReach===0 ? 'At this budget, contact us about the lightest place to start.' : inReach+' of '+items.length+' monthly services are in reach at this budget.';
+  }
+  slider.addEventListener('input',render);
+  window.refreshBudgetFit=render;
+  render();
+})();
+
+/* ---------- AD BUDGET PLANNER: arithmetic on the visitor's own numbers only ---------- */
+(function(){
+  const budgetEl = document.getElementById('apBudget');
+  if(!budgetEl) return;
+  const cpcEl = document.getElementById('apCpc');
+  const convEl = document.getElementById('apConv');
+  const out = document.getElementById('apOut');
+  const msg = document.getElementById('apMsg');
+  function render(){
+    const currency = currentCurrency();
+    const symbol = currency === 'INR' ? '\u20B9' : '$';
+    const locale = currency === 'INR' ? 'en-IN' : 'en-US';
+    const fmt = function(v){ return symbol + Number(v).toLocaleString(locale, { maximumFractionDigits: 0 }); };
+    const budget = parseFloat(budgetEl.value);
+    const cpc = parseFloat(cpcEl.value);
+    const conv = parseFloat(convEl.value);
+    if(!(budget > 0) || !(cpc > 0) || !(conv >= 0 && conv <= 100)){
+      out.textContent = '';
+      msg.textContent = 'Fill in all three numbers to see the results. Use the figures from your ad account and your website.';
+      return;
+    }
+    const clicks = Math.floor(budget / cpc);
+    const enquiries = clicks * conv / 100;
+    out.textContent = '';
+    const cards = [
+      ['Clicks each month', clicks.toLocaleString(locale), 'Ad budget divided by cost per click.'],
+      ['Enquiries each month', enquiries.toFixed(1), 'Clicks multiplied by the share that become enquiries.'],
+      ['Cost per enquiry', enquiries > 0 ? fmt(budget / enquiries) : 'None at this rate', 'Ad budget divided by enquiries.']
+    ];
+    cards.forEach(function(c){
+      const d = document.createElement('div');
+      const strong = document.createElement('strong');
+      strong.textContent = c[1];
+      const label = document.createElement('span');
+      label.textContent = c[0] + '. ' + c[2];
+      d.appendChild(strong);
+      d.appendChild(label);
+      out.appendChild(d);
+    });
+    msg.textContent = conv === 0 ? 'At 0% enquiries, your budget brings clicks but no enquiries. Check your form or call tracking.' : '';
+  }
+  [budgetEl, cpcEl, convEl].forEach(function(el){ el.addEventListener('input', render); });
+  document.querySelectorAll('#currSw button').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(render, 0); }); });
+  render();
+})();
+
+
 </script>
 </body>
 </html>
