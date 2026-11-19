@@ -83,7 +83,7 @@ Your job:
 - Find out which service the visitor is asking about and collect the answers for it. Do not recommend packages or services, and do not explain what any service includes. If the visitor asks what a service includes, say the team will explain it and give the contact details.
 - Ask the questions needed for that service. Ask one or two at a time, in plain friendly English. Do not repeat questions already answered.
 - Put the answers in the "answers" object using the exact keys below. Only use keys listed for the chosen service.
-- When all answers are known, say the estimate is shown below. Do not calculate or state any price, amount or range yourself. The system works out the price.
+- Only say the estimate is shown below when every question for the service is answered. If any question is still unanswered, ask the next one instead. Do not calculate or state any price, amount or range yourself. The system works out the price.
 
 Strict rules:
 - Never state, guess or calculate a price, amount, discount or total. Never mention ₹ or $ with a number.
@@ -107,6 +107,22 @@ Use true/false for yes/no answers, numbers for counts, and option names exactly 
 // Clow (price estimator) does not judge whether a service is needed; it sends those doubts to Aetheria.
 const NEED_DOUBT = /\b(do|does|should|would|will)\s+(i|we|my\s+\w+|our\s+\w+)\s+(really\s+)?need\b|\bneed\s+it\s+or\s+not\b|\bi\s+(will|'ll|might|may)\s+need\s+(it|this|that)\b|\b(is|are)\s+(it|this|that)\s+(necessary|needed|required|important)\b|\bshould\s+i\s+(get|buy|have|do|take)\b|\bnot\s+sure\s+(if|whether|what)\b|\bdon'?t\s+know\s+(if|whether)\b/i;
 const CLOW_REDIRECT = 'You shall talk to Aetheria first. It will clarify your doubts.';
+
+const ESTIMATE_FAIL_REPLY = `We couldn't generate your estimate right now. Your answers have been kept. Please try again, or contact our team at ${CONTACT.phone} or ${CONTACT.email}.`;
+const CLAIMS_ESTIMATE = /(estimate|quotation|quote)[^.]*\b(shown below|generated|ready|prepared|below)\b/i;
+
+// The model sometimes says the estimate is ready when answers are missing or no estimate exists.
+// The server decides: ask the next missing question, or say the estimate could not be made.
+export function guardReply(reply, service, missing, est) {
+  const claims = CLAIMS_ESTIMATE.test(reply);
+  if (missing.length) {
+    if (!claims) return reply;
+    const next = SERVICES[service].questions.find((q) => q.key === missing[0]);
+    return `Thanks, got that. ${next.question}`;
+  }
+  if (!est && claims) return ESTIMATE_FAIL_REPLY;
+  return reply;
+}
 
 async function handleChat(request, env) {
   let body;
@@ -160,11 +176,12 @@ async function handleChat(request, env) {
     }
   }
 
+  const missing = next.service ? missingFields(next.service, next.answers) : [];
   return json({
-    reply: safeReply(parsed.reply),
+    reply: guardReply(safeReply(parsed.reply), next.service, missing, est),
     state: next,
     estimate: est,
-    missing: next.service ? missingFields(next.service, next.answers) : [],
+    missing,
     ai_ready: true,
   });
 }
