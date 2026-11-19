@@ -650,6 +650,19 @@ body[data-curr="USD"] .pprice .p-inr{display:none;}
 .about-block p,.about-block li{color:var(--dim);line-height:1.7;margin:10px 0;}
 .about-h{font-size:1.5rem;color:var(--ink);margin:22px 0 8px;}
 .about-block .hubname{margin-top:18px;}
+
+/* Footer and back-to-top (content from the live site, new design styles) */
+.site-foot{margin-top:60px;padding:28px 24px 90px;border-top:1px solid var(--line2);color:var(--dim);font-size:.88rem;}
+.foot-grid{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+.foot-tag{margin:6px 0;}
+.foot-contact{display:flex;flex-direction:column;gap:6px;margin-top:8px;align-items:flex-start;}
+.foot-contact a{color:var(--cyan);}
+.foot-copy,.foot-links button,.foot-legal button{background:transparent;border:1px solid var(--line2);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;cursor:pointer;}
+.foot-links{display:flex;flex-direction:column;gap:8px;align-items:flex-start;}
+.foot-legal{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;}
+.foot-legal button,.foot-links button{border:0;padding:0;color:var(--dim);background:none;}
+.foot-bottom{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px;color:var(--faint);font-size:.8rem;}
+.to-top{position:fixed;right:18px;bottom:76px;width:40px;height:40px;border-radius:999px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;z-index:800;}
 </style>
 </head>
 <body data-curr="INR">
@@ -1132,6 +1145,37 @@ body[data-curr="USD"] .pprice .p-inr{display:none;}
   </div>
 </section>
 
+<footer class="site-foot" id="footer">
+  <div class="foot-grid">
+    <div>
+      <div class="brand"><span><span class="brace">{</span>CiT<span class="brace">}</span></span></div>
+      <p class="foot-tag">Cidex Infotech — digital work, scoped honestly.</p>
+      <p class="foot-tag" style="margin-top:16px">For queries, contact us:</p>
+      <div class="foot-contact">
+        <a href="tel:+918777324473">+91 87773 24473</a>
+        <a href="mailto:CidexInfotech1@gmail.com" id="footerEmailLink">CidexInfotech1@gmail.com</a>
+        <button type="button" class="foot-copy" id="copyEmailBtn" data-copy="CidexInfotech1@gmail.com">Copy</button>
+      </div>
+    </div>
+    <div class="foot-links">
+      <button type="button" onclick="nav('pricing')">Full Pricing</button>
+      <button type="button" onclick="nav('mail')">Contact us</button>
+      <button type="button" onclick="document.getElementById('authModal').classList.add('on')">Client Login</button>
+      <button type="button" onclick="nav('subscribe')">Subscribe</button>
+    </div>
+  </div>
+  <div class="foot-legal">
+    <button type="button" onclick="nav('privacy')">Privacy Policy</button>
+    <button type="button" onclick="nav('legal')">Terms &amp; Conditions</button>
+    <button type="button" onclick="nav('legal')">Refund Policy</button>
+    <button type="button" onclick="nav('legal')">Cookie Policy</button>
+  </div>
+  <div class="foot-bottom">
+    <span>© <span id="footYear"></span> Cidex Infotech. All prices in USD unless ₹ INR is selected.</span>
+    <span>Last updated <time id="footUpdated"></time></span>
+  </div>
+  <button type="button" class="to-top" id="backToTop" aria-label="Back to top">↑</button>
+</footer>
 </main>
 
 <!-- MODALS -->
@@ -2441,6 +2485,20 @@ function currentCurrency(){ return document.body.dataset.curr==='USD' ? 'USD' : 
 })();
 
 
+</script>
+<script>
+/* Footer: year, last updated, copy email, back to top */
+(function(){
+  const y=document.getElementById('footYear'); if(y) y.textContent=new Date().getFullYear();
+  const u=document.getElementById('footUpdated'); if(u) u.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+  const c=document.getElementById('copyEmailBtn');
+  if(c) c.onclick=function(){
+    const t=c.getAttribute('data-copy');
+    try{ navigator.clipboard.writeText(t).then(function(){ c.textContent='Copied'; setTimeout(function(){ c.textContent='Copy'; },1500); }); }catch(e){}
+  };
+  const top=document.getElementById('backToTop');
+  if(top) top.onclick=function(){ const m=document.getElementById('shell'); if(m) m.scrollTo({top:0,behavior:'smooth'}); window.scrollTo({top:0,behavior:'smooth'}); };
+})();
 </script>
 </body>
 </html>
